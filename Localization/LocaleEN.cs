@@ -1,10 +1,10 @@
-﻿// File: Localization/LocaleEN.cs
-// English en-US locale for Fast Bikes.
+// File: Localization/LocaleEN.cs
+// Purpose: English localization entries for FastBikes.
 
 namespace FastBikes
 {
+    using System.Collections.Generic;
     using Colossal; // IDictionarySource, IDictionaryEntryError
-    using System.Collections.Generic; // IEnumerable, Dictionary, KeyValuePair
 
     public sealed class LocaleEN : IDictionarySource
     {
@@ -20,7 +20,6 @@ namespace FastBikes
             Dictionary<string, int> indexCounts)
         {
             string title = Mod.ModName;
-
             if (!string.IsNullOrEmpty(Mod.ModVersion))
             {
                 title = title + " (" + Mod.ModVersion + ")";
@@ -28,7 +27,6 @@ namespace FastBikes
 
             return new Dictionary<string, string>
             {
-                // Options mod name
                 { m_Setting.GetSettingsLocaleID(), title },
 
                 // Tabs
@@ -36,43 +34,78 @@ namespace FastBikes
                 { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "About" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(Setting.TuningGrp),     "Bikes" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp),  "Mod info" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp), "Speed" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsHandlingGrp), "Handling" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp), "Reset" },
+
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Mod info" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp), "Links" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp), "Debug" },
 
-                // Actions / Bikes
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable bike tuning" },
+                // Master toggle
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "Scales bicycle max speed using a slider.\n" +
-                    "Turn OFF to restore vanilla values."
+                    "Turns the mod ON/OFF.\n" +
+                    "When OFF, vanilla bicycle and scooter behavior is restored."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BikeSpeedScalar)), "Bicycle speed" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BikeSpeedScalar)),
-                    "**50%** = 0.5x speed (slower)\n" +
-                    "**100%** = vanilla\n" +
-                    "**2000%** = 20x speed (very fast)\n\n" +
-                    "<Road/path speed limits and AI safe speed still apply>.\n" +
-                    "Acceleration and braking are scaled gently to avoid extreme launch/stop behavior at high top speeds."
+                // Speed
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Bike & scooter speed" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
+                    "**Scales top speed** for bicycles and scooters.\n" +
+                    "Acceleration and braking are adjusted automatically.\n" +
+                    "<Road speed limits still apply>."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetSliders)), "Reset slider" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetSliders)),
-                    "Sets the bicycle speed slider back to **100%** (vanilla default)." },
+                // Handling
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Stiffness" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
+                    "Handling scalar for **sway amplitude**.\n" +
+                    "Higher = less sway (tighter feel)."
+                },
 
-                // About
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpringScalar)), "Spring" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpringScalar)),
+                    "Scales **spring factors** in swaying physics."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
+                    "Scales **damping factors** in swaying physics.\n" +
+                    "Higher = settles faster."
+                },
+
+                // Reset
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Reset to vanilla" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
+                    "Sets all sliders back to **100%** and restores vanilla baselines."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Reset to mod defaults" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
+                    "Applies the mod’s default tuning values."
+                },
+
+                // About: Info
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Display name of this mod." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Display name." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Version" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Current version." },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)),
-                    "Opens the author’s Paradox mods page." },
-
+                // Links
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenGitHub)), "GitHub" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenGitHub)),
-                    "Opens the source repository." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenGitHub)), "Opens the project repository." },
+
+                // Debug
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.VerboseLogging)), "Verbose logging" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.VerboseLogging)),
+                    "Adds detailed logging for debugging."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Dump bicycle prefabs" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
+                    "Writes all prefabs with **BicycleData** to the game log."
+                },
             };
         }
 

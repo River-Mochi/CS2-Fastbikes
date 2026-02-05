@@ -1,10 +1,8 @@
 // File: Mod.cs
-// Entrypoint: registers settings, locales, ECS system.
+// Purpose: Entry point for FastBikes. Registers settings, localization, and ECS systems.
 
 namespace FastBikes
 {
-    using System;                    // Exception, Func<T>
-    using System.Reflection;         // Assembly for version number
     using Colossal;                  // IDictionarySource
     using Colossal.IO.AssetDatabase; // AssetDatabase.LoadSettings
     using Colossal.Localization;     // LocalizationManager
@@ -13,11 +11,13 @@ namespace FastBikes
     using Game;                      // UpdateSystem, SystemUpdatePhase
     using Game.Modding;              // IMod
     using Game.SceneFlow;            // GameManager
+    using System;                    // Exception, Func<T>
+    using System.Reflection;         // Assembly
 
     public sealed class Mod : IMod
     {
-        public const string ModName = "Fast Bikes";
         public const string ModId = "FastBikes";
+        public const string ModName = "Fast Bikes";
         public const string ModTag = "[FB]";
 
         public static readonly string ModVersion =
@@ -40,7 +40,10 @@ namespace FastBikes
 #endif
             );
 
-        public static Setting? Settings;
+        public static Setting? Settings
+        {
+            get; private set;
+        }
 
         public void OnLoad(UpdateSystem updateSystem)
         {
@@ -59,10 +62,27 @@ namespace FastBikes
             var setting = new Setting(this);
             Settings = setting;
 
+            // Locales should be best-effort; never crash mod load.
             AddLocaleSource("en-US", new LocaleEN(setting));
 
+            // Phase 2 (commented out for now)
+            // AddLocaleSource("fr-FR", new LocaleFR(setting));
+            // AddLocaleSource("es-ES", new LocaleES(setting));
+            // AddLocaleSource("de-DE", new LocaleDE(setting));
+            // AddLocaleSource("it-IT", new LocaleIT(setting));
+            // AddLocaleSource("ja-JP", new LocaleJA(setting));
+            // AddLocaleSource("ko-KR", new LocaleKO(setting));
+            // AddLocaleSource("zh-HANS", new LocaleZH_CN(setting));
+            // AddLocaleSource("pl-PL", new LocalePL(setting));
+            // AddLocaleSource("pt-BR", new LocalePT_BR(setting));
+            // AddLocaleSource("zh-HANT", new LocaleZH_HANT(setting));
+
+            // Settings + Options UI
             try
             {
+                // CS2 wiki + template pattern:
+                // - LoadSettings(sectionName, instance, defaultInstance)
+                // - Saving is automatic on changes (no manual SaveSettings(name, instance) call)
                 AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
                 setting.RegisterInOptionsUI();
             }
@@ -71,6 +91,7 @@ namespace FastBikes
                 WarnSafe(() => $"Settings/UI init failed: {ex.GetType().Name}: {ex.Message}");
             }
 
+            // System scheduling/init.
             try
             {
                 updateSystem.UpdateAfter<FastBikeSystem>(SystemUpdatePhase.PrefabUpdate);
@@ -88,10 +109,7 @@ namespace FastBikes
 
             if (Settings != null)
             {
-                try
-                {
-                    Settings.UnregisterInOptionsUI();
-                }
+                try { Settings.UnregisterInOptionsUI(); }
                 catch (Exception ex) { WarnSafe(() => $"UnregisterInOptionsUI failed: {ex.GetType().Name}: {ex.Message}"); }
 
                 Settings = null;
@@ -116,10 +134,7 @@ namespace FastBikes
                 return;
             }
 
-            try
-            {
-                lm.AddSource(localeId, source);
-            }
+            try { lm.AddSource(localeId, source); }
             catch (Exception ex)
             {
                 WarnSafe(() => $"AddLocaleSource: AddSource for '{localeId}' failed: {ex.GetType().Name}: {ex.Message}");

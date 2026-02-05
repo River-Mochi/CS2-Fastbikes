@@ -1,90 +1,132 @@
 // File: Settings/Setting.cs
-// Purpose: Options UI + settings for Fast Bikes (Actions/About tabs).
+// Purpose: Options UI + live apply triggers for FastBikes.
 
 namespace FastBikes
 {
-    using System;                    // Exception
     using Colossal.IO.AssetDatabase; // FileLocation
     using Game.Modding;              // IMod, ModSetting
     using Game.Settings;             // Settings UI attributes
-    using Game.UI;                   // Unit
     using Unity.Entities;            // World
     using UnityEngine;               // Application.OpenURL
 
-    [FileLocation("ModsSettings/FastBikes")]
+    [FileLocation(nameof(Setting))]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
-    [SettingsUIGroupOrder(TuningGrp, AboutInfoGrp, AboutLinksGrp)]
-    [SettingsUIShowGroupName(TuningGrp, AboutLinksGrp)]
+    [SettingsUIGroupOrder(
+        ActionsSpeedGrp, ActionsHandlingGrp, ActionsResetGrp,
+        AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
+    [SettingsUIShowGroupName(
+        ActionsSpeedGrp, ActionsHandlingGrp, ActionsResetGrp,
+        AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     public sealed class Setting : ModSetting
     {
-        // ---- TABS ----
         public const string ActionsTab = "Actions";
         public const string AboutTab = "About";
 
-        // ---- GROUPS ----
-        public const string TuningGrp = "Tuning";
-        public const string AboutInfoGrp = "AboutInfo";
-        public const string AboutLinksGrp = "AboutLinks";
+        public const string ActionsSpeedGrp = "Speed";
+        public const string ActionsHandlingGrp = "Handling";
+        public const string ActionsResetGrp = "Reset";
 
-        // ---- TUNABLE CONSTANTS ----
-        private const int kDefaultPercent = 100;
+        public const string AboutInfoGrp = "Mod info";
+        public const string AboutLinksGrp = "Links";
+        public const string AboutDebugGrp = "Debug";
 
-        private const int kBikeSpeedMin = 50;     // 0.5x
-        private const int kBikeSpeedMax = 2000;   // 20x
-        private const int kBikeSpeedStep = 10;
+        private const int Vanilla = 100;
 
-        private const string kUrlParadox =
-            "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
+        // Mod defaults
+        private const bool DefaultEnabled = true;
+        private const int DefaultSpeed = 150;
+        private const int DefaultStiffness = 100;
+        private const int DefaultSpring = 100;
+        private const int DefaultDamping = 100;
 
-        private const string kUrlGitHub =
-            "https://github.com/River-Mochi/CS2-Fastbikes";
-
-        // ---- BACKING FIELDS ----
-        private bool m_EnableFastBikes = true;
-
-        public Setting(IMod mod)
-            : base(mod)
+        public Setting(IMod mod) : base(mod)
         {
+            EnableFastBikes = DefaultEnabled;
+            SpeedScalar = DefaultSpeed;
+            StiffnessScalar = DefaultStiffness;
+            SpringScalar = DefaultSpring;
+            DampingScalar = DefaultDamping;
         }
 
         // --------------------------------------------------------------------
-        // ACTIONS – TUNING
+        // ACTIONS: Master toggle
         // --------------------------------------------------------------------
 
-        [SettingsUISection(ActionsTab, TuningGrp)]
+        [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
         [SettingsUISetter(typeof(Setting), nameof(SetEnableFastBikes))]
         public bool EnableFastBikes
         {
-            get => m_EnableFastBikes;
-            set => m_EnableFastBikes = value;
+            get; set;
         }
 
-        [SettingsUISlider(min = kBikeSpeedMin, max = kBikeSpeedMax, step = kBikeSpeedStep, scalarMultiplier = 1, unit = Unit.kPercentage)]
-        [SettingsUISection(ActionsTab, TuningGrp)]
-        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISetter(typeof(Setting), nameof(SetBikeSpeedScalar))]
-        public int BikeSpeedScalar { get; set; } = kDefaultPercent;
+        // ------------------------
+        // Actions: Speed
+        // ------------------------
 
-        [SettingsUIButton]
-        [SettingsUISection(ActionsTab, TuningGrp)]
+        [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        public bool ResetSliders
+        [SettingsUISlider(min = 50, max = 300, step = 5)]
+        [SettingsUISetter(typeof(Setting), nameof(SetSpeedScalar))]
+        public int SpeedScalar
         {
-            set
-            {
-                if (!value)
-                {
-                    return;
-                }
-
-                BikeSpeedScalar = kDefaultPercent;
-                RequestApply();
-            }
+            get; set;
         }
 
-        // --------------------------------------------------------------------
-        // ABOUT – INFO
-        // --------------------------------------------------------------------
+        // ------------------------
+        // Actions: Handling (placeholder until swaying component is confirmed)
+        // ------------------------
+
+        [SettingsUISection(ActionsTab, ActionsHandlingGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUISlider(min = 25, max = 400, step = 5)]
+        [SettingsUISetter(typeof(Setting), nameof(SetStiffnessScalar))]
+        public int StiffnessScalar
+        {
+            get; set;
+        }
+
+        [SettingsUISection(ActionsTab, ActionsHandlingGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUISlider(min = 25, max = 400, step = 5)]
+        [SettingsUISetter(typeof(Setting), nameof(SetSpringScalar))]
+        public int SpringScalar
+        {
+            get; set;
+        }
+
+        [SettingsUISection(ActionsTab, ActionsHandlingGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUISlider(min = 25, max = 400, step = 5)]
+        [SettingsUISetter(typeof(Setting), nameof(SetDampingScalar))]
+        public int DampingScalar
+        {
+            get; set;
+        }
+
+        // ------------------------
+        // Actions: Reset buttons
+        // ------------------------
+
+        [SettingsUISection(ActionsTab, ActionsResetGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUIButton]
+        [SettingsUIConfirmation]
+        public bool ResetToVanilla
+        {
+            set => DoResetToVanilla();
+        }
+
+        [SettingsUISection(ActionsTab, ActionsResetGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUIButton]
+        public bool ResetToModDefaults
+        {
+            set => DoResetToModDefaults();
+        }
+
+        // ------------------------
+        // About: Info
+        // ------------------------
 
         [SettingsUISection(AboutTab, AboutInfoGrp)]
         public string AboutName => Mod.ModName;
@@ -92,66 +134,47 @@ namespace FastBikes
         [SettingsUISection(AboutTab, AboutInfoGrp)]
         public string AboutVersion => Mod.ModVersion;
 
-        // --------------------------------------------------------------------
-        // ABOUT – LINKS
-        // --------------------------------------------------------------------
+        // ------------------------
+        // About: Links
+        // ------------------------
 
-        [SettingsUIButton]
-        [SettingsUIButtonGroup(AboutLinksGrp)]
         [SettingsUISection(AboutTab, AboutLinksGrp)]
-        public bool OpenParadoxMods
-        {
-            set
-            {
-                if (!value)
-                {
-                    return;
-                }
-
-                TryOpenUrl(kUrlParadox);
-            }
-        }
-
         [SettingsUIButton]
-        [SettingsUIButtonGroup(AboutLinksGrp)]
-        [SettingsUISection(AboutTab, AboutLinksGrp)]
+        [SettingsUIButtonGroup("LinksRow")]
         public bool OpenGitHub
         {
-            set
-            {
-                if (!value)
-                {
-                    return;
-                }
+            set => OpenUrl("https://github.com/River-Mochi/CS2-Fastbikes");
+        }
 
-                TryOpenUrl(kUrlGitHub);
-            }
+        // ------------------------
+        // About: Debug
+        // ------------------------
+
+        [SettingsUISection(AboutTab, AboutDebugGrp)]
+        public bool VerboseLogging
+        {
+            get; set;
+        }
+
+        [SettingsUISection(AboutTab, AboutDebugGrp)]
+        [SettingsUIButton]
+        public bool DumpBicyclePrefabs
+        {
+            set => RequestDump();
         }
 
         // --------------------------------------------------------------------
-        // DEFAULTS
+        // Defaults
         // --------------------------------------------------------------------
 
         public override void SetDefaults()
         {
-            m_EnableFastBikes = true;
-            BikeSpeedScalar = kDefaultPercent;
-        }
-
-        // --------------------------------------------------------------------
-        // UI Setter Handlers
-        // --------------------------------------------------------------------
-
-        private void SetEnableFastBikes(bool value)
-        {
-            m_EnableFastBikes = value;
-            RequestApply();
-        }
-
-        private void SetBikeSpeedScalar(int value)
-        {
-            BikeSpeedScalar = value;
-            RequestApply();
+            EnableFastBikes = DefaultEnabled;
+            SpeedScalar = DefaultSpeed;
+            StiffnessScalar = DefaultStiffness;
+            SpringScalar = DefaultSpring;
+            DampingScalar = DefaultDamping;
+            VerboseLogging = false;
         }
 
         // --------------------------------------------------------------------
@@ -165,11 +188,16 @@ namespace FastBikes
             {
                 return null;
             }
-
             return world;
         }
 
-        private void RequestApply()
+        private static void OpenUrl(string url)
+        {
+            try { Application.OpenURL(url); }
+            catch { }
+        }
+
+        private static void ScheduleApply()
         {
             World? world = GetWorld();
             if (world == null)
@@ -177,24 +205,92 @@ namespace FastBikes
                 return;
             }
 
-            world.GetOrCreateSystemManaged<FastBikeSystem>()
-                .ScheduleReapply();
+            world.GetOrCreateSystemManaged<FastBikeSystem>().ScheduleApply();
         }
 
-        private static void TryOpenUrl(string url)
+        private static void ScheduleResetVanilla()
         {
-            if (string.IsNullOrEmpty(url))
+            World? world = GetWorld();
+            if (world == null)
             {
                 return;
             }
 
-            try
+            world.GetOrCreateSystemManaged<FastBikeSystem>().ScheduleResetVanilla();
+        }
+
+        private static void RequestDump()
+        {
+            World? world = GetWorld();
+            if (world == null)
             {
-                Application.OpenURL(url);
+                return;
             }
-            catch (Exception)
+
+            world.GetOrCreateSystemManaged<FastBikeSystem>().ScheduleDump();
+        }
+
+        // --------------------------------------------------------------------
+        // UI setter handlers
+        // --------------------------------------------------------------------
+
+        private void SetEnableFastBikes(bool value)
+        {
+            EnableFastBikes = value;
+
+            if (EnableFastBikes)
             {
+                ScheduleApply();
             }
+            else
+            {
+                ScheduleResetVanilla();
+            }
+        }
+
+        private void SetSpeedScalar(int value)
+        {
+            SpeedScalar = value;
+            ScheduleApply();
+        }
+
+        private void SetStiffnessScalar(int value)
+        {
+            StiffnessScalar = value;
+            ScheduleApply();
+        }
+
+        private void SetSpringScalar(int value)
+        {
+            SpringScalar = value;
+            ScheduleApply();
+        }
+
+        private void SetDampingScalar(int value)
+        {
+            DampingScalar = value;
+            ScheduleApply();
+        }
+
+        private void DoResetToVanilla()
+        {
+            SpeedScalar = Vanilla;
+            StiffnessScalar = Vanilla;
+            SpringScalar = Vanilla;
+            DampingScalar = Vanilla;
+
+            ScheduleResetVanilla();
+        }
+
+        private void DoResetToModDefaults()
+        {
+            EnableFastBikes = DefaultEnabled;
+            SpeedScalar = DefaultSpeed;
+            StiffnessScalar = DefaultStiffness;
+            SpringScalar = DefaultSpring;
+            DampingScalar = DefaultDamping;
+
+            ScheduleApply();
         }
     }
 }
