@@ -6,6 +6,7 @@ namespace FastBikes
     using Colossal.IO.AssetDatabase; // FileLocation
     using Game.Modding;              // IMod, ModSetting
     using Game.Settings;             // Settings UI attributes
+    using Game.UI;                   // Unit
     using Unity.Entities;            // World
     using UnityEngine;               // Application.OpenURL
 
@@ -30,21 +31,20 @@ namespace FastBikes
         public const string AboutLinksGrp = "Links";
         public const string AboutDebugGrp = "Debug";
 
-        private const int Vanilla = 100;
+        // Vanilla multipliers
+        private const float Vanilla = 1.0f;
 
         // Mod defaults
         private const bool DefaultEnabled = true;
-        private const int DefaultSpeed = 150;
-        private const int DefaultStiffness = 100;
-        private const int DefaultSpring = 100;
-        private const int DefaultDamping = 100;
+        private const float DefaultSpeed = 2.0f;
+        private const float DefaultStiffness = 1.0f;
+        private const float DefaultDamping = 1.0f;
 
         public Setting(IMod mod) : base(mod)
         {
             EnableFastBikes = DefaultEnabled;
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
-            SpringScalar = DefaultSpring;
             DampingScalar = DefaultDamping;
         }
 
@@ -54,10 +54,7 @@ namespace FastBikes
 
         [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
         [SettingsUISetter(typeof(Setting), nameof(SetEnableFastBikes))]
-        public bool EnableFastBikes
-        {
-            get; set;
-        }
+        public bool EnableFastBikes { get; set; }
 
         // ------------------------
         // Actions: Speed
@@ -65,43 +62,25 @@ namespace FastBikes
 
         [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 50, max = 300, step = 5)]
+        [SettingsUISlider(min = 0.30f, max = 10.00f, step = 0.10f, unit = Unit.kFloatTwoFractions)]
         [SettingsUISetter(typeof(Setting), nameof(SetSpeedScalar))]
-        public int SpeedScalar
-        {
-            get; set;
-        }
+        public float SpeedScalar { get; set; }
 
         // ------------------------
-        // Actions: Handling (placeholder until swaying component is confirmed)
+        // Actions: Handling (Phase 3: SwayingData wiring)
         // ------------------------
 
         [SettingsUISection(ActionsTab, ActionsHandlingGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 25, max = 400, step = 5)]
+        [SettingsUISlider(min = 0.50f, max = 10.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
         [SettingsUISetter(typeof(Setting), nameof(SetStiffnessScalar))]
-        public int StiffnessScalar
-        {
-            get; set;
-        }
+        public float StiffnessScalar { get; set; }
 
         [SettingsUISection(ActionsTab, ActionsHandlingGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 25, max = 400, step = 5)]
-        [SettingsUISetter(typeof(Setting), nameof(SetSpringScalar))]
-        public int SpringScalar
-        {
-            get; set;
-        }
-
-        [SettingsUISection(ActionsTab, ActionsHandlingGrp)]
-        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 25, max = 400, step = 5)]
+        [SettingsUISlider(min = 0.50f, max = 10.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
         [SettingsUISetter(typeof(Setting), nameof(SetDampingScalar))]
-        public int DampingScalar
-        {
-            get; set;
-        }
+        public float DampingScalar { get; set; }
 
         // ------------------------
         // Actions: Reset buttons
@@ -110,7 +89,7 @@ namespace FastBikes
         [SettingsUISection(ActionsTab, ActionsResetGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
         [SettingsUIButton]
-        [SettingsUIConfirmation]
+        [SettingsUIButtonGroup("ResetRow")]
         public bool ResetToVanilla
         {
             set => DoResetToVanilla();
@@ -119,6 +98,7 @@ namespace FastBikes
         [SettingsUISection(ActionsTab, ActionsResetGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
         [SettingsUIButton]
+        [SettingsUIButtonGroup("ResetRow")]
         public bool ResetToModDefaults
         {
             set => DoResetToModDefaults();
@@ -151,10 +131,7 @@ namespace FastBikes
         // ------------------------
 
         [SettingsUISection(AboutTab, AboutDebugGrp)]
-        public bool VerboseLogging
-        {
-            get; set;
-        }
+        public bool VerboseLogging { get; set; }
 
         [SettingsUISection(AboutTab, AboutDebugGrp)]
         [SettingsUIButton]
@@ -172,7 +149,6 @@ namespace FastBikes
             EnableFastBikes = DefaultEnabled;
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
-            SpringScalar = DefaultSpring;
             DampingScalar = DefaultDamping;
             VerboseLogging = false;
         }
@@ -248,25 +224,19 @@ namespace FastBikes
             }
         }
 
-        private void SetSpeedScalar(int value)
+        private void SetSpeedScalar(float value)
         {
             SpeedScalar = value;
             ScheduleApply();
         }
 
-        private void SetStiffnessScalar(int value)
+        private void SetStiffnessScalar(float value)
         {
             StiffnessScalar = value;
             ScheduleApply();
         }
 
-        private void SetSpringScalar(int value)
-        {
-            SpringScalar = value;
-            ScheduleApply();
-        }
-
-        private void SetDampingScalar(int value)
+        private void SetDampingScalar(float value)
         {
             DampingScalar = value;
             ScheduleApply();
@@ -276,7 +246,6 @@ namespace FastBikes
         {
             SpeedScalar = Vanilla;
             StiffnessScalar = Vanilla;
-            SpringScalar = Vanilla;
             DampingScalar = Vanilla;
 
             ScheduleResetVanilla();
@@ -287,7 +256,6 @@ namespace FastBikes
             EnableFastBikes = DefaultEnabled;
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
-            SpringScalar = DefaultSpring;
             DampingScalar = DefaultDamping;
 
             ScheduleApply();

@@ -13,14 +13,14 @@ Fast Bikes speeds up bicycles and electric scooters.
 Features:
 - Speed multiplier (0.5x to 10x)
 - Accel/brake auto-scaled for stable handling
-- Optional sway tuning for stiffness/spring/damping
+- Optional sway tuning for stiffness/damping
 - One-click Reset to Vanilla and Reset to Mod Defaults
 - Debug button to dump Bicycle prefabs to the log
 
 tags: slow bike, bicycle speed, vehicle speed, quality of life.
 	</LongDescription>
 	<!--Thumbnail-->
-	<Thumbnail Value="Properties/Thumbnail.png" />
+	<Thumbnail Value="Properties/Thumbnail-bikesParis.jpg" />
 	<!--Screenshot, can be set multiple times-->
 	<Screenshot Value="" />
 	<!--Tag, can be set multiple times-->

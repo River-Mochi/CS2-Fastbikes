@@ -3,8 +3,9 @@
 
 namespace FastBikes
 {
-    using System.Collections.Generic;
     using Colossal; // IDictionarySource, IDictionaryEntryError
+    using System;
+    using System.Collections.Generic;
 
     public sealed class LocaleEN : IDictionarySource
     {
@@ -53,26 +54,23 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Bike & scooter speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
                     "**Scales top speed** for bicycles and scooters.\n" +
-                    "Acceleration and braking are adjusted automatically.\n" +
+                    "Acceleration and braking are also adjusted optimally for the speed selected.\n" +
                     "<Road speed limits still apply>."
                 },
 
                 // Handling
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Stiffness" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Handling scalar for **sway amplitude**.\n" +
-                    "Higher = less sway (tighter feel)."
-                },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpringScalar)), "Spring" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpringScalar)),
-                    "Scales **spring factors** in swaying physics."
+                    "Scalar for **sway amplitude**.\n" +
+                    "Higher = less sway (tighter feel).\n" +
+                    "Lower = more rocking (like a boat)\n" +
+                    "Note: scooters will still lean more because their baseline is already bigger."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
                     "Scales **damping factors** in swaying physics.\n" +
-                    "Higher = settles faster."
+                    "Higher = settles faster, less wobble (oscillation dies faster).\n"
                 },
 
                 // Reset

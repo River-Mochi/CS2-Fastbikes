@@ -1,16 +1,17 @@
 // File: Systems/FastBikeSystem.cs
-// Purpose: On-demand bicycle tuning on prefab entities (speed + accel/brake scaling).
+// Purpose: On-demand bicycle tuning on prefab entities (speed + accel/brake scaling + swaying handling).
 // Notes:
 // - Runs only on-demand (when settings change or on game load), then disables itself.
-// - Reads vanilla baselines from PrefabSystem -> BicyclePrefab authoring (not from *Data).
-// - Writes changes to Game.Prefabs.CarData on bicycle prefab entities.
-// - Handling sliders are saved/UI-visible but not applied until the swaying component is confirmed.
+// - Reads vanilla baselines from PrefabSystem -> BicyclePrefab authoring (not from *Data) for speed/accel/brake.
+// - Adjusts SwayingData on bicycle prefab entities using captured baseline values (patch-resilient and preserves scooter vs bike differences).
+// - Touches only entities with BicycleData to avoid affecting non-bicycle swaying (props, water, etc.).
 
 namespace FastBikes
 {
     using Colossal.Serialization.Entities; // Purpose
     using Game;                           // GameSystemBase, GameMode
-    using Game.Prefabs;                   // PrefabSystem, PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData
+    using Game.Prefabs;                   // PrefabSystem, PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, SwayingData
+    using System.Collections.Generic;     // Dictionary
     using Unity.Collections;              // Allocator, NativeArray
     using Unity.Entities;                 // Entity, EntityQuery, SystemAPI
     using Unity.Mathematics;              // math.*
@@ -24,7 +25,11 @@ namespace FastBikes
         private PrefabSystem m_PrefabSystem = null!;
 
         private EntityQuery m_BicycleCarQuery;
+        private EntityQuery m_BicycleSwayQuery;
         private EntityQuery m_BicyclePrefabQuery;
+
+        private readonly Dictionary<Entity, SwayingData> m_SwayingBaseline =
+            new Dictionary<Entity, SwayingData>();
 
         protected override void OnCreate()
         {
@@ -39,6 +44,11 @@ namespace FastBikes
                 .WithAll<PrefabData, BicycleData, CarData>()
                 .Build();
 
+            // Prefab entities that represent bicycles and have SwayingData.
+            m_BicycleSwayQuery = SystemAPI.QueryBuilder()
+                .WithAll<PrefabData, BicycleData, SwayingData>()
+                .Build();
+
             // Prefab entities that represent bicycles (for dump).
             m_BicyclePrefabQuery = SystemAPI.QueryBuilder()
                 .WithAll<PrefabData, BicycleData>()
@@ -48,6 +58,8 @@ namespace FastBikes
         protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
         {
             base.OnGameLoadingComplete(purpose, mode);
+
+            m_SwayingBaseline.Clear();
 
             if (Mod.Settings != null)
             {
@@ -104,40 +116,32 @@ namespace FastBikes
                 if (m_Dump)
                 {
                     m_Dump = false;
-                    DumpBicyclePrefabs();
+                    DumpBicyclePrefabs(setting.VerboseLogging);
                 }
 
                 bool forceVanilla = m_ResetVanilla || !setting.EnableFastBikes;
                 m_ResetVanilla = false;
 
-                float speedScalar = 1f;
+                float speedScalar = forceVanilla
+                    ? 1.0f
+                    : math.clamp(setting.SpeedScalar, 0.30f, 10.0f);
 
-                if (!forceVanilla)
-                {
-                    // SpeedScalar is percent (100 = vanilla).
-                    // Slider range in Setting.cs is 50..300 => 0.5x..3.0x.
-                    speedScalar = math.clamp(setting.SpeedScalar * 0.01f, 0.5f, 3.0f);
-                }
+                float stiffnessScalar = forceVanilla
+                    ? 1.0f
+                    : math.clamp(setting.StiffnessScalar, 0.50f, 10.0f);
+
+                float dampingScalar = forceVanilla
+                    ? 1.0f
+                    : math.clamp(setting.DampingScalar, 0.50f, 10.0f);
 
                 ApplyBicycleTuning(speedScalar);
+                ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
 
-                bool anyHandlingNonVanilla =
-                    setting.StiffnessScalar != 100 ||
-                    setting.SpringScalar != 100 ||
-                    setting.DampingScalar != 100;
-
-                if (!forceVanilla && anyHandlingNonVanilla)
-                {
-                    Mod.WarnOnce("FB_HANDLING_NOT_WIRED", () =>
-                        "[FB] Handling sliders are saved and shown in UI, but handling tuning is not applied yet (pending confirmed swaying component/fields).");
-                }
-
-#if DEBUG
                 if (setting.VerboseLogging)
                 {
-                    Mod.LogSafe(() => $"[FB] Applied. Enabled={setting.EnableFastBikes}, SpeedScalar={speedScalar:0.###}x");
+                    Mod.LogSafe(() =>
+                        $"[FB] Applied. Enabled={setting.EnableFastBikes}, Speed={speedScalar:0.##}x, Stiffness={stiffnessScalar:0.##}x, Damping={dampingScalar:0.##}x");
                 }
-#endif
             }
             catch (System.Exception ex)
             {
@@ -187,7 +191,47 @@ namespace FastBikes
             }
         }
 
-        private void DumpBicyclePrefabs()
+        private void ApplyBicycleSwaying(bool forceVanilla, float stiffnessScalar, float dampingScalar)
+        {
+            float stiff = math.max(0.01f, stiffnessScalar);
+            float damp = math.max(0.01f, dampingScalar);
+
+            using NativeArray<Entity> entities = m_BicycleSwayQuery.ToEntityArray(Allocator.Temp);
+
+            for (int i = 0; i < entities.Length; i++)
+            {
+                Entity prefabEntity = entities[i];
+
+                SwayingData current = EntityManager.GetComponentData<SwayingData>(prefabEntity);
+
+                if (!m_SwayingBaseline.TryGetValue(prefabEntity, out SwayingData baseline))
+                {
+                    baseline = current;
+                    m_SwayingBaseline.Add(prefabEntity, baseline);
+                }
+
+                if (forceVanilla)
+                {
+                    if (!current.Equals(baseline))
+                    {
+                        EntityManager.SetComponentData(prefabEntity, baseline);
+                    }
+                    continue;
+                }
+
+                SwayingData tuned = baseline;
+
+                // StiffnessScalar: higher -> less lean/sway (smaller max position).
+                tuned.m_MaxPosition = baseline.m_MaxPosition / stiff;
+
+                // DampingScalar: higher -> settles faster (smaller damping factors before pow()).
+                tuned.m_DampingFactors = baseline.m_DampingFactors / damp;
+
+                EntityManager.SetComponentData(prefabEntity, tuned);
+            }
+        }
+
+        private void DumpBicyclePrefabs(bool verbose)
         {
             using NativeArray<Entity> entities = m_BicyclePrefabQuery.ToEntityArray(Allocator.Temp);
 
@@ -195,13 +239,51 @@ namespace FastBikes
             {
                 Entity prefabEntity = entities[i];
 
+                string name = "(PrefabBase not found)";
+                string typeName = "(unknown)";
+
                 if (m_PrefabSystem.TryGetPrefab(prefabEntity, out PrefabBase prefabBase))
                 {
-                    Mod.LogSafe(() => $"[FB] Bicycle prefab: entity={prefabEntity.Index}:{prefabEntity.Version} name='{prefabBase.name}' type={prefabBase.GetType().Name}");
+                    name = prefabBase.name;
+                    typeName = prefabBase.GetType().Name;
+                }
+
+                Mod.LogSafe(() =>
+                    $"[FB] Bicycle prefab: entity={prefabEntity.Index}:{prefabEntity.Version} name='{name}' type={typeName}");
+
+                if (!verbose)
+                {
+                    continue;
+                }
+
+                if (EntityManager.HasComponent<CarData>(prefabEntity))
+                {
+                    CarData car = EntityManager.GetComponentData<CarData>(prefabEntity);
+                    Mod.LogSafe(() =>
+                        $"[FB]   CarData: MaxSpeed={car.m_MaxSpeed:0.###} m/s  Accel={car.m_Acceleration:0.###}  Brake={car.m_Braking:0.###}");
                 }
                 else
                 {
-                    Mod.LogSafe(() => $"[FB] Bicycle prefab: entity={prefabEntity.Index}:{prefabEntity.Version} (PrefabBase not found)");
+                    Mod.LogSafe(() => "[FB]   CarData: (missing)");
+                }
+
+                if (EntityManager.HasComponent<SwayingData>(prefabEntity))
+                {
+                    SwayingData sw = EntityManager.GetComponentData<SwayingData>(prefabEntity);
+
+                    if (!m_SwayingBaseline.TryGetValue(prefabEntity, out SwayingData baseSw))
+                    {
+                        baseSw = sw;
+                    }
+
+                    Mod.LogSafe(() =>
+                        $"[FB]   SwayingData baseline: MaxPos={baseSw.m_MaxPosition}  Damping={baseSw.m_DampingFactors}  Spring={baseSw.m_SpringFactors}");
+                    Mod.LogSafe(() =>
+                        $"[FB]   SwayingData current : MaxPos={sw.m_MaxPosition}  Damping={sw.m_DampingFactors}  Spring={sw.m_SpringFactors}");
+                }
+                else
+                {
+                    Mod.LogSafe(() => "[FB]   SwayingData: (missing)");
                 }
             }
 
