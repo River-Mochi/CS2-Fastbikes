@@ -7,7 +7,7 @@ namespace FastBikes
     using Game.Modding;              // IMod, ModSetting
     using Game.Settings;             // Settings UI attributes
     using Game.UI;                   // Unit
-    using System;                    // Exception
+    using System;                    // Exception, Math
     using Unity.Entities;            // World
     using UnityEngine;               // Application.OpenURL
 
@@ -38,11 +38,13 @@ namespace FastBikes
         // Vanilla multipliers
         private const float Vanilla = 1.0f;
 
-        // Mod defaults
+        // Mod defaults (first install)
         private const bool DefaultEnabled = true;
         private const float DefaultSpeed = 2.0f;
         private const float DefaultStiffness = 1.25f;
         private const float DefaultDamping = 1.25f;
+
+        private const float FloatEpsilon = 0.0001f;
 
         public Setting(IMod mod) : base(mod)
         {
@@ -96,7 +98,15 @@ namespace FastBikes
         [SettingsUIButtonGroup("ResetRow")]
         public bool ResetToModDefaults
         {
-            set => DoResetToModDefaults();
+            set
+            {
+                if (!value)
+                {
+                    return;
+                }
+
+                DoResetToModDefaults();
+            }
         }
 
         [SettingsUISection(ActionsTab, ActionsResetGrp)]
@@ -105,7 +115,15 @@ namespace FastBikes
         [SettingsUIButtonGroup("ResetRow")]
         public bool ResetToVanilla
         {
-            set => DoResetToVanilla();
+            set
+            {
+                if (!value)
+                {
+                    return;
+                }
+
+                DoResetToVanilla();
+            }
         }
 
         // ------------------------
@@ -153,7 +171,15 @@ namespace FastBikes
         [SettingsUIButton]
         public bool DumpBicyclePrefabs
         {
-            set => RequestDump();
+            set
+            {
+                if (!value)
+                {
+                    return;
+                }
+
+                RequestDump();
+            }
         }
 
         // --------------------------------------------------------------------
@@ -221,6 +247,11 @@ namespace FastBikes
 
         private void SetEnableFastBikes(bool value)
         {
+            if (EnableFastBikes == value)
+            {
+                return;
+            }
+
             EnableFastBikes = value;
 
             if (EnableFastBikes)
@@ -235,24 +266,53 @@ namespace FastBikes
 
         private void SetSpeedScalar(float value)
         {
+            if (Math.Abs(SpeedScalar - value) < FloatEpsilon)
+            {
+                return;
+            }
+
             SpeedScalar = value;
-            ScheduleApply();
+
+            // Slider setters are invoked repeatedly while dragging; apply is scheduled per change.
+            if (EnableFastBikes)
+            {
+                ScheduleApply();
+            }
         }
 
         private void SetStiffnessScalar(float value)
         {
+            if (Math.Abs(StiffnessScalar - value) < FloatEpsilon)
+            {
+                return;
+            }
+
             StiffnessScalar = value;
-            ScheduleApply();
+
+            if (EnableFastBikes)
+            {
+                ScheduleApply();
+            }
         }
 
         private void SetDampingScalar(float value)
         {
+            if (Math.Abs(DampingScalar - value) < FloatEpsilon)
+            {
+                return;
+            }
+
             DampingScalar = value;
-            ScheduleApply();
+
+            if (EnableFastBikes)
+            {
+                ScheduleApply();
+            }
         }
 
         private void DoResetToVanilla()
         {
+            EnableFastBikes = DefaultEnabled;
             SpeedScalar = Vanilla;
             StiffnessScalar = Vanilla;
             DampingScalar = Vanilla;

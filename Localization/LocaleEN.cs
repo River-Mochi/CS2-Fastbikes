@@ -63,18 +63,19 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Stiffness" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
                     "Scalar for **sway amplitude**.\n" +
-                    "Higher = less lean (tighter look).\n" +
+                    "Higher = less leaning (tighter look).\n" +
                     "Lower = more wobble.\n" +
                     "Note: scooters can still lean more because their defaults are different.\n" +
                     "More stable at high speed: 1.25–1.75.\n" +
-                    "More wobble: 0.75."
+                    "More wobble: below 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
                     "Higher = settles faster (oscillation dies faster).\n" +
-                    "More stable at high speed: 1.25–2.0.\n" +
-                    "More wobble: 0.75."
+                    "**1.0 = game defaults**\n" +
+                    "More stable at high speed: 1.25–2.0+\n" +
+                    "More wobble: below 0.75."
                 },
 
                 // Reset buttons
@@ -99,11 +100,12 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Opens the author’s Paradox mods page." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Dump bicycle prefabs" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Bicycle Prefab Dump" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "Writes bicycle/scooter prefab values to FastBikes.log\n" +
-                    "Useful after game updates or when reporting issues.\n" +
-                    "Shows authoring values, CarData, and SwayingData."
+                    "Logs bicycle/scooter detailed values.\n" +
+                    "Not needed for normal gameplay.\n\n" +
+                    "Useful after game updates or when debugging issues.\n" +
+                    "Load city first, data sent to **FastBikes.log**."
                 },
             };
         }
