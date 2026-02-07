@@ -7,7 +7,7 @@ namespace FastBikes
     using Game.Modding;              // IMod, ModSetting
     using Game.Settings;             // Settings UI attributes
     using Game.UI;                   // Unit
-    using System;
+    using System;                    // Exception
     using Unity.Entities;            // World
     using UnityEngine;               // Application.OpenURL
 
@@ -31,8 +31,9 @@ namespace FastBikes
         public const string AboutInfoGrp = "Mod info";
         public const string AboutLinksGrp = "Links";
         public const string AboutDebugGrp = "Debug";
+
         private const string UrlParadox =
-        "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
+            "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
 
         // Vanilla multipliers
         private const float Vanilla = 1.0f;
@@ -40,8 +41,8 @@ namespace FastBikes
         // Mod defaults
         private const bool DefaultEnabled = true;
         private const float DefaultSpeed = 2.0f;
-        private const float DefaultStiffness = 1.0f;
-        private const float DefaultDamping = 1.0f;
+        private const float DefaultStiffness = 1.25f;
+        private const float DefaultDamping = 1.25f;
 
         public Setting(IMod mod) : base(mod)
         {
@@ -70,18 +71,18 @@ namespace FastBikes
         public float SpeedScalar { get; set; }
 
         // ------------------------
-        // Actions: Handling (Phase 3: SwayingData wiring)
+        // Actions: Handling
         // ------------------------
 
         [SettingsUISection(ActionsTab, ActionsHandlingGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 0.50f, max = 10.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
+        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
         [SettingsUISetter(typeof(Setting), nameof(SetStiffnessScalar))]
         public float StiffnessScalar { get; set; }
 
         [SettingsUISection(ActionsTab, ActionsHandlingGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 0.50f, max = 10.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
+        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
         [SettingsUISetter(typeof(Setting), nameof(SetDampingScalar))]
         public float DampingScalar { get; set; }
 
@@ -93,18 +94,18 @@ namespace FastBikes
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
         [SettingsUIButton]
         [SettingsUIButtonGroup("ResetRow")]
-        public bool ResetToVanilla
+        public bool ResetToModDefaults
         {
-            set => DoResetToVanilla();
+            set => DoResetToModDefaults();
         }
 
         [SettingsUISection(ActionsTab, ActionsResetGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
         [SettingsUIButton]
         [SettingsUIButtonGroup("ResetRow")]
-        public bool ResetToModDefaults
+        public bool ResetToVanilla
         {
-            set => DoResetToModDefaults();
+            set => DoResetToVanilla();
         }
 
         // ------------------------
@@ -124,7 +125,6 @@ namespace FastBikes
         [SettingsUIButton]
         [SettingsUIButtonGroup("LinksRow")]
         [SettingsUISection(AboutTab, AboutLinksGrp)]
-
         public bool OpenParadoxMods
         {
             set
@@ -150,9 +150,6 @@ namespace FastBikes
         // ------------------------
 
         [SettingsUISection(AboutTab, AboutDebugGrp)]
-        public bool VerboseLogging { get; set; }
-
-        [SettingsUISection(AboutTab, AboutDebugGrp)]
         [SettingsUIButton]
         public bool DumpBicyclePrefabs
         {
@@ -169,7 +166,6 @@ namespace FastBikes
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
-            VerboseLogging = false;
         }
 
         // --------------------------------------------------------------------
@@ -184,12 +180,6 @@ namespace FastBikes
                 return null;
             }
             return world;
-        }
-
-        private static void OpenUrl(string url)
-        {
-            try { Application.OpenURL(url); }
-            catch { }
         }
 
         private static void ScheduleApply()

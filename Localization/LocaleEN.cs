@@ -4,8 +4,7 @@
 namespace FastBikes
 {
     using Colossal; // IDictionarySource, IDictionaryEntryError
-    using System;
-    using System.Collections.Generic;
+    using System.Collections.Generic; // IEnumerable, Dictionary, KeyValuePair
 
     public sealed class LocaleEN : IDictionarySource
     {
@@ -47,41 +46,46 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
                     "Turns the mod ON/OFF.\n" +
-                    "When OFF, vanilla bicycle and scooter behavior is restored."
+                    "When OFF, bicycle and scooter behavior is restored."
                 },
 
                 // Speed
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Bike & scooter speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
-                    "**Scales top speed** for bicycles and scooters.\n" +
-                    "Acceleration and braking are also adjusted optimally for the speed selected.\n" +
-                    "<Road speed limits still apply>."
+                    "**Scales top speed**\n" +
+                    "Acceleration and braking are also adjusted for the selected speed.\n" +
+                    "**0.30 = 30%** of game default\n" +
+                    "**1.00 = game default**\n" +
+                    "Note: road speed limits and game conditions may still apply."
                 },
 
                 // Handling
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Stiffness" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
                     "Scalar for **sway amplitude**.\n" +
-                    "Higher = less sway (tighter feel).\n" +
-                    "Lower = more rocking (like a boat)\n" +
-                    "Note: scooters will still lean more because their baseline is already bigger."
+                    "Higher = less lean (tighter look).\n" +
+                    "Lower = more wobble.\n" +
+                    "Note: scooters can still lean more because their defaults are different.\n" +
+                    "More stable at high speed: 1.25–1.75.\n" +
+                    "More wobble: 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Scales **damping factors** in swaying physics.\n" +
-                    "Higher = settles faster, less wobble (oscillation dies faster).\n"
+                    "Higher = settles faster (oscillation dies faster).\n" +
+                    "More stable at high speed: 1.25–2.0.\n" +
+                    "More wobble: 0.75."
                 },
 
-                // Reset
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Reset to vanilla" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
-                    "Sets all sliders back to **100%** and restores vanilla baselines."
-                },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Reset to mod defaults" },
+                // Reset buttons
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod defaults" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
                     "Applies the mod’s default tuning values."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Game defaults" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
+                    "Sets all sliders back to **100%** and restores game defaults."
                 },
 
                 // About: Info
@@ -92,17 +96,14 @@ namespace FastBikes
 
                 // Links
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Opens the author's Paradox mods page." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Opens the author’s Paradox mods page." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.VerboseLogging)), "Verbose logging" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.VerboseLogging)),
-                    "Adds detailed logging for debugging."
-                },
-
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Dump bicycle prefabs" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "Writes all prefabs with **BicycleData** to the FastBikes.log."
+                    "Writes bicycle/scooter prefab values to FastBikes.log\n" +
+                    "Useful after game updates or when reporting issues.\n" +
+                    "Shows authoring values, CarData, and SwayingData."
                 },
             };
         }
