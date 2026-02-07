@@ -184,13 +184,17 @@ publish/
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
-# Note: Comment the next line if you want to checkin your web deploy settings,
-# but database connection strings (with potential passwords) will be unencrypted
-// *.pubxml
 *.publishproj
 
-# Track publish profiles (override any broader ignore)
-!Properties/PublishProfiles/*.pubxml
+# Note: Comment the next line if you want to checkin your web deploy settings,
+# but database connection strings (with potential passwords) will be unencrypted
+# Comment it out to allow pubxml in the repo.
+# *.pubxml
+
+# Allow CS2 publish profiles (track these)
+!**/Properties/
+!**/Properties/PublishProfiles/
+!**/Properties/PublishProfiles/*.pubxml
 
 # Ignore machine-specific publish profile user files
 *.pubxml.user

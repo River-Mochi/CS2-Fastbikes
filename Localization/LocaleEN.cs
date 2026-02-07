@@ -91,8 +91,8 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Current version." },
 
                 // Links
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenGitHub)), "GitHub" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenGitHub)), "Opens the project repository." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Opens the author's Paradox mods page." },
 
                 // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.VerboseLogging)), "Verbose logging" },
@@ -102,7 +102,7 @@ namespace FastBikes
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Dump bicycle prefabs" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "Writes all prefabs with **BicycleData** to the game log."
+                    "Writes all prefabs with **BicycleData** to the FastBikes.log."
                 },
             };
         }

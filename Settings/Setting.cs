@@ -7,6 +7,7 @@ namespace FastBikes
     using Game.Modding;              // IMod, ModSetting
     using Game.Settings;             // Settings UI attributes
     using Game.UI;                   // Unit
+    using System;
     using Unity.Entities;            // World
     using UnityEngine;               // Application.OpenURL
 
@@ -30,6 +31,8 @@ namespace FastBikes
         public const string AboutInfoGrp = "Mod info";
         public const string AboutLinksGrp = "Links";
         public const string AboutDebugGrp = "Debug";
+        private const string UrlParadox =
+        "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
 
         // Vanilla multipliers
         private const float Vanilla = 1.0f;
@@ -118,12 +121,28 @@ namespace FastBikes
         // About: Links
         // ------------------------
 
-        [SettingsUISection(AboutTab, AboutLinksGrp)]
         [SettingsUIButton]
         [SettingsUIButtonGroup("LinksRow")]
-        public bool OpenGitHub
+        [SettingsUISection(AboutTab, AboutLinksGrp)]
+
+        public bool OpenParadoxMods
         {
-            set => OpenUrl("https://github.com/River-Mochi/CS2-Fastbikes");
+            set
+            {
+                if (!value)
+                {
+                    return;
+                }
+
+                try
+                {
+                    Application.OpenURL(UrlParadox);
+                }
+                catch (Exception)
+                {
+                    // Silent catch; worst case the link does nothing.
+                }
+            }
         }
 
         // ------------------------
