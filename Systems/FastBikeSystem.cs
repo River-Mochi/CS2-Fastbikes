@@ -14,12 +14,19 @@ namespace FastBikes
 
     public sealed partial class FastBikeSystem : GameSystemBase
     {
+        private const float MinSpeed = 0.30f;
+        private const float MaxSpeed = 10.00f;
+
+        private const float MinHandling = 0.30f;
+        private const float MaxHandling = 5.00f;
+
         private bool m_Dirty;
         private bool m_ResetVanilla;
 
         private PrefabSystem m_PrefabSystem = null!;
 
-        // Key = bicycle prefab entity, Value = captured "vanilla baseline" SwayingData for this load session.
+        // Key = bicycle prefab entity, Value = first-seen SwayingData baseline for this load session.
+        // This baseline is intentionally session-local to keep tuning reversible and compatible with other changes.
         private readonly Dictionary<Entity, SwayingData> m_SwayingBaseline =
             new Dictionary<Entity, SwayingData>();
 
@@ -105,17 +112,19 @@ namespace FastBikes
                 bool forceVanilla = m_ResetVanilla || !setting.EnableFastBikes;
                 m_ResetVanilla = false;
 
-                float speedScalar = forceVanilla ? 1.0f : math.clamp(setting.SpeedScalar, 0.30f, 10.0f);
-                float stiffnessScalar = forceVanilla ? 1.0f : math.clamp(setting.StiffnessScalar, 0.30f, 5.0f);
-                float dampingScalar = forceVanilla ? 1.0f : math.clamp(setting.DampingScalar, 0.30f, 5.0f);
+                float speedScalar = forceVanilla ? 1.0f : math.clamp(setting.SpeedScalar, MinSpeed, MaxSpeed);
+                float stiffnessScalar = forceVanilla ? 1.0f : math.clamp(setting.StiffnessScalar, MinHandling, MaxHandling);
+                float dampingScalar = forceVanilla ? 1.0f : math.clamp(setting.DampingScalar, MinHandling, MaxHandling);
 
                 int tunedCars = ApplyBicycleTuning(speedScalar);
                 int tunedSway = ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
 
+#if DEBUG
                 Mod.LogSafe(() =>
-                    $"[FB] Applied. Enabled={setting.EnableFastBikes}, Speed={speedScalar:0.##}x, " +
-                    $"Stiffness={stiffnessScalar:0.##}x, Damping={dampingScalar:0.##}x, " +
+                    $"[FB] Applied. Mode={(forceVanilla ? "Vanilla" : "Tuned")}, " +
+                    $"Speed={speedScalar:0.##}x, Stiffness={stiffnessScalar:0.##}x, Damping={dampingScalar:0.##}x, " +
                     $"CarDataUpdated={tunedCars}, SwayUpdated={tunedSway}");
+#endif
             }
             catch (System.Exception ex)
             {
@@ -194,7 +203,7 @@ namespace FastBikes
 
                 SwayingData tuned = baseline;
 
-                tuned.m_MaxPosition = baseline.m_MaxPosition / stiff;     // higher stiffness -> smaller lean distance
+                tuned.m_MaxPosition = baseline.m_MaxPosition / stiff;      // higher stiffness -> smaller lean distance
                 tuned.m_DampingFactors = baseline.m_DampingFactors / damp; // higher damping -> settles faster
                 tuned.m_DampingFactors = math.clamp(tuned.m_DampingFactors, 0.01f, 0.999f); // safety clamp
 
@@ -212,19 +221,19 @@ namespace FastBikes
         {
             bicyclePrefab = default!;
 
-            // safe way to read default BicyclePrefab fields (m_MaxSpeed, m_Acceleration, m_Braking).
+            // Read default BicyclePrefab fields (m_MaxSpeed, m_Acceleration, m_Braking) via PrefabSystem -> PrefabBase.
             if (!m_PrefabSystem.TryGetPrefab(prefabEntity, out PrefabBase prefabBase))
             {
-                return false; // PrefabBase missing (unexpected, but safe to skip).
+                return false;
             }
 
-            if (prefabBase is BicyclePrefab bike)   // BicyclePrefab has the authoring fields.
+            if (prefabBase is BicyclePrefab bike)
             {
                 bicyclePrefab = bike;
                 return true;
             }
-            return false;  // If an entity has BicycleData but not be a BicyclePrefab authoring type.
-        }
 
+            return false;
+        }
     }
 }

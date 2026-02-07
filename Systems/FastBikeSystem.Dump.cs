@@ -140,7 +140,7 @@ namespace FastBikes
 
                 string kind = isScooter ? "Scooter" : "Bicycle";
 
-                // Authoring (BicyclePrefab) drives the expected CarData numbers.
+                // BicyclePrefab base drives the expected CarData numbers.
                 bool hasAuthoring = hasPrefabBase && prefabBase is BicyclePrefab;
                 BicyclePrefab bikeAuthoring = hasAuthoring ? (BicyclePrefab)prefabBase : null!;
 

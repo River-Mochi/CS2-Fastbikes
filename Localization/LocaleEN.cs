@@ -45,8 +45,8 @@ namespace FastBikes
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "Turns the mod ON/OFF.\n" +
-                    "When OFF, bicycle and scooter behavior is restored."
+                    "**Turns the mod ON/OFF.**\n" +
+                    "When OFF, bicycle and scooter behavior is restored to game defaults."
                 },
 
                 // Speed
@@ -56,7 +56,8 @@ namespace FastBikes
                     "Acceleration and braking are also adjusted for the selected speed.\n" +
                     "**0.30 = 30%** of game default\n" +
                     "**1.00 = game default**\n" +
-                    "Note: road speed limits and game conditions may still apply."
+                    "Note: road limits and game conditions may still apply.\n" +
+                    "Install Road Speed Adjuster mod to increase road limits and see higher bike speeds."
                 },
 
                 // Handling
@@ -64,8 +65,8 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
                     "Scalar for **sway amplitude**.\n" +
                     "Higher = less leaning (tighter look).\n" +
-                    "**1.0 = game defaults**\n" +
-                    "Lower = more wobble.\n" +
+                    "1.0 = game defaults\n" +
+                    "**Lower = more wobble.**\n" +
                     "For more stable at high speed: 1.25–1.75\n" +
                     "Note: scooters can still lean more because their defaults are different."
                 },
@@ -73,8 +74,8 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
                     "Higher = settles faster (oscillation dies faster).\n" +
-                    "**1.0 = game defaults**\n" +
-                    "Lower = more wobble.\n" +
+                    "1.0 = game defaults\n" +
+                    "**Lower = more wobble.**\n" +
                     "For more stable at high speed: 1.25–2.0+"
                 },
 
