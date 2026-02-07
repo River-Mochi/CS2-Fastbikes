@@ -1,5 +1,5 @@
 // File: Localization/LocaleEN.cs
-// Purpose: English localization entries for FastBikes.
+// Purpose: English entries for FastBikes.
 
 namespace FastBikes
 {
@@ -45,8 +45,8 @@ namespace FastBikes
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "**Turns the mod ON/OFF.**\n" +
-                    "When OFF, bicycle and scooter behavior is restored to game defaults."
+                    "Turns the mod ON/OFF.\n" +
+                    "When OFF, bicycle and scooter behavior is restored."
                 },
 
                 // Speed
@@ -56,33 +56,32 @@ namespace FastBikes
                     "Acceleration and braking are also adjusted for the selected speed.\n" +
                     "**0.30 = 30%** of game default\n" +
                     "**1.00 = game default**\n" +
-                    "Note: road limits and game conditions may still apply.\n" +
-                    "Install Road Speed Adjuster mod to increase road limits and see higher bike speeds."
+                    "Note: road speed limits and game conditions may still apply."
                 },
 
-                // Handling
+                // Stability
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Stiffness" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
                     "Scalar for **sway amplitude**.\n" +
                     "Higher = less leaning (tighter look).\n" +
-                    "1.0 = game defaults\n" +
-                    "**Lower = more wobble.**\n" +
-                    "For more stable at high speed: 1.25–1.75\n" +
-                    "Note: scooters can still lean more because their defaults are different."
+                    "Lower = more wobble.\n" +
+                    "Note: scooters can still lean more because their defaults are different.\n" +
+                    "More stable at high speed: 1.25–1.75.\n" +
+                    "More wobble: 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
                     "Higher = settles faster (oscillation dies faster).\n" +
-                    "1.0 = game defaults\n" +
-                    "**Lower = more wobble.**\n" +
-                    "For more stable at high speed: 1.25–2.0+"
+                    "**1.0 = game defaults**\n" +
+                    "More stable at high speed: 1.25–2.0+\n" +
+                    "More wobble: < 0.75"
                 },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod defaults" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
-                    "Applies the mod’s default Stability values."
+                    "Applies the mod’s default tuning values."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Game defaults" },
@@ -106,7 +105,7 @@ namespace FastBikes
                     "Logs bicycle/scooter detailed values.\n" +
                     "Not needed for normal gameplay.\n\n" +
                     "Useful after game updates or when debugging issues.\n" +
-                    "Load city first, data sent to **FastBikes.log**."
+                    "Load city first, data sent to **FastBikes.log**"
                 },
             };
         }

@@ -64,25 +64,23 @@ namespace FastBikes
 
             // Locales should be best-effort; never crash mod load.
             AddLocaleSource("en-US", new LocaleEN(setting));
-
-            // Phase 2 (commented out for now)
-            // AddLocaleSource("fr-FR", new LocaleFR(setting));
-            // AddLocaleSource("es-ES", new LocaleES(setting));
-            // AddLocaleSource("de-DE", new LocaleDE(setting));
-            // AddLocaleSource("it-IT", new LocaleIT(setting));
-            // AddLocaleSource("ja-JP", new LocaleJA(setting));
-            // AddLocaleSource("ko-KR", new LocaleKO(setting));
-            // AddLocaleSource("zh-HANS", new LocaleZH_CN(setting));
-            // AddLocaleSource("pl-PL", new LocalePL(setting));
-            // AddLocaleSource("pt-BR", new LocalePT_BR(setting));
-            // AddLocaleSource("zh-HANT", new LocaleZH_HANT(setting));
+            AddLocaleSource("fr-FR", new LocaleFR(setting));
+            AddLocaleSource("es-ES", new LocaleES(setting));
+            AddLocaleSource("de-DE", new LocaleDE(setting));
+            AddLocaleSource("it-IT", new LocaleIT(setting));
+            AddLocaleSource("ja-JP", new LocaleJA(setting));
+            AddLocaleSource("ko-KR", new LocaleKO(setting));
+            AddLocaleSource("pl-PL", new LocalePL(setting));
+            AddLocaleSource("pt-BR", new LocalePT_BR(setting));
+            AddLocaleSource("zh-HANS", new LocaleZH_CN(setting));    // Simplified Chinese
+            AddLocaleSource("zh-HANT", new LocaleZH_HANT(setting));  // Traditional Chinese
 
             // Settings + Options UI
             try
             {
-                // CS2 wiki + template pattern:
-                // - LoadSettings(sectionName, instance, defaultInstance)
-                // - Saving is automatic on changes (no manual SaveSettings(name, instance) call)
+     
+                // LoadSettings(sectionName, instance, defaultInstance)
+                // Saving is automatic on changes
                 AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
                 setting.RegisterInOptionsUI();
             }

@@ -11,7 +11,8 @@ namespace FastBikes
     using Unity.Entities;            // World
     using UnityEngine;               // Application.OpenURL
 
-    [FileLocation("ModsSettings/FastBike/FastBike")]    // Settings file location.
+    // Stable settings path (pre-first-publish). Changing this later creates a new settings file.
+    [FileLocation("ModsSettings/FastBikes/FastBikes")]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(
         ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp,
@@ -35,15 +36,16 @@ namespace FastBikes
         private const string UrlParadox =
             "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
 
-        // Vanilla multipliers
+        // Vanilla multipliers.
         private const float Vanilla = 1.0f;
 
-        // Mod defaults (first install)
+        // Mod defaults (first install).
         private const bool DefaultEnabled = true;
         private const float DefaultSpeed = 2.0f;
         private const float DefaultStiffness = 1.25f;
         private const float DefaultDamping = 1.25f;
 
+        // Float compare guard to avoid scheduling applies on identical values.
         private const float FloatEpsilon = 0.0001f;
 
         public Setting(IMod mod) : base(mod)
@@ -55,7 +57,7 @@ namespace FastBikes
         }
 
         // --------------------------------------------------------------------
-        // ACTIONS: Master toggle
+        // ACTIONS: Main toggle
         // --------------------------------------------------------------------
 
         [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
@@ -66,6 +68,7 @@ namespace FastBikes
         // Actions: Speed
         // ------------------------
 
+        // SettingsUIHideByCondition(..., invert: true) hides controls when the condition is false.
         [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
         [SettingsUISlider(min = 0.30f, max = 10.00f, step = 0.10f, unit = Unit.kFloatTwoFractions)]
@@ -73,7 +76,7 @@ namespace FastBikes
         public float SpeedScalar { get; set; }
 
         // ------------------------
-        // Actions: Handling
+        // Actions: Stability
         // ------------------------
 
         [SettingsUISection(ActionsTab, ActionsStabilityGrp)]
@@ -205,6 +208,7 @@ namespace FastBikes
             {
                 return null;
             }
+
             return world;
         }
 
@@ -312,17 +316,16 @@ namespace FastBikes
 
         private void DoResetToVanilla()
         {
-            EnableFastBikes = DefaultEnabled;
             SpeedScalar = Vanilla;
             StiffnessScalar = Vanilla;
             DampingScalar = Vanilla;
 
+            // Explicit vanilla restore is used to revert exactly to cached baselines.
             ScheduleResetVanilla();
         }
 
         private void DoResetToModDefaults()
         {
-            EnableFastBikes = DefaultEnabled;
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
