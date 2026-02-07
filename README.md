@@ -18,7 +18,7 @@ It applies a configurable speed multiplier and automatically scales acceleration
 
 > Default install values:
 > - Enabled: ON  
-> - Speed: 2x, Stiffness: 1.25x, Damping: 1.25x  
+> - Speed: 2x, Stiffness: 1.25x, Damping: 1.25x 
 
 ### Enable Fast Bikes
 Turns the mod ON/OFF.
@@ -56,6 +56,7 @@ How quickly sway settles.
 
 - Edits bicycle/scooter prefab data.
 - If another mod edits the same values, whichever mod applies last will win.
+- Supports 11 languages
 
 ## Troubleshooting
 
@@ -72,3 +73,6 @@ How quickly sway settles.
 
 - Discord: https://discord.gg/HTav7ARPs2
 - GitHub: https://github.com/River-Mochi/CS2-Fastbikes
+
+## Credits
+**River-mochi** - mod author

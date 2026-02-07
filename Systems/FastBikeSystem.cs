@@ -19,7 +19,7 @@ namespace FastBikes
 
         private PrefabSystem m_PrefabSystem = null!;
 
-        // Key = bicycle prefab entity, Value = captured "vanilla baseline" SwayingData for this load session.
+        // Key = bicycle prefab entity, Value = captured "vanilla base" SwayingData for this load session.
         private readonly Dictionary<Entity, SwayingData> m_SwayingBaseline =
             new Dictionary<Entity, SwayingData>();
 

@@ -53,7 +53,7 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Bike & scooter speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
                     "**Scales top speed**\n" +
-                    "Acceleration and braking are also adjusted for the selected speed.\n" +
+                    "Smooth acceleration and braking formula use for high speeds.\n" +
                     "**0.30 = 30%** of game default\n" +
                     "**1.00 = game default**\n" +
                     "Note: road speed limits and game conditions may still apply."

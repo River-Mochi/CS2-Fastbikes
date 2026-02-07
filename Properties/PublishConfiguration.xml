@@ -7,27 +7,45 @@
   <ShortDescription Value="Fast Bikes and Scooters (adjustable speed + swaying) :)" />
   <!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
   <!--LongDescription Value="Fast Bikes" /-->
-  <LongDescription> Fast Bikes speeds up bicycles and electric scooters (or slower).
+  <LongDescription>Is your city stuck behind slow bikes?
+
+Fast Bikes speeds up bicycles and electric scooters (or slows them down).
 
 Features:
-- Speed multiplier to slower and faster.
-- Accel/brake auto-scaled for stable handling
-- Optional sway Stability for stiffness/damping
+
+- Speed multiplier
+- Uses a smoothing formula for acceleration + braking
+- Optional sway stability tuning (stiffness/damping)
 - One-click Reset buttons.
 
-Note: 
-- Road speed limits and game conditions may still apply and cap speeds.
-- Install **Road Speed Adjuster** mod to double road speeds, which makes bikes better.
-- Safe to remove any time. For fastest "reset to game defaults" save the city, then remove. 
-- If you uncheck the enable box, it disables the mod if you don't want to uninstall it.
-- 8 languages
+Tech notes:
 
-tags: slow bike, bicycle speed, scooter speed, quality of life.
+- Road speed limits and game conditions may still cap speeds.
+- Try **Road Speed Adjuster** mod to raise road speeds, which makes Fast-bikes even better.
+- Uncheck Enable to disable the mod without uninstalling.
+- Safe to remove any time (reset first for the cleanest return to game defaults).
+- 11 Languages
+
+Support and Feedback
+If the mod helps you, give it a Like :)
+Report issues on Github link, Forum, or Discord.
+
+Performant design
+
+- Great effort was made to ensure this runs only when you change mod menu settings, then goes idle.
+- Does not run per-frame continuously in-city to impact fps :)
+
+### Credits
+- **River-mochi** - author
+
+
+tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life.
 	</LongDescription>
   <!--Thumbnail-->
   <Thumbnail Value="Properties/Thumbnail10.jpg" />
   <!--Screenshot, can be set multiple times-->
-  <Screenshot Value="" />
+	<Screenshot Value="Properties/image10-Actions.jpg" />
+	<Screenshot Value="Properties/image20-slowBike.jpg" />
   <!--Tag, can be set multiple times-->
   <Tag Value="" />
   <!--Link to the forum post where the mod can be discussed-->

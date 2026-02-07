@@ -46,45 +46,45 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Fast Bikes aktivieren" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
                     "Schaltet den Mod EIN/AUS.\n" +
-                    "Wenn AUS, wird das Verhalten von Fahrrädern und E-Scootern wiederhergestellt."
+                    "Wenn AUS, werden Fahrrad- und E-Scooter-Werte wiederhergestellt."
                 },
 
                 // Speed
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Fahrrad- & E-Scooter-Geschwindigkeit" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
                     "**Skaliert die Höchstgeschwindigkeit**\n" +
-                    "Beschleunigung und Bremsen werden ebenfalls für die gewählte Geschwindigkeit angepasst.\n" +
-                    "**0.30 = 30%** des Spiel-Standards\n" +
+                    "Beschleunigung und Bremsen werden ebenfalls an die gewählte Geschwindigkeit angepasst.\n" +
+                    "**0.30 = 30%** der Spiel-Standards\n" +
                     "**1.00 = Spiel-Standard**\n" +
-                    "Hinweis: Tempolimits der Wege und Spielbedingungen können weiterhin gelten."
+                    "Hinweis: Tempolimits von Wegen/Straßen und Spielbedingungen können weiterhin gelten."
                 },
 
                 // Stability
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Steifigkeit" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Faktor für die **Schwank-/Neigamplitude**.\n" +
+                    "Skalar für die **Schwankamplitude**.\n" +
                     "Höher = weniger Neigung (strafferes Aussehen).\n" +
                     "Niedriger = mehr Wackeln.\n" +
-                    "Hinweis: E-Scooter können sich weiterhin stärker neigen, weil ihre Standardwerte anders sind.\n" +
+                    "Hinweis: E-Scooter können weiterhin stärker kippen, da ihre Standardwerte anders sind.\n" +
                     "Stabiler bei hoher Geschwindigkeit: 1.25–1.75.\n" +
                     "Mehr Wackeln: 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Dämpfung" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Höher = beruhigt sich schneller (Oszillation endet schneller).\n" +
+                    "Höher = beruhigt sich schneller (Schwingungen klingen schneller ab).\n" +
                     "**1.0 = Spiel-Standardwerte**\n" +
                     "Stabiler bei hoher Geschwindigkeit: 1.25–2.0+\n" +
                     "Mehr Wackeln: < 0.75"
                 },
 
                 // Reset buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod-Standardwerte" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod-Standards" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
                     "Wendet die Standard-Tuningwerte des Mods an."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Spiel-Standardwerte" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Spiel-Standards" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
                     "Setzt alle Regler auf **100%** zurück und stellt die Spiel-Standardwerte wieder her."
                 },
@@ -103,9 +103,9 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Fahrrad-Prefab-Dump" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
                     "Protokolliert detaillierte Werte für Fahrräder/E-Scooter.\n" +
-                    "Nicht für normales Gameplay nötig.\n\n" +
-                    "Nützlich nach Spielupdates oder beim Debuggen.\n" +
-                    "Zuerst eine Stadt laden; Daten werden in **FastBikes.log** geschrieben."
+                    "Für normales Spielen nicht nötig.\n\n" +
+                    "Nützlich nach Spiel-Updates oder beim Debuggen.\n" +
+                    "Zuerst eine Stadt laden; Daten gehen an **FastBikes.log**"
                 },
             };
         }
