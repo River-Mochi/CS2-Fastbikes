@@ -35,7 +35,7 @@ namespace FastBikes
 
                 // Groups
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp), "Speed" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsHandlingGrp), "Handling" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp), "Stability" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp), "Reset" },
 
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Mod info" },
@@ -64,24 +64,24 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
                     "Scalar for **sway amplitude**.\n" +
                     "Higher = less leaning (tighter look).\n" +
+                    "**1.0 = game defaults**\n" +
                     "Lower = more wobble.\n" +
-                    "Note: scooters can still lean more because their defaults are different.\n" +
-                    "More stable at high speed: 1.25–1.75.\n" +
-                    "More wobble: below 0.75."
+                    "For more stable at high speed: 1.25–1.75\n" +
+                    "Note: scooters can still lean more because their defaults are different."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
                     "Higher = settles faster (oscillation dies faster).\n" +
                     "**1.0 = game defaults**\n" +
-                    "More stable at high speed: 1.25–2.0+\n" +
-                    "More wobble: below 0.75."
+                    "Lower = more wobble.\n" +
+                    "For more stable at high speed: 1.25–2.0+"
                 },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod defaults" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
-                    "Applies the mod’s default tuning values."
+                    "Applies the mod’s default Stability values."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Game defaults" },

@@ -11,13 +11,13 @@ namespace FastBikes
     using Unity.Entities;            // World
     using UnityEngine;               // Application.OpenURL
 
-    [FileLocation(nameof(Setting))]
+    [FileLocation("ModsSettings/FastBike/FastBike")]    // Settings file location.
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(
-        ActionsSpeedGrp, ActionsHandlingGrp, ActionsResetGrp,
+        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     [SettingsUIShowGroupName(
-        ActionsSpeedGrp, ActionsHandlingGrp, ActionsResetGrp,
+        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     public sealed class Setting : ModSetting
     {
@@ -25,7 +25,7 @@ namespace FastBikes
         public const string AboutTab = "About";
 
         public const string ActionsSpeedGrp = "Speed";
-        public const string ActionsHandlingGrp = "Handling";
+        public const string ActionsStabilityGrp = "Stability";
         public const string ActionsResetGrp = "Reset";
 
         public const string AboutInfoGrp = "Mod info";
@@ -76,15 +76,15 @@ namespace FastBikes
         // Actions: Handling
         // ------------------------
 
-        [SettingsUISection(ActionsTab, ActionsHandlingGrp)]
+        [SettingsUISection(ActionsTab, ActionsStabilityGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
+        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.10f, unit = Unit.kFloatTwoFractions)]
         [SettingsUISetter(typeof(Setting), nameof(SetStiffnessScalar))]
         public float StiffnessScalar { get; set; }
 
-        [SettingsUISection(ActionsTab, ActionsHandlingGrp)]
+        [SettingsUISection(ActionsTab, ActionsStabilityGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
+        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.10f, unit = Unit.kFloatTwoFractions)]
         [SettingsUISetter(typeof(Setting), nameof(SetDampingScalar))]
         public float DampingScalar { get; set; }
 
