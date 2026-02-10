@@ -1,14 +1,11 @@
 // File: Systems/FastBikeSystem.cs
-// Purpose: On-demand bicycle tuning on prefab entities (speed + accel/brake scaling + swaying stability) and pathway speed scaling trigger.
+// Purpose: On-demand bicycle tuning on prefab entities (speed + accel/brake scaling + swaying stability) + pathway speed scaling.
 
 namespace FastBikes
 {
     using Colossal.Serialization.Entities; // Purpose
     using Game;                           // GameSystemBase, GameMode
-    using Game.Common;                    // Deleted
     using Game.Prefabs;                   // PrefabSystem, PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, SwayingData
-    using Game.Tools;                     // Temp
-    using System;
     using System.Collections.Generic;     // Dictionary
     using Unity.Entities;                 // Entity, RefRW, SystemAPI
     using Unity.Mathematics;              // math.*
@@ -37,7 +34,7 @@ namespace FastBikes
         {
             base.OnGameLoadingComplete(purpose, mode);
 
-            m_SwayingBaseline.Clear(); // recapture per load session
+            m_SwayingBaseline.Clear();
 
             if (Mod.Settings != null)
             {
@@ -108,19 +105,19 @@ namespace FastBikes
                 int tunedCars = ApplyBicycleTuning(speedScalar);
                 int tunedSway = ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
 
-                // Alpha: Pathway speed scaling (paths, not roads).
                 float pathScalar = forceVanilla ? 1.0f : math.clamp(setting.PathSpeedScalarAlpha, 1.0f, 10.0f);
                 int tunedPaths = ApplyPathwaySpeedLimit(pathScalar);
 
 #if DEBUG
                 Mod.LogSafe(() =>
-                    $"[FB] Applied. Enabled={setting.EnableFastBikes}, Speed={speedScalar:0.##}x, " +
-                    $"Stiffness={stiffnessScalar:0.##}x, Damping={dampingScalar:0.##}x, " +
+                    "[FB] Applied. " +
+                    $"Enabled={setting.EnableFastBikes}, " +
+                    $"BikeSpeed={speedScalar:0.##}x, Stiffness={stiffnessScalar:0.##}x, Damping={dampingScalar:0.##}x, " +
                     $"PathSpeed={pathScalar:0.##}x, " +
                     $"CarDataUpdated={tunedCars}, SwayUpdated={tunedSway}, PathUpdated={tunedPaths}");
 #endif
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 Mod.WarnOnce("FB_SYSTEM_EXCEPTION", () =>
                     $"[FB] FastBikeSystem failed: {ex.GetType().Name}: {ex.Message}");
@@ -135,14 +132,14 @@ namespace FastBikes
         /// <summary>Tunes CarData on bicycle prefab entities using BicyclePrefab authoring as baseline.</summary>
         private int ApplyBicycleTuning(float speedScalar)
         {
-            float speed = math.max(0f, speedScalar);                // top speed uses scalar directly
-            float accelBrake = math.sqrt(math.max(0.01f, speed));   // accel/brake use sqrt(scalar)
+            float speed = math.max(0f, speedScalar);
+            float accelBrake = math.sqrt(math.max(0.01f, speed));
 
             int updated = 0;
 
-            foreach ((RefRW<CarData> carRW, Entity prefabEntity) in SystemAPI.Query<RefRW<CarData>>()
+            foreach (var (carRW, prefabEntity) in SystemAPI.Query<RefRW<CarData>>()
                 .WithAll<PrefabData, BicycleData>()
-                .WithNone<Deleted, Temp>()
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
                 .WithEntityAccess())
             {
                 if (!TryGetBicycleBase(prefabEntity, out BicyclePrefab bicyclePrefab))
@@ -150,7 +147,7 @@ namespace FastBikes
                     continue;
                 }
 
-                float baseMaxMs = bicyclePrefab.m_MaxSpeed * (1f / 3.6f); // authoring km/h -> runtime m/s
+                float baseMaxMs = bicyclePrefab.m_MaxSpeed * (1f / 3.6f);
 
                 float newMaxSpeed = baseMaxMs <= 0f ? 0f : math.max(0.01f, baseMaxMs * speed);
                 float newAccel = bicyclePrefab.m_Acceleration <= 0f ? 0f : bicyclePrefab.m_Acceleration * accelBrake;
@@ -178,14 +175,13 @@ namespace FastBikes
 
             int updated = 0;
 
-            foreach ((RefRW<SwayingData> swayRW, Entity prefabEntity) in SystemAPI.Query<RefRW<SwayingData>>()
+            foreach (var (swayRW, prefabEntity) in SystemAPI.Query<RefRW<SwayingData>>()
                 .WithAll<PrefabData, BicycleData>()
-                .WithNone<Deleted, Temp>()
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
                 .WithEntityAccess())
             {
                 SwayingData current = swayRW.ValueRO;
 
-                // Baseline = first-seen SwayingData for this prefab entity after load.
                 if (!m_SwayingBaseline.TryGetValue(prefabEntity, out SwayingData baseline))
                 {
                     baseline = current;
@@ -204,9 +200,9 @@ namespace FastBikes
 
                 SwayingData tuned = baseline;
 
-                tuned.m_MaxPosition = baseline.m_MaxPosition / stiff;        // higher stiffness -> smaller lean distance
-                tuned.m_DampingFactors = baseline.m_DampingFactors / damp;   // higher damping -> settles faster
-                tuned.m_DampingFactors = math.clamp(tuned.m_DampingFactors, 0.01f, 0.999f); // safety clamp
+                tuned.m_MaxPosition = baseline.m_MaxPosition / stiff;
+                tuned.m_DampingFactors = baseline.m_DampingFactors / damp;
+                tuned.m_DampingFactors = math.clamp(tuned.m_DampingFactors, 0.01f, 0.999f);
 
                 if (!tuned.Equals(current))
                 {

@@ -1,13 +1,13 @@
 // File: Systems/FastBikeSystem.PathwaySpeed.cs
-// Purpose: pathway speed-limit scaling (PathwayData + PathwayComposition) using PathwayPrefab authoring as baseline.
+// Purpose: pathway speed-limit scaling (PathwayData + PathwayComposition + existing lane CarLane) using PathwayPrefab authoring as baseline.
 
 namespace FastBikes
 {
-    using Game.Common;              // Deleted
-    using Game.Prefabs;             // PrefabSystem, PrefabBase, PathwayPrefab, PathwayData, PathwayComposition, PrefabData, PrefabRef, NetCompositionData
-    using Game.Tools;               // Temp
-    using Unity.Entities;           // Entity, RefRO, RefRW, SystemAPI
-    using Unity.Mathematics;        // math.*
+    using Game.Common;      // Deleted, Owner
+    using Game.Prefabs;     // PrefabSystem, PrefabBase, PathwayPrefab, PathwayData, PathwayComposition, PrefabData, PrefabRef, NetCompositionData
+    using Game.Tools;       // Temp
+    using Unity.Entities;   // Entity, RefRO, RefRW, SystemAPI
+    using Unity.Mathematics;// math.*
 
     public sealed partial class FastBikeSystem
     {
@@ -15,6 +15,7 @@ namespace FastBikes
         /// Tunes pathway speed limits on:
         /// - PathwayData (prefab entity runtime data)
         /// - PathwayComposition (net composition copies used by net systems)
+        /// - Game.Net.CarLane (existing runtime lane entities) to avoid 30 km/h caps persisting on placed networks
         /// Authoring is km/h; runtime fields are m/s.
         /// </summary>
         private int ApplyPathwaySpeedLimit(float scalar)
@@ -46,7 +47,6 @@ namespace FastBikes
             }
 
             // 2) PathwayComposition on composition entities.
-            // WithEntityAccess removed: query yields a 2-tuple (compRW, prefabRefRO).
             foreach (var (compRW, prefabRefRO) in SystemAPI
                 .Query<RefRW<Game.Prefabs.PathwayComposition>, RefRO<PrefabRef>>()
                 .WithAll<NetCompositionData>()
@@ -70,6 +70,52 @@ namespace FastBikes
                 }
             }
 
+            // 3) Existing runtime lane entities frequently keep old limits (Game.Net.CarLane),
+            // which can cause bikes to keep capping at 30 km/h even after prefab/composition updates.
+            int laneUpdated = 0;
+
+            foreach (var (laneRW, ownerRO) in SystemAPI
+                .Query<RefRW<Game.Net.CarLane>, RefRO<Game.Common.Owner>>()
+                .WithNone<Deleted, Temp>())
+            {
+                Entity ownerEntity = ownerRO.ValueRO.m_Owner;
+
+                if (!SystemAPI.HasComponent<PrefabRef>(ownerEntity))
+                {
+                    continue;
+                }
+
+                PrefabRef pref = SystemAPI.GetComponent<PrefabRef>(ownerEntity);
+                Entity prefabEntity = pref.m_Prefab;
+
+                float desiredMs;
+
+                if (SystemAPI.HasComponent<PathwayData>(prefabEntity))
+                {
+                    desiredMs = SystemAPI.GetComponent<PathwayData>(prefabEntity).m_SpeedLimit;
+                }
+                else
+                {
+                    if (!TryGetPathwayBase(prefabEntity, out PathwayPrefab pathwayPrefab))
+                    {
+                        continue;
+                    }
+
+                    float baseMs = pathwayPrefab.m_SpeedLimit * (1f / 3.6f);
+                    desiredMs = (baseMs <= 0f) ? 0f : baseMs * s;
+                }
+
+                ref Game.Net.CarLane lane = ref laneRW.ValueRW;
+
+                if (lane.m_SpeedLimit != desiredMs || lane.m_DefaultSpeedLimit != desiredMs)
+                {
+                    lane.m_SpeedLimit = desiredMs;
+                    lane.m_DefaultSpeedLimit = desiredMs;
+                    laneUpdated++;
+                }
+            }
+
+            updated += laneUpdated;
             return updated;
         }
 
