@@ -1,25 +1,32 @@
+# .gitattributes
+# Auto-detect text files; enforce line endings per rules below.
 * text=auto
 
-# Windows-style line endings for VS project files and C#
-*.sln      text eol=crlf
-*.csproj   text eol=crlf
-*.props    text eol=crlf
-*.targets  text eol=crlf
-*.cs       text eol=crlf
-# optional: LF renders nicer on GitHub
-*.md       text eol=lf
-*.json text eol=lf
+# Windows-style line endings for Visual Studio / C#
+*.sln        text eol=crlf
+*.csproj     text eol=crlf
+*.props      text eol=crlf
+*.targets    text eol=crlf
+*.cs         text eol=crlf
+*.csx        text eol=crlf
+*.xml        text eol=crlf
+*.config     text eol=crlf
+*.editorconfig text eol=lf
 
-# XML (edited in VS a lot)
-*.xml      text eol=crlf
+# Optional: LF renders nicer on GitHub / tooling
+*.md         text eol=lf
+*.json       text eol=lf
+*.yml        text eol=lf
+*.yaml       text eol=lf
 
 # Scripts
-*.sh       text eol=lf
-*.bash     text eol=lf
-*.ps1      text eol=crlf
+*.sh         text eol=lf
+*.bash       text eol=lf
+*.ps1        text eol=crlf
 
 # Binaries
-*.png binary
-*.jpg binary
-*.svg binary
-*.ico binary
+*.png        binary
+*.jpg        binary
+*.jpeg       binary
+*.svg        binary
+*.ico        binary
