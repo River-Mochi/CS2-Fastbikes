@@ -1,5 +1,5 @@
 // File: Systems/FastBikeSystem.cs
-// Purpose: On-demand bicycle tuning on prefab entities (speed + accel/brake scaling + swaying stability).
+// Purpose: On-demand bicycle tuning on prefab entities (speed + accel/brake scaling + swaying stability) and pathway speed scaling trigger.
 
 namespace FastBikes
 {
@@ -7,8 +7,8 @@ namespace FastBikes
     using Game;                           // GameSystemBase, GameMode
     using Game.Common;                    // Deleted
     using Game.Prefabs;                   // PrefabSystem, PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, SwayingData
-    using Game.Settings;
     using Game.Tools;                     // Temp
+    using System;
     using System.Collections.Generic;     // Dictionary
     using Unity.Entities;                 // Entity, RefRW, SystemAPI
     using Unity.Mathematics;              // math.*
@@ -20,7 +20,7 @@ namespace FastBikes
 
         private PrefabSystem m_PrefabSystem = null!;
 
-        // Key = bicycle prefab entity, Value = captured "vanilla base" SwayingData for this load session.
+        // Key = bicycle prefab entity, Value = captured baseline SwayingData for this load session.
         private readonly Dictionary<Entity, SwayingData> m_SwayingBaseline =
             new Dictionary<Entity, SwayingData>();
 
@@ -37,7 +37,6 @@ namespace FastBikes
         {
             base.OnGameLoadingComplete(purpose, mode);
 
-            // Parameters are required by the override; no special behavior needed per mode/purpose.
             m_SwayingBaseline.Clear(); // recapture per load session
 
             if (Mod.Settings != null)
@@ -109,18 +108,19 @@ namespace FastBikes
                 int tunedCars = ApplyBicycleTuning(speedScalar);
                 int tunedSway = ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
 
-                // Alpha: Pathway speed limits (paths, not roads).
-                float pathScalar = (!forceVanilla && setting.DoublePathSpeedAlpha) ? 2.0f : 1.0f;
+                // Alpha: Pathway speed scaling (paths, not roads).
+                float pathScalar = forceVanilla ? 1.0f : math.clamp(setting.PathSpeedScalarAlpha, 1.0f, 10.0f);
                 int tunedPaths = ApplyPathwaySpeedLimit(pathScalar);
 
 #if DEBUG
                 Mod.LogSafe(() =>
                     $"[FB] Applied. Enabled={setting.EnableFastBikes}, Speed={speedScalar:0.##}x, " +
                     $"Stiffness={stiffnessScalar:0.##}x, Damping={dampingScalar:0.##}x, " +
-                    $"CarDataUpdated={tunedCars}, SwayUpdated={tunedSway}");
+                    $"PathSpeed={pathScalar:0.##}x, " +
+                    $"CarDataUpdated={tunedCars}, SwayUpdated={tunedSway}, PathUpdated={tunedPaths}");
 #endif
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Mod.WarnOnce("FB_SYSTEM_EXCEPTION", () =>
                     $"[FB] FastBikeSystem failed: {ex.GetType().Name}: {ex.Message}");
@@ -166,6 +166,7 @@ namespace FastBikes
                     updated++;
                 }
             }
+
             return updated;
         }
 
@@ -221,7 +222,6 @@ namespace FastBikes
         {
             bicyclePrefab = default!;
 
-            // Safe way to read default BicyclePrefab fields (m_MaxSpeed, m_Acceleration, m_Braking).
             if (!m_PrefabSystem.TryGetPrefab(prefabEntity, out PrefabBase prefabBase))
             {
                 return false;

@@ -1,13 +1,13 @@
 // File: Systems/FastBikeSystem.Dump.cs
-// Purpose: Dump bicycle/scooter prefab values (authoring + current prefab-entity data) for debugging.
+// Purpose: Dump bicycle/scooter prefab values + pathway speed-limit values (authoring + current data) for debugging.
 
 namespace FastBikes
 {
     using Game.Common;        // Deleted
-    using Game.Prefabs;       // PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, SwayingData
+    using Game.Prefabs;       // PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, PrefabRef, NetCompositionData, PathwayPrefab, PathwayData, PathwayComposition
     using Game.Tools;         // Temp
     using System;             // StringComparison
-    using Unity.Entities;     // Entity, RefRO, SystemAPI
+    using Unity.Entities;     // Entity, RefRO, RefRW, SystemAPI
     using Unity.Mathematics;  // math.*
 
     public sealed partial class FastBikeSystem
@@ -21,6 +21,8 @@ namespace FastBikes
 
         private const float kSwayMaxPosMismatchPct = 0.10f;   // 10%
         private const float kSwayDampingMismatchPct = 0.15f;  // 15%
+
+        private const float kPathSpeedMismatchPct = 0.03f;    // 3%
 
         public void ScheduleDump()
         {
@@ -180,7 +182,7 @@ namespace FastBikes
                     missingCarData++;
                 }
 
-                // Current SwayingData (prefab entity component) + expected derived from cached baseline.
+                // Current SwayingData (float3 fields)
                 bool hasSway = SystemAPI.HasComponent<SwayingData>(prefabEntity);
                 SwayingData sw = default;
 
@@ -212,10 +214,8 @@ namespace FastBikes
                         ? (baselineSw.m_DampingFactors / math.max(0.01f, effectiveDamp))
                         : baselineSw.m_DampingFactors;
 
-                    // Same safety clamp as ApplyBicycleSwaying().
                     expectedDamping = math.clamp(expectedDamping, 0.01f, 0.999f);
 
-                    // Only flag mismatch when the baseline was actually cached (otherwise expected==current).
                     if (baselineCached)
                     {
                         swayMaxPosMismatch = RelativeDiffMax(expectedMaxPos, sw.m_MaxPosition) > kSwayMaxPosMismatchPct;
@@ -247,7 +247,6 @@ namespace FastBikes
                     $"[FB] {kind} prefab: entity={prefabEntity.Index}:{prefabEntity.Version} name='{name}' type={typeName}" +
                     (string.IsNullOrEmpty(mismatchTags) ? string.Empty : " [" + mismatchTags + "]"));
 
-                // Authoring (PrefabBase)
                 if (hasAuthoring)
                 {
                     Mod.LogSafe(() =>
@@ -267,7 +266,6 @@ namespace FastBikes
                     Mod.LogSafe(() => "[FB]   Authoring: (missing or not BicyclePrefab)");
                 }
 
-                // Current CarData
                 if (hasCarData)
                 {
                     float carMs = car.m_MaxSpeed;
@@ -291,7 +289,6 @@ namespace FastBikes
                     Mod.LogSafe(() => "[FB]   CarData: (missing)");
                 }
 
-                // SwayingData (float3 fields)
                 if (hasSway)
                 {
                     Mod.LogSafe(() =>
@@ -331,6 +328,103 @@ namespace FastBikes
                 $"Total={total} (Bicycles={bikes}, Scooters={scooters}), " +
                 $"MissingPrefabBase={missingPrefabBase}, MissingCarData={missingCarData}, MissingSwaying={missingSwaying}, " +
                 $"MismatchedPrefabs={mismatchedPrefabs}");
+        }
+
+        private void DumpPathwaySpeeds(bool enableFastBikes, float pathSpeedScalar)
+        {
+            float effectivePath = enableFastBikes ? math.max(0.01f, pathSpeedScalar) : 1.0f;
+
+            int prefabTotal = 0;
+            int prefabMissingBase = 0;
+            int prefabMismatched = 0;
+
+            int compTotal = 0;
+            int compMissingBase = 0;
+            int compMismatched = 0;
+
+            Mod.LogSafe(() =>
+                "[FB] Dump pathways start. " +
+                $"EnableFastBikes={enableFastBikes}, PathSpeed={pathSpeedScalar:0.##} (Eff={effectivePath:0.##})");
+
+            // PathwayData on prefab entities
+            foreach ((RefRO<PathwayData> pathRO, Entity prefabEntity) in SystemAPI.Query<RefRO<PathwayData>>()
+                .WithAll<PrefabData>()
+                .WithNone<Deleted, Temp>()
+                .WithEntityAccess())
+            {
+                prefabTotal++;
+
+                if (!TryGetPathwayBase(prefabEntity, out PathwayPrefab pathwayPrefab))
+                {
+                    prefabMissingBase++;
+                    continue;
+                }
+
+                float baseMs = pathwayPrefab.m_SpeedLimit * (1f / 3.6f);
+                float expected = baseMs <= 0f ? 0f : baseMs * effectivePath;
+
+                float actual = pathRO.ValueRO.m_SpeedLimit;
+
+                bool mismatch = RelativeDiff(expected, actual) > kPathSpeedMismatchPct;
+                if (mismatch)
+                {
+                    prefabMismatched++;
+                }
+
+                if (mismatch)
+                {
+                    Mod.LogSafe(() =>
+                        "[FB] PathwayData mismatch: " +
+                        $"prefab='{pathwayPrefab.name}', " +
+                        $"Expected={expected:0.###} m/s ({MsToKmh(expected):0.#} km/h), " +
+                        $"Actual={actual:0.###} m/s ({MsToKmh(actual):0.#} km/h), " +
+                        $"Diff={FormatPct(RelativeDiff(expected, actual))}");
+                }
+            }
+
+            // PathwayComposition on composition entities (copy used by net systems)
+            foreach ((RefRO<PathwayComposition> compRO, RefRO<PrefabRef> prefabRefRO, Entity compEntity) in SystemAPI
+                .Query<RefRO<PathwayComposition>, RefRO<PrefabRef>>()
+                .WithAll<NetCompositionData>()
+                .WithNone<Deleted, Temp>()
+                .WithEntityAccess())
+            {
+                compTotal++;
+
+                Entity prefabEntity = prefabRefRO.ValueRO.m_Prefab;
+
+                if (!TryGetPathwayBase(prefabEntity, out PathwayPrefab pathwayPrefab))
+                {
+                    compMissingBase++;
+                    continue;
+                }
+
+                float baseMs = pathwayPrefab.m_SpeedLimit * (1f / 3.6f);
+                float expected = baseMs <= 0f ? 0f : baseMs * effectivePath;
+
+                float actual = compRO.ValueRO.m_SpeedLimit;
+
+                bool mismatch = RelativeDiff(expected, actual) > kPathSpeedMismatchPct;
+                if (mismatch)
+                {
+                    compMismatched++;
+                }
+
+                if (mismatch)
+                {
+                    Mod.LogSafe(() =>
+                        "[FB] PathwayComposition mismatch: " +
+                        $"entity={compEntity.Index}:{compEntity.Version}, prefab='{pathwayPrefab.name}', " +
+                        $"Expected={expected:0.###} m/s ({MsToKmh(expected):0.#} km/h), " +
+                        $"Actual={actual:0.###} m/s ({MsToKmh(actual):0.#} km/h), " +
+                        $"Diff={FormatPct(RelativeDiff(expected, actual))}");
+                }
+            }
+
+            Mod.LogSafe(() =>
+                "[FB] Dump pathways complete. " +
+                $"PathwayData: Total={prefabTotal}, MissingPrefabBase={prefabMissingBase}, Mismatched={prefabMismatched}. " +
+                $"PathwayComposition: Total={compTotal}, MissingPrefabBase={compMissingBase}, Mismatched={compMismatched}.");
         }
     }
 }

@@ -89,6 +89,17 @@ namespace FastBikes
                     "Sets all sliders back to **100%** and restores game defaults."
                 },
 
+                // Alpha Path Speed
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsAlphaGrp), "Path Speed Limit (alpha)" },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalarAlpha)), "Path speed limit (alpha)" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalarAlpha)),
+                    "Scales the **Pathway** speed limit (paths, not roads).\n" +
+                    "**1.00 = game default**\n" +
+                    "Affects bike paths, divided pedestrian+bike paths, and pedestrian-only pathways.\n" +
+                    "Alpha: experimental feature."
+                },
+
                 // About: Info
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Display name." },
@@ -106,17 +117,6 @@ namespace FastBikes
                     "Not needed for normal gameplay.\n\n" +
                     "Useful after game updates or when debugging issues.\n" +
                     "Load city first, data sent to **FastBikes.log**"
-                },
-
-                // Alpha Path Speed
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsAlphaGrp), "Path Speed (alpha)" },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DoublePathSpeedAlpha)), "Double speed of bike paths (alpha)" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DoublePathSpeedAlpha)),
-                    "Doubles the Pathway speed limit.\n" +
-                    "Affects bike paths and divided pedestrian/bike paths.\n" +
-                    "May also affect pedestrian-only paths.\n" +
-                    "Alpha: experimental feature."
                 },
 
 
