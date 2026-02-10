@@ -11,26 +11,27 @@
 
 Fast Bikes speeds up bicycles and electric scooters (or slows them down).
 
-Features:
+### Features
 
 - Speed multiplier
 - Uses a smoothing formula for acceleration + braking
 - Optional sway stability tuning (stiffness/damping)
 - One-click Reset buttons.
 
-Tech notes:
+### Tech notes
 
 - Road speed limits and game conditions may still cap speeds.
-- Try **Road Speed Adjuster** mod to raise road speeds, which makes Fast-bikes even better.
+- To make Fast-bikes even better, install "Road Speed Adjuster" mod to change road speeds.
 - Uncheck Enable to disable the mod without uninstalling.
 - Safe to remove any time (reset first for the cleanest return to game defaults).
 - 11 Languages
 
-Support and Feedback
+### Support and Feedback
+
 If the mod helps you, give it a Like :)
 Report issues on Github link, Forum, or Discord.
 
-Performant design
+### Performant design
 
 - Great effort was made to ensure this runs only when you change mod menu settings, then goes idle.
 - Does not run per-frame continuously in-city to impact fps :)
@@ -44,8 +45,8 @@ tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life.
   <!--Thumbnail-->
   <Thumbnail Value="Properties/Thumbnail10.jpg" />
   <!--Screenshot, can be set multiple times-->
-	<Screenshot Value="Properties/image10-Actions.jpg" />
-	<Screenshot Value="Properties/image20-slowBike.jpg" />
+  <Screenshot Value="Properties/image10-Actions.jpg" />
+  <Screenshot Value="Properties/image20-slowBike.jpg" />
   <!--Tag, can be set multiple times-->
   <Tag Value="" />
   <!--Link to the forum post where the mod can be discussed-->
