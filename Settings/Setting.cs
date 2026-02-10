@@ -15,10 +15,10 @@ namespace FastBikes
     [FileLocation("ModsSettings/FastBikes/FastBikes")]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(
-        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp,
+        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsAlphaGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     [SettingsUIShowGroupName(
-        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp,
+        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsAlphaGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     public sealed class Setting : ModSetting
     {
@@ -28,6 +28,7 @@ namespace FastBikes
         public const string ActionsSpeedGrp = "Speed";
         public const string ActionsStabilityGrp = "Stability";
         public const string ActionsResetGrp = "Reset";
+        public const string ActionsAlphaGrp = "Alpha";
 
         public const string AboutInfoGrp = "Mod info";
         public const string AboutLinksGrp = "Links";
@@ -45,6 +46,9 @@ namespace FastBikes
         private const float DefaultStiffness = 1.25f;
         private const float DefaultDamping = 1.25f;
 
+        // Alpha defaults.
+        private const bool DefaultDoublePathSpeedAlpha = false;
+
         // Float compare guard to avoid scheduling applies on identical values.
         private const float FloatEpsilon = 0.0001f;
 
@@ -54,6 +58,8 @@ namespace FastBikes
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
+
+            DoublePathSpeedAlpha = DefaultDoublePathSpeedAlpha;
         }
 
         // --------------------------------------------------------------------
@@ -130,6 +136,15 @@ namespace FastBikes
         }
 
         // ------------------------
+        // Actions: Alpha
+        // ------------------------
+
+        [SettingsUISection(ActionsTab, ActionsAlphaGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUISetter(typeof(Setting), nameof(SetDoublePathSpeedAlpha))]
+        public bool DoublePathSpeedAlpha { get; set; }
+
+        // ------------------------
         // About: Info
         // ------------------------
 
@@ -195,6 +210,8 @@ namespace FastBikes
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
+
+            DoublePathSpeedAlpha = DefaultDoublePathSpeedAlpha;
         }
 
         // --------------------------------------------------------------------
@@ -314,11 +331,27 @@ namespace FastBikes
             }
         }
 
+        private void SetDoublePathSpeedAlpha(bool value)
+        {
+            if (DoublePathSpeedAlpha == value)
+            {
+                return;
+            }
+
+            DoublePathSpeedAlpha = value;
+
+            if (EnableFastBikes)
+            {
+                ScheduleApply();
+            }
+        }
+
         private void DoResetToVanilla()
         {
             SpeedScalar = Vanilla;
             StiffnessScalar = Vanilla;
             DampingScalar = Vanilla;
+            DoublePathSpeedAlpha = false;
 
             // Explicit vanilla restore is used to revert exactly to cached baselines.
             ScheduleResetVanilla();
@@ -329,6 +362,7 @@ namespace FastBikes
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
+            DoublePathSpeedAlpha = DefaultDoublePathSpeedAlpha;
 
             ScheduleApply();
         }

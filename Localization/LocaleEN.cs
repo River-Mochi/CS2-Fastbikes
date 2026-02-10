@@ -107,6 +107,19 @@ namespace FastBikes
                     "Useful after game updates or when debugging issues.\n" +
                     "Load city first, data sent to **FastBikes.log**"
                 },
+
+                // Alpha Path Speed
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsAlphaGrp), "Path Speed (alpha)" },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DoublePathSpeedAlpha)), "Double speed of bike paths (alpha)" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DoublePathSpeedAlpha)),
+                    "Doubles the Pathway speed limit.\n" +
+                    "Affects bike paths and divided pedestrian/bike paths.\n" +
+                    "May also affect pedestrian-only paths.\n" +
+                    "Alpha: experimental feature."
+                },
+
+
             };
         }
 

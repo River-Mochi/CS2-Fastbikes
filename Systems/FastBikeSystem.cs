@@ -7,6 +7,7 @@ namespace FastBikes
     using Game;                           // GameSystemBase, GameMode
     using Game.Common;                    // Deleted
     using Game.Prefabs;                   // PrefabSystem, PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, SwayingData
+    using Game.Settings;
     using Game.Tools;                     // Temp
     using System.Collections.Generic;     // Dictionary
     using Unity.Entities;                 // Entity, RefRW, SystemAPI
@@ -108,6 +109,10 @@ namespace FastBikes
                 int tunedCars = ApplyBicycleTuning(speedScalar);
                 int tunedSway = ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
 
+                // Alpha: Pathway speed limits (paths, not roads).
+                float pathScalar = (!forceVanilla && setting.DoublePathSpeedAlpha) ? 2.0f : 1.0f;
+                int tunedPaths = ApplyPathwaySpeedLimit(pathScalar);
+
 #if DEBUG
                 Mod.LogSafe(() =>
                     $"[FB] Applied. Enabled={setting.EnableFastBikes}, Speed={speedScalar:0.##}x, " +
@@ -161,7 +166,6 @@ namespace FastBikes
                     updated++;
                 }
             }
-
             return updated;
         }
 
