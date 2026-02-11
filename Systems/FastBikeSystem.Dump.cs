@@ -3,12 +3,9 @@
 
 namespace FastBikes
 {
-    using Game.Common;        // Deleted, Owner
     using Game.Prefabs;       // PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, SwayingData, PathwayPrefab, PathwayData, PathwayComposition, PrefabRef, NetCompositionData
-    using Game.Tools;         // Temp
     using System;             // StringComparison
-    using System.Collections.Generic; // Dictionary, IEnumerable, KeyValuePair
-    using Unity.Entities;     // Entity, RefRO, RefRW, SystemAPI
+    using Unity.Entities;     // Entity, RefRO, SystemAPI
     using Unity.Mathematics;  // math.*
 
     public sealed partial class FastBikeSystem
@@ -45,8 +42,13 @@ namespace FastBikes
 
         private static bool IsScooterName(string name)
         {
-            return !string.IsNullOrEmpty(name) &&
-                   name.StartsWith("ElectricScooter", StringComparison.OrdinalIgnoreCase);
+            if (string.IsNullOrEmpty(name))
+            {
+                return false;
+            }
+
+            return name.StartsWith("ElectricScooter", StringComparison.OrdinalIgnoreCase) ||
+                   name.StartsWith("Scooter", StringComparison.OrdinalIgnoreCase);
         }
 
         private static float RelativeDiff(float expected, float actual)
@@ -90,6 +92,21 @@ namespace FastBikes
             return "MISMATCH(" + tags.TrimEnd(',') + ")";
         }
 
+        private static bool TryGetSettings(out Setting settings)
+        {
+            if (Mod.Settings is Setting s)
+            {
+                settings = s;
+                return true;
+            }
+
+            settings = default!; // never used when returning false
+            Mod.WarnOnce("FB_SETTINGS_NULL", () => "[FB] Settings is null; Dump using PathSpeed=1x.");
+
+            return false;
+
+        }
+
         private void DumpBicyclePrefabs(bool enableFastBikes, float speedScalar, float stiffnessScalar, float dampingScalar)
         {
             float effectiveSpeed = enableFastBikes ? math.clamp(speedScalar, 0.30f, 10.0f) : 1.0f;
@@ -98,11 +115,13 @@ namespace FastBikes
 
             float effectiveAccelBrake = math.sqrt(math.max(0.01f, effectiveSpeed));
 
+            float rawPathSpeed = -1f;
             float pathScalar = 1.0f;
-            Setting? setting = Mod.Settings;
-            if (enableFastBikes && setting != null)
+
+            if (enableFastBikes && TryGetSettings(out Setting settings))
             {
-                pathScalar = math.clamp(setting.PathSpeedScalarAlpha, 1.0f, 10.0f);
+                rawPathSpeed = settings.PathSpeedScalar;
+                pathScalar = math.clamp(rawPathSpeed, 1.0f, 10.0f);
             }
 
             Mod.LogSafe(() =>
@@ -111,7 +130,7 @@ namespace FastBikes
                 $"Speed={speedScalar:0.##} (Eff={effectiveSpeed:0.##}), " +
                 $"Stiff={stiffnessScalar:0.##} (Eff={effectiveStiff:0.##}), " +
                 $"Damp={dampingScalar:0.##} (Eff={effectiveDamp:0.##}), " +
-                $"PathSpeedAlpha={(setting == null ? -1f : setting.PathSpeedScalarAlpha):0.##} (Eff={pathScalar:0.##})");
+                $"PathSpeed={rawPathSpeed:0.##} (Eff={pathScalar:0.##})");
 
             int total = 0;
             int bikes = 0;
@@ -123,9 +142,9 @@ namespace FastBikes
 
             int mismatchedPrefabs = 0;
 
-            foreach (var (_, prefabEntity) in SystemAPI.Query<RefRO<PrefabData>>()
-                .WithAll<BicycleData>()
-                .WithNone<Deleted, Temp>()
+            foreach ((RefRO<Game.Prefabs.PrefabData> _, Entity prefabEntity) in SystemAPI.Query<RefRO<Game.Prefabs.PrefabData>>()
+                .WithAll<Game.Prefabs.BicycleData>()
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
                 .WithEntityAccess())
             {
                 total++;
@@ -165,8 +184,8 @@ namespace FastBikes
                     expectedBrake = bikeAuthoring.m_Braking * effectiveAccelBrake;
                 }
 
-                bool hasCarData = SystemAPI.HasComponent<CarData>(prefabEntity);
-                CarData car = default;
+                bool hasCarData = SystemAPI.HasComponent<Game.Prefabs.CarData>(prefabEntity);
+                Game.Prefabs.CarData car = default;
 
                 bool speedMismatch = false;
                 bool accelMismatch = false;
@@ -174,7 +193,7 @@ namespace FastBikes
 
                 if (hasCarData)
                 {
-                    car = SystemAPI.GetComponent<CarData>(prefabEntity);
+                    car = SystemAPI.GetComponent<Game.Prefabs.CarData>(prefabEntity);
 
                     if (hasAuthoring)
                     {
@@ -188,11 +207,11 @@ namespace FastBikes
                     missingCarData++;
                 }
 
-                bool hasSway = SystemAPI.HasComponent<SwayingData>(prefabEntity);
-                SwayingData sw = default;
+                bool hasSway = SystemAPI.HasComponent<Game.Prefabs.SwayingData>(prefabEntity);
+                Game.Prefabs.SwayingData sw = default;
 
                 bool baselineCached = false;
-                SwayingData baselineSw = default;
+                Game.Prefabs.SwayingData baselineSw = default;
 
                 bool swayMaxPosMismatch = false;
                 bool swayDampingMismatch = false;
@@ -202,7 +221,7 @@ namespace FastBikes
 
                 if (hasSway)
                 {
-                    sw = SystemAPI.GetComponent<SwayingData>(prefabEntity);
+                    sw = SystemAPI.GetComponent<Game.Prefabs.SwayingData>(prefabEntity);
 
                     baselineCached = m_SwayingBaseline.TryGetValue(prefabEntity, out baselineSw);
                     if (!baselineCached)
@@ -345,9 +364,10 @@ namespace FastBikes
             float prefabMin = float.PositiveInfinity;
             float prefabMax = float.NegativeInfinity;
 
-            foreach (var (pathRO, prefabEntity) in SystemAPI.Query<RefRO<PathwayData>>()
-                .WithAll<PrefabData>()
-                .WithNone<Deleted, Temp>()
+            foreach ((RefRO<Game.Prefabs.PathwayData> pathRO, Entity prefabEntity) in SystemAPI
+                .Query<RefRO<Game.Prefabs.PathwayData>>()
+                .WithAll<Game.Prefabs.PrefabData>()
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
                 .WithEntityAccess())
             {
                 prefabs++;
@@ -392,9 +412,10 @@ namespace FastBikes
             float compMin = float.PositiveInfinity;
             float compMax = float.NegativeInfinity;
 
-            foreach (var (compRO, prefabRefRO) in SystemAPI.Query<RefRO<Game.Prefabs.PathwayComposition>, RefRO<PrefabRef>>()
-                .WithAll<NetCompositionData>()
-                .WithNone<Deleted, Temp>())
+            foreach ((RefRO<Game.Prefabs.PathwayComposition> compRO, RefRO<Game.Prefabs.PrefabRef> prefabRefRO) in SystemAPI
+                .Query<RefRO<Game.Prefabs.PathwayComposition>, RefRO<Game.Prefabs.PrefabRef>>()
+                .WithAll<Game.Prefabs.NetCompositionData>()
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp>())
             {
                 comps++;
 
@@ -405,12 +426,12 @@ namespace FastBikes
 
                 Entity prefabEntity = prefabRefRO.ValueRO.m_Prefab;
 
-                if (!SystemAPI.HasComponent<PathwayData>(prefabEntity))
+                if (!SystemAPI.HasComponent<Game.Prefabs.PathwayData>(prefabEntity))
                 {
                     continue;
                 }
 
-                float desiredMs = SystemAPI.GetComponent<PathwayData>(prefabEntity).m_SpeedLimit;
+                float desiredMs = SystemAPI.GetComponent<Game.Prefabs.PathwayData>(prefabEntity).m_SpeedLimit;
 
                 if (math.abs(compMs - desiredMs) > kLaneAbsMismatchMs)
                 {
@@ -423,29 +444,35 @@ namespace FastBikes
                 $"Count={comps}, MismatchAbs>{kLaneAbsMismatchMs:0.###} m/s={compMismatch}, " +
                 $"CompSpeedMin={MsToKmh(compMin):0.###} km/h, CompSpeedMax={MsToKmh(compMax):0.###} km/h");
 
+            // Lane diagnostics (runtime entities)
             int lanes = 0;
             int pathLanes = 0;
             int laneMismatch = 0;
+            int laneDefaultMismatch = 0;
 
             float laneMin = float.PositiveInfinity;
             float laneMax = float.NegativeInfinity;
 
-            foreach (var (laneRO, ownerRO) in SystemAPI.Query<RefRO<Game.Net.CarLane>, RefRO<Game.Common.Owner>>()
-                .WithNone<Deleted, Temp>())
+            float laneDefaultMin = float.PositiveInfinity;
+            float laneDefaultMax = float.NegativeInfinity;
+
+            foreach ((RefRO<Game.Net.CarLane> laneRO, RefRO<Game.Common.Owner> ownerRO) in SystemAPI
+                .Query<RefRO<Game.Net.CarLane>, RefRO<Game.Common.Owner>>()
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp>())
             {
                 lanes++;
 
                 Entity ownerEntity = ownerRO.ValueRO.m_Owner;
 
-                if (!SystemAPI.HasComponent<PrefabRef>(ownerEntity))
+                if (!SystemAPI.HasComponent<Game.Prefabs.PrefabRef>(ownerEntity))
                 {
                     continue;
                 }
 
-                PrefabRef pref = SystemAPI.GetComponent<PrefabRef>(ownerEntity);
+                Game.Prefabs.PrefabRef pref = SystemAPI.GetComponent<Game.Prefabs.PrefabRef>(ownerEntity);
                 Entity prefabEntity = pref.m_Prefab;
 
-                if (!SystemAPI.HasComponent<PathwayData>(prefabEntity))
+                if (!SystemAPI.HasComponent<Game.Prefabs.PathwayData>(prefabEntity))
                 {
                     continue;
                 }
@@ -453,21 +480,36 @@ namespace FastBikes
                 pathLanes++;
 
                 float laneMs = laneRO.ValueRO.m_SpeedLimit;
+                float laneDefaultMs = laneRO.ValueRO.m_DefaultSpeedLimit;
+
                 laneMin = math.min(laneMin, laneMs);
                 laneMax = math.max(laneMax, laneMs);
 
-                float desiredMs = SystemAPI.GetComponent<PathwayData>(prefabEntity).m_SpeedLimit;
+                laneDefaultMin = math.min(laneDefaultMin, laneDefaultMs);
+                laneDefaultMax = math.max(laneDefaultMax, laneDefaultMs);
 
-                if (math.abs(laneMs - desiredMs) > kLaneAbsMismatchMs)
+                float desiredMs = SystemAPI.GetComponent<Game.Prefabs.PathwayData>(prefabEntity).m_SpeedLimit;
+
+                bool speedBad = math.abs(laneMs - desiredMs) > kLaneAbsMismatchMs;
+                bool defaultBad = math.abs(laneDefaultMs - desiredMs) > kLaneAbsMismatchMs;
+
+                if (speedBad || defaultBad)
                 {
                     laneMismatch++;
+                }
+
+                if (defaultBad)
+                {
+                    laneDefaultMismatch++;
                 }
             }
 
             Mod.LogSafe(() =>
                 "[FB] Lane speed summary: " +
-                $"TotalCarLanes={lanes}, PathCarLanes={pathLanes}, MismatchAbs>{kLaneAbsMismatchMs:0.###} m/s={laneMismatch}, " +
-                $"LaneSpeedMin={MsToKmh(laneMin):0.###} km/h, LaneSpeedMax={MsToKmh(laneMax):0.###} km/h");
+                $"TotalCarLanes={lanes}, PathCarLanes={pathLanes}, " +
+                $"MismatchAbs>{kLaneAbsMismatchMs:0.###} m/s={laneMismatch}, DefaultMismatchAbs>{kLaneAbsMismatchMs:0.###} m/s={laneDefaultMismatch}, " +
+                $"LaneSpeedMin={MsToKmh(laneMin):0.###} km/h, LaneSpeedMax={MsToKmh(laneMax):0.###} km/h, " +
+                $"LaneDefaultMin={MsToKmh(laneDefaultMin):0.###} km/h, LaneDefaultMax={MsToKmh(laneDefaultMax):0.###} km/h");
         }
     }
 }

@@ -46,7 +46,7 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
                     "Turns the mod ON/OFF.\n" +
-                    "When OFF, bicycle and scooter behavior is restored."
+                    "When OFF, bicycle and scooter behavior is restored to game defaults."
                 },
 
                 // Speed
@@ -63,8 +63,8 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Stiffness" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
                     "Scalar for **sway amplitude**.\n" +
-                    "Higher = less leaning (tighter look).\n" +
-                    "Lower = more wobble.\n" +
+                    "**Higher = less leaning** (tighter look).\n" +
+                    "**Lower = more wobble.**\n" +
                     "Note: scooters can still lean more because their defaults are different.\n" +
                     "More stable at high speed: 1.25–1.75.\n" +
                     "More wobble: 0.75."
@@ -89,15 +89,13 @@ namespace FastBikes
                     "Sets all sliders back to **100%** and restores game defaults."
                 },
 
-                // Alpha Path Speed
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsAlphaGrp), "Path Speed Limit (alpha)" },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalarAlpha)), "Path speed limit (alpha)" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalarAlpha)),
-                    "Scales the **Pathway** speed limit (paths, not roads).\n" +
+                // Beta Path Speed
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Path speed limit" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
+                    "Scales **Path** speed limits (paths are not roads).\n" +
                     "**1.00 = game default**\n" +
                     "Affects bike paths, divided pedestrian+bike paths, and pedestrian-only pathways.\n" +
-                    "Alpha: experimental feature."
+                    "Beta feature - still testing this feature."
                 },
 
                 // About: Info
@@ -111,12 +109,12 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Opens the author’s Paradox mods page." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Bicycle Prefab Dump" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Bike Prefab Dump" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
                     "Logs bicycle/scooter detailed values.\n" +
                     "Not needed for normal gameplay.\n\n" +
-                    "Useful after game updates or when debugging issues.\n" +
-                    "Load city first, data sent to **FastBikes.log**"
+                    "Useful to verify prefabs after game updates or when debugging.\n" +
+                    "Load city first; data sent to **FastBikes.log**"
                 },
 
 

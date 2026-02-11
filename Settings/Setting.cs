@@ -15,10 +15,10 @@ namespace FastBikes
     [FileLocation("ModsSettings/FastBikes/FastBikes")]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(
-        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsAlphaGrp,
+        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsPathSpeedGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     [SettingsUIShowGroupName(
-        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsAlphaGrp,
+        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsPathSpeedGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     public sealed class Setting : ModSetting
     {
@@ -29,8 +29,8 @@ namespace FastBikes
         public const string ActionsStabilityGrp = "Stability";
         public const string ActionsResetGrp = "Reset";
 
-        // Alpha group stays at the bottom of Actions.
-        public const string ActionsAlphaGrp = "Alpha";
+        // Path Speed group stays at the bottom of Actions.
+        public const string ActionsPathSpeedGrp = "PathSpeed";
 
         public const string AboutInfoGrp = "Mod info";
         public const string AboutLinksGrp = "Links";
@@ -48,8 +48,8 @@ namespace FastBikes
         private const float DefaultStiffness = 1.25f;
         private const float DefaultDamping = 1.25f;
 
-        // Alpha defaults: 1.0 = off/vanilla behavior.
-        private const float DefaultPathSpeedScalarAlpha = 1.0f;
+        // Defaults: 1.0 = off/vanilla behavior.
+        private const float DefaultPathSpeedScalar = 1.5f;
 
         // Float compare guard to avoid scheduling applies on identical values.
         private const float FloatEpsilon = 0.0001f;
@@ -61,7 +61,7 @@ namespace FastBikes
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
 
-            PathSpeedScalarAlpha = DefaultPathSpeedScalarAlpha;
+            PathSpeedScalar = DefaultPathSpeedScalar;
         }
 
         // --------------------------------------------------------------------
@@ -137,15 +137,15 @@ namespace FastBikes
             }
         }
 
-        // ------------------------
-        // Actions: Alpha (experimental)
-        // ------------------------
+        // -----------------------------
+        // Actions: Path speed (experimental)
+        // -----------------------------
 
-        [SettingsUISection(ActionsTab, ActionsAlphaGrp)]
+        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 1.00f, max = 10.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
-        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalarAlpha))]
-        public float PathSpeedScalarAlpha { get; set; }
+        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
+        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
+        public float PathSpeedScalar { get; set; }
 
         // ------------------------
         // About: Info
@@ -214,7 +214,7 @@ namespace FastBikes
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
 
-            PathSpeedScalarAlpha = DefaultPathSpeedScalarAlpha;
+            PathSpeedScalar = DefaultPathSpeedScalar;
         }
 
         // --------------------------------------------------------------------
@@ -334,14 +334,14 @@ namespace FastBikes
             }
         }
 
-        private void SetPathSpeedScalarAlpha(float value)
+        private void SetPathSpeedScalar(float value)
         {
-            if (Math.Abs(PathSpeedScalarAlpha - value) < FloatEpsilon)
+            if (Math.Abs(PathSpeedScalar - value) < FloatEpsilon)
             {
                 return;
             }
 
-            PathSpeedScalarAlpha = value;
+            PathSpeedScalar = value;
 
             if (EnableFastBikes)
             {
@@ -355,7 +355,7 @@ namespace FastBikes
             StiffnessScalar = Vanilla;
             DampingScalar = Vanilla;
 
-            PathSpeedScalarAlpha = Vanilla;
+            PathSpeedScalar = Vanilla;
 
             // Explicit vanilla restore is used to revert exactly to cached baselines.
             ScheduleResetVanilla();
@@ -367,7 +367,7 @@ namespace FastBikes
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
 
-            PathSpeedScalarAlpha = DefaultPathSpeedScalarAlpha;
+            PathSpeedScalar = DefaultPathSpeedScalar;
 
             ScheduleApply();
         }

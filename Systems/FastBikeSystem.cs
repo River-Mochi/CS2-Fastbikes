@@ -105,7 +105,7 @@ namespace FastBikes
                 int tunedCars = ApplyBicycleTuning(speedScalar);
                 int tunedSway = ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
 
-                float pathScalar = forceVanilla ? 1.0f : math.clamp(setting.PathSpeedScalarAlpha, 1.0f, 10.0f);
+                float pathScalar = forceVanilla ? 1.0f : math.clamp(setting.PathSpeedScalar, 1.0f, 10.0f);
                 int tunedPaths = ApplyPathwaySpeedLimit(pathScalar);
 
 #if DEBUG
@@ -137,7 +137,7 @@ namespace FastBikes
 
             int updated = 0;
 
-            foreach (var (carRW, prefabEntity) in SystemAPI.Query<RefRW<CarData>>()
+            foreach ((RefRW<CarData> carRW, Entity prefabEntity) in SystemAPI.Query<RefRW<CarData>>()
                 .WithAll<PrefabData, BicycleData>()
                 .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
                 .WithEntityAccess())
@@ -175,7 +175,7 @@ namespace FastBikes
 
             int updated = 0;
 
-            foreach (var (swayRW, prefabEntity) in SystemAPI.Query<RefRW<SwayingData>>()
+            foreach ((RefRW<SwayingData> swayRW, Entity prefabEntity) in SystemAPI.Query<RefRW<SwayingData>>()
                 .WithAll<PrefabData, BicycleData>()
                 .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
                 .WithEntityAccess())
