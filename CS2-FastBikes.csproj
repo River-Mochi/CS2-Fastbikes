@@ -79,17 +79,12 @@
 		<None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
 	</ItemGroup>
 
-	<Target Name="UpdatePublishConfigVersion"
-        BeforeTargets="Build"
-        Condition="'$(Configuration)' != 'Debug' AND Exists('$(PublishConfigurationPath)')">
+	<Target Name="UpdatePublishConfigVersion" BeforeTargets="Build" Condition="'$(Configuration)' != 'Debug' AND Exists('$(PublishConfigurationPath)')">
 
 		<!-- Update <ModVersion Value="..."/> in PublishConfiguration.xml -->
-		<XmlPoke XmlInputPath="$(PublishConfigurationPath)"
-				 Query="/Publish/ModVersion/@Value"
-				 Value="$(Version)" />
+		<XmlPoke XmlInputPath="$(PublishConfigurationPath)" Query="/Publish/ModVersion/@Value" Value="$(Version)" />
 
-		<Message Importance="High"
-				 Text="Updated $(PublishConfigurationPath) ModVersion to $(Version)" />
+		<Message Importance="High" Text="Updated $(PublishConfigurationPath) ModVersion to $(Version)" />
 	</Target>
 
 </Project>
