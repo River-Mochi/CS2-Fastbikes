@@ -45,11 +45,11 @@ namespace FastBikes
         // Mod defaults (first install).
         private const bool DefaultEnabled = true;
         private const float DefaultSpeed = 2.0f;
-        private const float DefaultStiffness = 1.25f;
-        private const float DefaultDamping = 1.25f;
+        private const float DefaultStiffness = 1.50f;
+        private const float DefaultDamping = 1.50f;
 
         // Defaults: 1.0 = off/vanilla behavior.
-        private const float DefaultPathSpeedScalar = 1.5f;
+        private const float DefaultPathSpeedScalar = 2.0f;
 
         // Float compare guard to avoid scheduling applies on identical values.
         private const float FloatEpsilon = 0.0001f;
@@ -138,7 +138,7 @@ namespace FastBikes
         }
 
         // -----------------------------
-        // Actions: Path speed (experimental)
+        // Actions: Path speed
         // -----------------------------
 
         [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]

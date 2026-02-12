@@ -4,49 +4,56 @@
   <!--Name of the mod to display to players-->
   <DisplayName Value="Fast Bikes" />
   <!--Short description of the mod-->
-  <ShortDescription Value="Fast Bikes and Scooters (adjustable speed + swaying) :)" />
+  <ShortDescription Value="Fast Bikes, Scooters, and Path Speeds :)" />
   <!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
   <!--LongDescription Value="Fast Bikes" /-->
-  <LongDescription>Is your city stuck behind slow bikes?
+  <LongDescription>
+	  Is your city stuck behind slow bikes? 🚴🚴🚗🚐🚚🚙
 
-Fast Bikes speeds up bicycles and electric scooters (or slows them down).
+	  🚲 Fast Bikes and electric scooters.
 
-### Features
+	  🛣️ NEW: PATH speed limit - YES - now you can change bike paths (separate from roads)!
 
-- Speed multiplier
-- Uses a smoothing formula for acceleration + braking
-- Optional sway stability tuning (stiffness/damping)
-- One-click Reset buttons.
+	  - No known road mod lets you set "path" speeds.
 
-### Tech notes
+	  #### Features
 
-- Road speed limits and game conditions may still cap speeds.
-- To make Fast-bikes even better, install "Road Speed Adjuster" mod to change road speeds.
-- Uncheck Enable to disable the mod without uninstalling.
-- Safe to remove any time (reset first for the cleanest return to game defaults).
-- 11 Languages
+	  ✅  Speed ⬆️ ⬇️
+	  ✅  Smoothing math for acceleration + braking
+	  ✅  Optional sway stability tuning
+	  ✅  One-click Reset buttons.
 
-### Support and Feedback
+	  #### Tech notes
 
-If the mod helps you, give it a Like :)
-Report issues on Github link, Forum, or Discord.
+	  - Road speed limits and game conditions may still cap speeds.
+	  - Compatible with "Road Speed Adjuster" mod.
+	  - Path speed is **new**, please report any issues with this part.
+	  - To disable the mod without uninstalling, uncheck [ ] the box.
+	  - Safe to remove any time (reset button first for cleanest return to game defaults).
+	  - Has 11 Languages
 
-### Performant design
+	  #### Support and Feedback
 
-- Great effort was made to ensure this runs only when you change mod menu settings, then goes idle.
-- Does not run per-frame continuously in-city to impact fps :)
+	  If the mod helps you, give it a Like :), it's free.
+	  Report issues on Github link, Forum, or Discord.
 
-### Credits
-- **River-mochi** - author
+	  #### Performant design
+
+	  - Great effort made to ensure this runs only when you change mod menu settings, then goes idle.
+	  - Does not run continuously per-frame in cities to impact fps :)
+
+	  #### Credits
+	  - **River-mochi** - author
 
 
-tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life.
-	</LongDescription>
+	  tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life, change path speed, bike path.
+  </LongDescription>
   <!--Thumbnail-->
-  <Thumbnail Value="Properties/Thumbnail10.jpg" />
+  <Thumbnail Value="Properties/ThumbnailFastBikePath8.jpg" />
   <!--Screenshot, can be set multiple times-->
   <Screenshot Value="Properties/image10-Actions.jpg" />
   <Screenshot Value="Properties/image20-slowBike.jpg" />
+  <Screenshot Value="Properties/image30-BikesParis.jpg" />
   <!--Tag, can be set multiple times-->
   <Tag Value="" />
   <!--Link to the forum post where the mod can be discussed-->
