@@ -105,6 +105,9 @@ dotnet_naming_rule.private_internal_const_fields_k_prefix.severity = suggestion
 [Settings/Settings.cs]
 dotnet_diagnostic.CA1822.severity = none
 
+[.editorconfig]
+end_of_line = lf
+
 
 [*.xml]
 end_of_line = crlf

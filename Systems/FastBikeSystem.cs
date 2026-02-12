@@ -105,7 +105,7 @@ namespace FastBikes
                 int tunedCars = ApplyBicycleTuning(speedScalar);
                 int tunedSway = ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
 
-                float pathScalar = forceVanilla ? 1.0f : math.clamp(setting.PathSpeedScalar, 1.0f, 10.0f);
+                float pathScalar = forceVanilla ? 1.0f : math.clamp(setting.PathSpeedScalar, 1.0f, 5.0f);
                 int tunedPaths = ApplyPathwaySpeedLimit(pathScalar);
 
 #if DEBUG

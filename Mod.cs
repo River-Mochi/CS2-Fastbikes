@@ -78,10 +78,11 @@ namespace FastBikes
             // Settings + Options UI
             try
             {
-     
+
                 // LoadSettings(sectionName, instance, defaultInstance)
                 // Saving is automatic on changes
                 AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
+
                 setting.RegisterInOptionsUI();
             }
             catch (Exception ex)

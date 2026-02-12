@@ -37,7 +37,7 @@ namespace FastBikes
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp), "Speed" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp), "Stability" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp), "Reset" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp), "Pathways" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp), "Paths" },
 
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Mod info" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp), "Links" },
