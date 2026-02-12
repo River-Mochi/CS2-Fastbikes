@@ -54,7 +54,7 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Bike & scooter speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
                     "**Scales top speed**\n" +
-                    "Smooth acceleration and braking formula use for high speeds.\n" +
+                    "Smooth acceleration and braking formula is used for high speeds.\n" +
                     "**0.30 = 30%** of game default\n" +
                     "**1.00 = game default**\n" +
                     "Note: road speed limits and game conditions may still apply."
@@ -68,7 +68,7 @@ namespace FastBikes
                     "**Lower = more wobble.**\n" +
                     "Note: scooters can still lean more because their defaults are different.\n" +
                     "For more stable at high speed: 1.25–1.75.\n" +
-                    "Fo more wobble: < 0.75."
+                    "For more wobble: < 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
@@ -112,12 +112,11 @@ namespace FastBikes
                 // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Bike Debug Dump" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "One-time log of bicycle/scooter detailed prefab values.\n" +
+                    "One-time log dump of detailed bicycle values.\n" +
                     "Not needed for normal gameplay.\n\n" +
                     "Useful to verify prefabs after game updates or when debugging.\n" +
-                    "Load city first before clicking; data sent to **FastBikes.log**"
+                    "Load city first before clicking; data sent to **Logs/FastBikes.log**"
                 },
-
 
             };
         }

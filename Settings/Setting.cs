@@ -79,7 +79,7 @@ namespace FastBikes
         // SettingsUIHideByCondition(..., invert: true) hides controls when the condition is false.
         [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 0.30f, max = 10.00f, step = 0.10f, unit = Unit.kFloatTwoFractions)]
+        [SettingsUISlider(min = 0.30f, max = 10.00f, step = 0.10f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
         [SettingsUISetter(typeof(Setting), nameof(SetSpeedScalar))]
         public float SpeedScalar { get; set; }
 
@@ -89,13 +89,13 @@ namespace FastBikes
 
         [SettingsUISection(ActionsTab, ActionsStabilityGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.10f, unit = Unit.kFloatTwoFractions)]
+        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.10f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
         [SettingsUISetter(typeof(Setting), nameof(SetStiffnessScalar))]
         public float StiffnessScalar { get; set; }
 
         [SettingsUISection(ActionsTab, ActionsStabilityGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.10f, unit = Unit.kFloatTwoFractions)]
+        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.10f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
         [SettingsUISetter(typeof(Setting), nameof(SetDampingScalar))]
         public float DampingScalar { get; set; }
 
@@ -143,7 +143,7 @@ namespace FastBikes
 
         [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions)]
+        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
         [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
         public float PathSpeedScalar { get; set; }
 
@@ -232,37 +232,40 @@ namespace FastBikes
             return world;
         }
 
-        private static void ScheduleApply()
+        private static FastBikeSystem? GetSystem()
         {
             World? world = GetWorld();
             if (world == null)
             {
-                return;
+                return null;
             }
 
-            world.GetOrCreateSystemManaged<FastBikeSystem>().ScheduleApply();
+            return world.GetOrCreateSystemManaged<FastBikeSystem>();
         }
 
-        private static void ScheduleResetVanilla()
+        private static void ScheduleApplyAll()
         {
-            World? world = GetWorld();
-            if (world == null)
-            {
-                return;
-            }
+            GetSystem()?.ScheduleApplyAll();
+        }
 
-            world.GetOrCreateSystemManaged<FastBikeSystem>().ScheduleResetVanilla();
+        private static void ScheduleApplyBicyclesAndStability()
+        {
+            GetSystem()?.ScheduleApplyBicyclesAndStability();
+        }
+
+        private static void ScheduleApplyPaths()
+        {
+            GetSystem()?.ScheduleApplyPaths();
+        }
+
+        private static void ScheduleResetVanillaAll()
+        {
+            GetSystem()?.ScheduleResetVanillaAll();
         }
 
         private static void RequestDump()
         {
-            World? world = GetWorld();
-            if (world == null)
-            {
-                return;
-            }
-
-            world.GetOrCreateSystemManaged<FastBikeSystem>().ScheduleDump();
+            GetSystem()?.ScheduleDump();
         }
 
         // --------------------------------------------------------------------
@@ -276,15 +279,14 @@ namespace FastBikes
                 return;
             }
 
-            EnableFastBikes = value;
-
-            if (EnableFastBikes)
+            // AutomaticSettings sets the property after this callback.
+            if (value)
             {
-                ScheduleApply();
+                ScheduleApplyAll();
             }
             else
             {
-                ScheduleResetVanilla();
+                ScheduleResetVanillaAll();
             }
         }
 
@@ -295,12 +297,9 @@ namespace FastBikes
                 return;
             }
 
-            SpeedScalar = value;
-
-            // Slider setters are invoked repeatedly while dragging; apply is scheduled per change.
             if (EnableFastBikes)
             {
-                ScheduleApply();
+                ScheduleApplyBicyclesAndStability();
             }
         }
 
@@ -311,11 +310,9 @@ namespace FastBikes
                 return;
             }
 
-            StiffnessScalar = value;
-
             if (EnableFastBikes)
             {
-                ScheduleApply();
+                ScheduleApplyBicyclesAndStability();
             }
         }
 
@@ -326,11 +323,9 @@ namespace FastBikes
                 return;
             }
 
-            DampingScalar = value;
-
             if (EnableFastBikes)
             {
-                ScheduleApply();
+                ScheduleApplyBicyclesAndStability();
             }
         }
 
@@ -341,11 +336,9 @@ namespace FastBikes
                 return;
             }
 
-            PathSpeedScalar = value;
-
             if (EnableFastBikes)
             {
-                ScheduleApply();
+                ScheduleApplyPaths();
             }
         }
 
@@ -357,8 +350,11 @@ namespace FastBikes
 
             PathSpeedScalar = Vanilla;
 
+            // Bool buttons do not auto-save; persist explicitly.
+            ApplyAndSave();
+
             // Explicit vanilla restore is used to revert exactly to cached baselines.
-            ScheduleResetVanilla();
+            ScheduleResetVanillaAll();
         }
 
         private void DoResetToModDefaults()
@@ -369,7 +365,10 @@ namespace FastBikes
 
             PathSpeedScalar = DefaultPathSpeedScalar;
 
-            ScheduleApply();
+            // Bool buttons do not auto-save; persist explicitly.
+            ApplyAndSave();
+
+            ScheduleApplyAll();
         }
     }
 }

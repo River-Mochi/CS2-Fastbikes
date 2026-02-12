@@ -9,10 +9,11 @@ namespace FastBikes
     using System.Collections.Generic;     // Dictionary
     using Unity.Entities;                 // Entity, RefRW, SystemAPI
     using Unity.Mathematics;              // math.*
-
     public sealed partial class FastBikeSystem : GameSystemBase
     {
-        private bool m_Dirty;
+        private bool m_BikeDirty;
+        private bool m_StabilityDirty;
+        private bool m_PathDirty;
         private bool m_ResetVanilla;
 
         private PrefabSystem m_PrefabSystem = null!;
@@ -28,6 +29,14 @@ namespace FastBikes
             // On-demand only: system stays disabled unless a setting change or debug dump is requested.
             Enabled = false;
             m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
+
+            CreatePathQueries();
+        }
+
+        protected override void OnDestroy()
+        {
+            DisposePathBatch();
+            base.OnDestroy();
         }
 
         protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
@@ -35,31 +44,66 @@ namespace FastBikes
             base.OnGameLoadingComplete(purpose, mode);
 
             m_SwayingBaseline.Clear();
+            DisposePathBatch();
 
             if (Mod.Settings != null)
             {
-                ScheduleApply();
+                ScheduleApplyAll();
             }
         }
 
-        public void ScheduleApply()
+        // --------------------------------------------------------------------
+        // Scheduling
+        // --------------------------------------------------------------------
+
+        public void ScheduleApplyAll()
         {
-            m_Dirty = true;
+            m_BikeDirty = true;
+            m_StabilityDirty = true;
+            m_PathDirty = true;
             m_ResetVanilla = false;
+
+            DisposePathBatch();
             Enabled = true;
         }
 
-        public void ScheduleResetVanilla()
+        public void ScheduleApplyBicyclesAndStability()
         {
-            m_Dirty = true;
-            m_ResetVanilla = true;
+            m_BikeDirty = true;
+            m_StabilityDirty = true;
+            m_ResetVanilla = false;
+
             Enabled = true;
         }
+
+        public void ScheduleApplyPaths()
+        {
+            m_PathDirty = true;
+            m_ResetVanilla = false;
+
+            DisposePathBatch();
+            Enabled = true;
+        }
+
+        public void ScheduleResetVanillaAll()
+        {
+            m_BikeDirty = true;
+            m_StabilityDirty = true;
+            m_PathDirty = true;
+            m_ResetVanilla = true;
+
+            DisposePathBatch();
+            Enabled = true;
+        }
+
+        // --------------------------------------------------------------------
+        // Update
+        // --------------------------------------------------------------------
 
         protected override void OnUpdate()
         {
             // Dump can run without apply (m_Dump lives in FastBikeSystem.Dump.cs).
-            if (!m_Dirty && !m_Dump)
+            if (!m_BikeDirty && !m_StabilityDirty && !m_PathDirty && !m_ResetVanilla && !m_Dump && !IsPathBatchActive())
             {
                 Enabled = false;
                 return;
@@ -68,9 +112,13 @@ namespace FastBikes
             Setting? setting = Mod.Settings;
             if (setting == null)
             {
-                m_Dirty = false;
+                m_BikeDirty = false;
+                m_StabilityDirty = false;
+                m_PathDirty = false;
                 m_ResetVanilla = false;
                 m_Dump = false;
+
+                DisposePathBatch();
                 Enabled = false;
                 return;
             }
@@ -88,13 +136,6 @@ namespace FastBikes
                         dampingScalar: setting.DampingScalar);
                 }
 
-                if (!m_Dirty)
-                {
-                    return;
-                }
-
-                m_Dirty = false;
-
                 bool forceVanilla = m_ResetVanilla || !setting.EnableFastBikes;
                 m_ResetVanilla = false;
 
@@ -102,30 +143,53 @@ namespace FastBikes
                 float stiffnessScalar = forceVanilla ? 1.0f : math.clamp(setting.StiffnessScalar, 0.30f, 5.0f);
                 float dampingScalar = forceVanilla ? 1.0f : math.clamp(setting.DampingScalar, 0.30f, 5.0f);
 
-                int tunedCars = ApplyBicycleTuning(speedScalar);
-                int tunedSway = ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
+                // Bicycle tuning
+                if (m_BikeDirty)
+                {
+                    m_BikeDirty = false;
+                    ApplyBicycleTuning(speedScalar);
+                }
 
-                float pathScalar = forceVanilla ? 1.0f : math.clamp(setting.PathSpeedScalar, 1.0f, 5.0f);
-                int tunedPaths = ApplyPathwaySpeedLimit(pathScalar);
+                // Stability (swaying)
+                if (m_StabilityDirty)
+                {
+                    m_StabilityDirty = false;
+                    ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
+                }
 
-#if DEBUG
-                Mod.LogSafe(() =>
-                    "[FB] Applied. " +
-                    $"Enabled={setting.EnableFastBikes}, " +
-                    $"BikeSpeed={speedScalar:0.##}x, Stiffness={stiffnessScalar:0.##}x, Damping={dampingScalar:0.##}x, " +
-                    $"PathSpeed={pathScalar:0.##}x, " +
-                    $"CarDataUpdated={tunedCars}, SwayUpdated={tunedSway}, PathUpdated={tunedPaths}");
-#endif
+                // Path updates (prefabs + compositions once, lanes batched)
+                if (m_PathDirty && !IsPathBatchActive())
+                {
+                    m_PathDirty = false;
+
+                    float pathScalar = forceVanilla ? 1.0f : math.clamp(setting.PathSpeedScalar, 1.0f, 5.0f);
+                    ApplyPathwayPrefabAndComposition(pathScalar);
+                    BeginPathLaneBatch(pathScalar);
+                }
+
+                // Continue lane batching if active
+                if (IsPathBatchActive())
+                {
+                    ContinuePathLaneBatch();
+                }
             }
             catch (System.Exception ex)
             {
                 Mod.WarnOnce("FB_SYSTEM_EXCEPTION", () =>
                     $"[FB] FastBikeSystem failed: {ex.GetType().Name}: {ex.Message}");
+                DisposePathBatch();
             }
             finally
             {
-                // Run-once behavior: disable until the next explicit schedule.
-                Enabled = false;
+                if (!m_BikeDirty && !m_StabilityDirty && !m_PathDirty && !m_ResetVanilla && !m_Dump && !IsPathBatchActive())
+                {
+                    // Run-once behavior: disable until the next explicit schedule.
+                    Enabled = false;
+                }
+                else
+                {
+                    Enabled = true;
+                }
             }
         }
 

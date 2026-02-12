@@ -3,6 +3,7 @@
 
 namespace FastBikes
 {
+    using Game.Common;        // Deleted, Owner
     using Game.Prefabs;       // PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, SwayingData, PathwayPrefab, PathwayData, PathwayComposition, PrefabRef, NetCompositionData
     using System;             // StringComparison
     using Unity.Entities;     // Entity, RefRO, SystemAPI
@@ -35,10 +36,7 @@ namespace FastBikes
         private static float KmhToMs(float kmh) => kmh * (1f / 3.6f);
         private static float KmhToMph(float kmh) => kmh * 0.621371f;
 
-        private static string F3(float3 v)
-        {
-            return $"({v.x:0.###},{v.y:0.###},{v.z:0.###})";
-        }
+        private static string F3(float3 v) => $"({v.x:0.###},{v.y:0.###},{v.z:0.###})";
 
         private static bool IsScooterName(string name)
         {
@@ -64,10 +62,7 @@ namespace FastBikes
             return math.cmax(rel);
         }
 
-        private static string FormatPct(float value01)
-        {
-            return (value01 * 100f).ToString("0.##") + "%";
-        }
+        private static string FormatPct(float value01) => (value01 * 100f).ToString("0.##") + "%";
 
         private static string BuildMismatchTags(
             bool speedMismatch,
@@ -100,11 +95,9 @@ namespace FastBikes
                 return true;
             }
 
-            settings = default!; // never used when returning false
+            settings = default!;
             Mod.WarnOnce("FB_SETTINGS_NULL", () => "[FB] Settings is null; Dump using PathSpeed=1x.");
-
             return false;
-
         }
 
         private void DumpBicyclePrefabs(bool enableFastBikes, float speedScalar, float stiffnessScalar, float dampingScalar)
@@ -121,7 +114,7 @@ namespace FastBikes
             if (enableFastBikes && TryGetSettings(out Setting settings))
             {
                 rawPathSpeed = settings.PathSpeedScalar;
-                pathScalar = math.clamp(rawPathSpeed, 1.0f, 10.0f);
+                pathScalar = math.clamp(rawPathSpeed, 1.0f, 5.0f);
             }
 
             Mod.LogSafe(() =>
@@ -352,10 +345,10 @@ namespace FastBikes
                 $"MissingPrefabBase={missingPrefabBase}, MissingCarData={missingCarData}, MissingSwaying={missingSwaying}, " +
                 $"MismatchedPrefabs={mismatchedPrefabs}");
 
-            DumpPathwaySpeedDiagnostics(pathScalar);
+            DumpPathSpeedReport(pathScalar);
         }
 
-        private void DumpPathwaySpeedDiagnostics(float pathScalar)
+        private void DumpPathSpeedReport(float pathScalar)
         {
             int prefabs = 0;
             int prefabMissingBase = 0;
@@ -444,7 +437,6 @@ namespace FastBikes
                 $"Count={comps}, MismatchAbs>{kLaneAbsMismatchMs:0.###} m/s={compMismatch}, " +
                 $"CompSpeedMin={MsToKmh(compMin):0.###} km/h, CompSpeedMax={MsToKmh(compMax):0.###} km/h");
 
-            // Lane diagnostics (runtime entities)
             int lanes = 0;
             int pathLanes = 0;
             int laneMismatch = 0;
