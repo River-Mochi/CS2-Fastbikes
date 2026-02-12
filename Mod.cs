@@ -62,7 +62,7 @@ namespace FastBikes
             var setting = new Setting(this);
             Settings = setting;
 
-            // Locales should be best-effort; never crash mod load.
+            // Locales are best-effort; never crash mod load.
             AddLocaleSource("en-US", new LocaleEN(setting));
             AddLocaleSource("fr-FR", new LocaleFR(setting));
             AddLocaleSource("es-ES", new LocaleES(setting));
@@ -80,8 +80,7 @@ namespace FastBikes
             {
 
                 // LoadSettings(sectionName, instance, defaultInstance)
-                // Saving is automatic on changes
-                AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
+                AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this)); // Saving settings is automatic on changes
 
                 setting.RegisterInOptionsUI();
             }
@@ -90,7 +89,7 @@ namespace FastBikes
                 WarnSafe(() => $"Settings/UI init failed: {ex.GetType().Name}: {ex.Message}");
             }
 
-            // System scheduling/init.
+            // System Scheduling/init.
             try
             {
                 updateSystem.UpdateAfter<FastBikeSystem>(SystemUpdatePhase.PrefabUpdate);

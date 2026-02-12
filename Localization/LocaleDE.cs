@@ -37,6 +37,7 @@ namespace FastBikes
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp), "Geschwindigkeit" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp), "Stabilität" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp), "Zurücksetzen" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp), "Wege" },
 
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Mod-Info" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp), "Links" },
@@ -45,48 +46,57 @@ namespace FastBikes
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Fast Bikes aktivieren" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "Schaltet den Mod EIN/AUS.\n" +
-                    "Wenn AUS, werden Fahrrad- und E-Scooter-Werte wiederhergestellt."
+                    "Schaltet das Mod ON/OFF.\n" +
+                    "Wenn OFF, werden Fahrrad- und Scooter-Werte auf Spielstandard zurückgesetzt."
                 },
 
                 // Speed
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Fahrrad- & E-Scooter-Geschwindigkeit" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Fahrrad- & Scooter-Speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
                     "**Skaliert die Höchstgeschwindigkeit**\n" +
-                    "Beschleunigung und Bremsen werden ebenfalls an die gewählte Geschwindigkeit angepasst.\n" +
-                    "**0.30 = 30%** der Spiel-Standards\n" +
-                    "**1.00 = Spiel-Standard**\n" +
-                    "Hinweis: Tempolimits von Wegen/Straßen und Spielbedingungen können weiterhin gelten."
+                    "Für hohe Geschwindigkeiten wird eine weichere Beschleunigungs-/Bremsformel genutzt.\n" +
+                    "**0.30 = 30%** vom Spielstandard\n" +
+                    "**1.00 = Spielstandard**\n" +
+                    "Hinweis: Tempolimits und Spielbedingungen können weiter gelten."
                 },
 
                 // Stability
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Steifigkeit" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Skalar für die **Schwankamplitude**.\n" +
-                    "Höher = weniger Neigung (strafferes Aussehen).\n" +
-                    "Niedriger = mehr Wackeln.\n" +
-                    "Hinweis: E-Scooter können weiterhin stärker kippen, da ihre Standardwerte anders sind.\n" +
-                    "Stabiler bei hoher Geschwindigkeit: 1.25–1.75.\n" +
-                    "Mehr Wackeln: 0.75."
+                    "Skalar für die **Schwank-Amplitude**.\n" +
+                    "**Höher = weniger Neigung** (wirkt „straffer“).\n" +
+                    "**Niedriger = mehr Wackeln.**\n" +
+                    "Hinweis: Scooter können stärker neigen (andere Defaults).\n" +
+                    "Stabiler bei Highspeed: 1.25–1.75.\n" +
+                    "Mehr Wackeln: < 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Dämpfung" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Höher = beruhigt sich schneller (Schwingungen klingen schneller ab).\n" +
-                    "**1.0 = Spiel-Standardwerte**\n" +
-                    "Stabiler bei hoher Geschwindigkeit: 1.25–2.0+\n" +
+                    "Höher = beruhigt sich schneller (Schwingen endet schneller).\n" +
+                    "**1.0 = Spielstandard**\n" +
+                    "Stabiler bei Highspeed: 1.25–2.0+\n" +
                     "Mehr Wackeln: < 0.75"
                 },
 
                 // Reset buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod-Standards" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod-Defaults" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
-                    "Wendet die Standard-Tuningwerte des Mods an."
+                    "Setzt auf die Standardwerte des Mods."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Spiel-Standards" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Spiel-Defaults" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
-                    "Setzt alle Regler auf **100%** zurück und stellt die Spiel-Standardwerte wieder her."
+                    "Setzt alle Slider auf **100%** und stellt den Spielstandard wieder her."
+                },
+
+                // Path Speed
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Weg-Tempolimit" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
+                    "Skaliert Tempolimits von **Wegen** (Wege sind keine Straßen).\n" +
+                    "**1.00 = Spielstandard**\n" +
+                    "Betrifft: Radwege, getrennte Fuß+Rad, und reine Fußwege.\n" +
+                    "Neue Beta-Funktion — Feedback auf GitHub oder im Forum willkommen."
                 },
 
                 // About: Info
@@ -100,13 +110,14 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Öffnet die Paradox-Mods-Seite des Autors." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Fahrrad-Prefab-Dump" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Fahrrad-Debug-Report" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "Protokolliert detaillierte Werte für Fahrräder/E-Scooter.\n" +
+                    "Einmaliger Log-Report mit detaillierten Fahrrad/Roller-Prefabwerten.\n" +
                     "Für normales Spielen nicht nötig.\n\n" +
-                    "Nützlich nach Spiel-Updates oder beim Debuggen.\n" +
-                    "Zuerst eine Stadt laden; Daten gehen an **FastBikes.log**"
+                    "Hilfreich nach Updates oder beim Debuggen.\n" +
+                    "Erst eine Stadt laden, dann klicken; Ausgabe in **Logs/FastBikes.log**"
                 },
+
             };
         }
 

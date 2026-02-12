@@ -4,6 +4,7 @@
 namespace FastBikes
 {
     using Colossal; // IDictionarySource, IDictionaryEntryError
+    using Colossal.IO.AssetDatabase.Internal;
     using System.Collections.Generic; // IEnumerable, Dictionary, KeyValuePair
 
     public sealed class LocalePL : IDictionarySource
@@ -37,56 +38,66 @@ namespace FastBikes
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp), "Prędkość" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp), "Stabilność" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp), "Reset" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp), "Ścieżki" },
 
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Informacje o modzie" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Info o modzie" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp), "Linki" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp), "Debug" },
 
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Włącz Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "Włącza/wyłącza mod.\n" +
-                    "Gdy jest WYŁ., zachowanie rowerów i hulajnóg elektrycznych zostaje przywrócone."
+                    "Włącza/wyłącza mod (ON/OFF).\n" +
+                    "Gdy OFF, rowery i hulajnogi wracają do wartości domyślnych gry."
                 },
 
                 // Speed
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Prędkość rowerów i hulajnóg" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
                     "**Skaluje prędkość maksymalną**\n" +
-                    "Przyspieszenie i hamowanie są też dostosowywane do wybranej prędkości.\n" +
-                    "**0.30 = 30%** domyślnych wartości gry\n" +
-                    "**1.00 = wartości domyślne gry**\n" +
-                    "Uwaga: limity prędkości na drogach/ścieżkach i warunki gry nadal mogą mieć zastosowanie."
+                    "Dla dużych prędkości używana jest łagodniejsza formuła przyspieszania/hamowania.\n" +
+                    "**0.30 = 30%** wartości domyślnej\n" +
+                    "**1.00 = domyślne w grze**\n" +
+                    "Uwaga: limity prędkości i warunki gry nadal mogą obowiązywać."
                 },
 
                 // Stability
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Sztywność" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Mnożnik **amplitudy kołysania**.\n" +
-                    "Wyżej = mniej przechyłu (bardziej „sztywno”).\n" +
-                    "Niżej = więcej chwiania.\n" +
-                    "Uwaga: hulajnogi mogą nadal bardziej się przechylać, bo ich wartości domyślne są inne.\n" +
-                    "Większa stabilność przy dużej prędkości: 1.25–1.75.\n" +
-                    "Więcej chwiania: 0.75."
+                    "Skalar dla **amplitudy kołysania**.\n" +
+                    "**Wyżej = mniej przechyłu** (bardziej „sztywno”).\n" +
+                    "**Niżej = więcej bujania.**\n" +
+                    "Uwaga: hulajnogi mogą przechylać się bardziej (inne wartości bazowe).\n" +
+                    "Stabilniej przy wysokiej prędkości: 1.25–1.75.\n" +
+                    "Więcej bujania: < 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Tłumienie" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Wyżej = szybciej się uspokaja (drgania szybciej zanikają).\n" +
-                    "**1.0 = wartości domyślne gry**\n" +
-                    "Większa stabilność przy dużej prędkości: 1.25–2.0+\n" +
-                    "Więcej chwiania: < 0.75"
+                    "Wyżej = szybciej się uspokaja (oscylacje szybciej znikają).\n" +
+                    "**1.0 = domyślne w grze**\n" +
+                    "Stabilniej przy wysokiej prędkości: 1.25–2.0+\n" +
+                    "Więcej bujania: < 0.75"
                 },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Domyślne moda" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
-                    "Stosuje domyślne wartości strojenia moda."
+                    "Ustawia domyślne wartości strojenia moda."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Domyślne gry" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
-                    "Ustawia wszystkie suwaki na **100%** i przywraca wartości domyślne gry."
+                    "Ustawia wszystkie suwaki na **100%** i przywraca wartości gry."
+                },
+
+                // Path Speed
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Limit prędkości na ścieżkach" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
+                    "Skaluje limity prędkości na **ścieżkach** (ścieżki to nie drogi).\n" +
+                    "**1.00 = domyślne w grze**\n" +
+                    "Dotyczy: ścieżek rowerowych, ścieżek pieszy+rower oraz pieszych.\n" +
+                    "Nowa funkcja Beta — daj znać na GitHubie lub forum."
                 },
 
                 // About: Info
@@ -97,15 +108,16 @@ namespace FastBikes
 
                 // Links
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Otwiera stronę autora w serwisie Paradox Mods." },
-
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)),
+                    "Otwiera stronę autora w serwisie Paradox Mods." },
+                
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Zrzut prefabów rowerów" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Raport debug rowerów" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "Zapisuje szczegółowe wartości rowerów/hulajnóg w logu.\n" +
-                    "Nie jest potrzebne do normalnej rozgrywki.\n\n" +
-                    "Przydatne po aktualizacjach gry lub podczas debugowania.\n" +
-                    "Najpierw wczytaj miasto; dane trafią do **FastBikes.log**"
+                    "Jednorazowy raport w logu z detalami prefabów rowerów/hulajnóg.\n" +
+                    "Niepotrzebne do normalnej gry.\n\n" +
+                    "Przydatne po aktualizacjach gry lub do debugowania.\n" +
+                    "Najpierw wczytaj miasto; wynik w **Logs/FastBikes.log**"
                 },
             };
         }

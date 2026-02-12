@@ -11,8 +11,8 @@ namespace FastBikes
     using Unity.Entities;            // World
     using UnityEngine;               // Application.OpenURL
 
-    // Stable settings path (pre-first-publish). Changing this later creates a new settings file.
-    [FileLocation("ModsSettings/FastBikes/FastBikes")]
+
+    [FileLocation("ModsSettings/FastBikes/FastBikes")]    // Settings file path
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(
         ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsPathSpeedGrp,
@@ -29,7 +29,7 @@ namespace FastBikes
         public const string ActionsStabilityGrp = "Stability";
         public const string ActionsResetGrp = "Reset";
 
-        // Path Speed group stays at the bottom of Actions.
+        // PathSpeed group at bottom of Actions.
         public const string ActionsPathSpeedGrp = "PathSpeed";
 
         public const string AboutInfoGrp = "Mod info";
@@ -39,34 +39,33 @@ namespace FastBikes
         private const string UrlParadox =
             "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
 
-        // Vanilla multipliers.
-        private const float Vanilla = 1.0f;
 
-        // Mod defaults (first install).
+        private const float Vanilla = 1.0f;   // game default multipliers.
+
+        // Mod defaults (first install), 1.0 = off (vanilla game).
         private const bool DefaultEnabled = true;
         private const float DefaultSpeed = 2.0f;
         private const float DefaultStiffness = 1.50f;
         private const float DefaultDamping = 1.50f;
 
-        // Defaults: 1.0 = off/vanilla behavior.
         private const float DefaultPathSpeedScalar = 2.0f;
 
-        // Float compare guard to avoid scheduling applies on identical values.
+        // Float compare guard to avoid scheduling extra applies on near identical values.
         private const float FloatEpsilon = 0.0001f;
 
         public Setting(IMod mod) : base(mod)
         {
-            EnableFastBikes = DefaultEnabled;
-            SpeedScalar = DefaultSpeed;
-            StiffnessScalar = DefaultStiffness;
-            DampingScalar = DefaultDamping;
+            EnableFastBikes     = DefaultEnabled;
+            SpeedScalar         = DefaultSpeed;
+            StiffnessScalar     = DefaultStiffness;
+            DampingScalar       = DefaultDamping;
 
-            PathSpeedScalar = DefaultPathSpeedScalar;
+            PathSpeedScalar     = DefaultPathSpeedScalar;
         }
 
-        // --------------------------------------------------------------------
+        // -------------------------------------------------
         // ACTIONS: Main toggle
-        // --------------------------------------------------------------------
+        // -------------------------------------------------
 
         [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
         [SettingsUISetter(typeof(Setting), nameof(SetEnableFastBikes))]
@@ -268,9 +267,9 @@ namespace FastBikes
             GetSystem()?.ScheduleDump();
         }
 
-        // --------------------------------------------------------------------
+        // ------------------------------------------------
         // UI setter handlers
-        // --------------------------------------------------------------------
+        // ------------------------------------------------
 
         private void SetEnableFastBikes(bool value)
         {
@@ -350,11 +349,9 @@ namespace FastBikes
 
             PathSpeedScalar = Vanilla;
 
-            // Bool buttons do not auto-save; persist explicitly.
-            ApplyAndSave();
-
-            // Explicit vanilla restore is used to revert exactly to cached baselines.
-            ScheduleResetVanillaAll();
+         
+            ApplyAndSave();             // Bool buttons do not auto-save; persist explicitly.
+            ScheduleResetVanillaAll();  // Explicit vanilla restore is used to revert exactly to cached baselines.
         }
 
         private void DoResetToModDefaults()
@@ -365,8 +362,7 @@ namespace FastBikes
 
             PathSpeedScalar = DefaultPathSpeedScalar;
 
-            // Bool buttons do not auto-save; persist explicitly.
-            ApplyAndSave();
+            ApplyAndSave();             // Bool buttons do not auto-save; persist explicitly.
 
             ScheduleApplyAll();
         }

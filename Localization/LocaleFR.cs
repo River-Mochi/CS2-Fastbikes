@@ -37,6 +37,7 @@ namespace FastBikes
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp), "Vitesse" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp), "Stabilité" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp), "Réinitialiser" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp), "Chemins" },
 
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Infos du mod" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp), "Liens" },
@@ -46,28 +47,28 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Activer Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
                     "Active/désactive le mod (ON/OFF).\n" +
-                    "Lorsque c’est OFF, le comportement des vélos et des trottinettes est restauré."
+                    "Lorsque c’est OFF, le comportement des vélos et des trottinettes est restauré aux valeurs par défaut du jeu."
                 },
 
                 // Speed
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Vitesse vélos & trottinettes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
                     "**Multiplie la vitesse de pointe**\n" +
-                    "L’accélération et le freinage sont aussi ajustés selon la vitesse choisie.\n" +
+                    "Une formule d’accélération et de freinage plus douce est utilisée à grande vitesse.\n" +
                     "**0.30 = 30%** de la valeur par défaut du jeu\n" +
                     "**1.00 = valeur par défaut du jeu**\n" +
-                    "Note : les limites de vitesse des voies et les conditions du jeu peuvent encore s’appliquer."
+                    "Note : les limites de vitesse et les conditions du jeu peuvent encore s’appliquer."
                 },
 
                 // Stability
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Rigidité" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
                     "Multiplicateur de l’**amplitude de balancement**.\n" +
-                    "Plus élevé = moins d’inclinaison (aspect plus “serré”).\n" +
-                    "Plus faible = plus d’oscillation.\n" +
+                    "**Plus élevé = moins d’inclinaison** (aspect plus “serré”).\n" +
+                    "**Plus faible = plus d’oscillation.**\n" +
                     "Note : les trottinettes peuvent encore plus s’incliner car leurs valeurs par défaut diffèrent.\n" +
                     "Plus stable à grande vitesse : 1.25–1.75.\n" +
-                    "Plus d’oscillation : 0.75."
+                    "Plus d’oscillation : < 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Amortissement" },
@@ -89,6 +90,15 @@ namespace FastBikes
                     "Remet tous les curseurs à **100%** et restaure les valeurs par défaut du jeu."
                 },
 
+                // Path Speed
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Limite de vitesse des chemins" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
+                    "Multiplie les limites de vitesse des **chemins** (les chemins ne sont pas des routes).\n" +
+                    "**1.00 = valeur par défaut du jeu**\n" +
+                    "Affecte : pistes cyclables, voies piétons+vélos séparées, et chemins piétons.\n" +
+                    "Nouvelle fonctionnalité bêta — retours bienvenus (GitHub ou forum)."
+                },
+
                 // About: Info
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Nom affiché." },
@@ -100,13 +110,14 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Ouvre la page Paradox Mods de l’auteur." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Dump des prefabs de vélos" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Rapport debug vélos" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "Journalise des valeurs détaillées des vélos/trottinettes.\n" +
+                    "Rapport unique dans les logs avec des valeurs détaillées vélos/trottinettes.\n" +
                     "Inutile pour une partie normale.\n\n" +
-                    "Utile après des mises à jour du jeu ou pour diagnostiquer des problèmes.\n" +
-                    "Charger une ville d’abord, données écrites dans **FastBikes.log**"
+                    "Utile pour vérifier les prefabs après une mise à jour ou pour déboguer.\n" +
+                    "Charger une ville d’abord, puis cliquer ; sortie dans **Logs/FastBikes.log**"
                 },
+
             };
         }
 

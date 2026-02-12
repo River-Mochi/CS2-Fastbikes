@@ -110,14 +110,13 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Opens the author’s Paradox mods page." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Bike Debug Dump" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Bike debug report" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "One-time log dump of detailed bicycle values.\n" +
+                    "One-time log report of bicycle relevant values.\n" +
                     "Not needed for normal gameplay.\n\n" +
                     "Useful to verify prefabs after game updates or when debugging.\n" +
                     "Load city first before clicking; data sent to **Logs/FastBikes.log**"
                 },
-
             };
         }
 

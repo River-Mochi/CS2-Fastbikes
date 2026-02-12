@@ -36,62 +36,72 @@ namespace FastBikes
                 // Groups
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp), "Velocidade" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp), "Estabilidade" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp), "Redefinir" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp), "Reset" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp), "Caminhos" },
 
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Informações do mod" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Info do mod" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp), "Links" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp), "Debug" },
 
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Ativar Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "Liga/desliga o mod.\n" +
-                    "Quando estiver DESL., o comportamento de bicicletas e patinetes elétricos é restaurado."
+                    "Liga/desliga o mod (ON/OFF).\n" +
+                    "Quando OFF, bicicletas e patinetes voltam ao padrão do jogo."
                 },
 
                 // Speed
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Velocidade de bicicleta e patinete" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Velocidade de bike e patinete" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
                     "**Escala a velocidade máxima**\n" +
-                    "A aceleração e a frenagem também são ajustadas para a velocidade selecionada.\n" +
+                    "Em velocidades altas, usa uma fórmula mais suave para acelerar/frear.\n" +
                     "**0.30 = 30%** do padrão do jogo\n" +
                     "**1.00 = padrão do jogo**\n" +
-                    "Observação: limites de velocidade de vias/caminhos e condições do jogo ainda podem se aplicar."
+                    "Obs.: limites de velocidade e condições do jogo ainda podem valer."
                 },
 
                 // Stability
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Rigidez" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Multiplicador da **amplitude do balanço**.\n" +
-                    "Maior = menos inclinação (visual mais firme).\n" +
-                    "Menor = mais oscilação.\n" +
-                    "Observação: patinetes ainda podem inclinar mais, pois os padrões deles são diferentes.\n" +
+                    "Escala a **amplitude do balanço**.\n" +
+                    "**Maior = menos inclinação** (visual mais “firme”).\n" +
+                    "**Menor = mais bamboleio.**\n" +
+                    "Obs.: patinetes podem inclinar mais (valores base diferentes).\n" +
                     "Mais estável em alta velocidade: 1.25–1.75.\n" +
-                    "Mais oscilação: 0.75."
+                    "Mais bamboleio: < 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Amortecimento" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Maior = estabiliza mais rápido (a oscilação some mais rápido).\n" +
-                    "**1.0 = padrões do jogo**\n" +
+                    "Maior = estabiliza mais rápido (a oscilação some antes).\n" +
+                    "**1.0 = padrão do jogo**\n" +
                     "Mais estável em alta velocidade: 1.25–2.0+\n" +
-                    "Mais oscilação: < 0.75"
+                    "Mais bamboleio: < 0.75"
                 },
 
                 // Reset buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Padrões do mod" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Padrão do mod" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
-                    "Aplica os valores padrão de ajuste do mod."
+                    "Aplica os valores padrão do mod."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Padrões do jogo" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Padrão do jogo" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
-                    "Define todos os controles deslizantes de volta para **100%** e restaura os padrões do jogo."
+                    "Volta todos os sliders para **100%** e restaura o padrão do jogo."
+                },
+
+                // Path Speed
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Limite de velocidade dos caminhos" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
+                    "Escala o limite de velocidade de **caminhos** (caminhos não são ruas).\n" +
+                    "**1.00 = padrão do jogo**\n" +
+                    "Afeta: ciclovias, caminhos pedestre+bike separados e caminhos só de pedestres.\n" +
+                    "Novo recurso Beta — manda feedback no GitHub ou no fórum."
                 },
 
                 // About: Info
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Nome de exibição." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Nome exibido." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Versão" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Versão atual." },
 
@@ -100,12 +110,12 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "Abre a página do autor no Paradox Mods." },
 
                 // Debug
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Dump de prefabs de bicicleta" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Relatório de debug de bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "Registra valores detalhados de bicicletas/patinetes no log.\n" +
-                    "Não é necessário para o jogo normal.\n\n" +
-                    "Útil após atualizações do jogo ou ao depurar problemas.\n" +
-                    "Carregue a cidade primeiro; os dados vão para **FastBikes.log**"
+                    "Relatório único no log com valores detalhados de bikes/patinetes.\n" +
+                    "Não é necessário para jogar normalmente.\n\n" +
+                    "Útil após atualizações do jogo ou para depurar.\n" +
+                    "Carregue uma cidade antes de clicar; saída em **Logs/FastBikes.log**"
                 },
             };
         }

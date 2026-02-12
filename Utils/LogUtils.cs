@@ -60,7 +60,7 @@ namespace CS2HonuShared
         /// Safe logging wrapper:
         /// - Only evaluates messageFactory if the level is enabled
         /// - Never throws outward (even if messageFactory or the logger throws)
-        /// - Avoids attaching Exception objects except at Error (optional policy)
+        /// - Attach Exception objects at Error level but not at warning (optional policy)
         /// </summary>
         public static void TryLog(ILog log, Level level, Func<string> messageFactory, Exception? exception = null)
         {
@@ -95,7 +95,7 @@ namespace CS2HonuShared
             }
             catch
             {
-                // Logging must never throw back into gameplay/mod loading.
+                // Logging must not throw back into gameplay/mod loading.
             }
         }
 

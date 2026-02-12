@@ -29,7 +29,6 @@ namespace FastBikes
         private void CreatePathQueries()
         {
             // Cached lane query used only when PathSpeedScalar changes (snapshot + batch update).
-            // QueryBuilder avoids EntityQueryDesc/ComponentType arrays and keeps generator-safe type names.
             m_PathLaneQuery = SystemAPI.QueryBuilder()
                 .WithAll<Game.Net.CarLane, Game.Common.Owner>()
                 .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
@@ -48,8 +47,8 @@ namespace FastBikes
                 m_PathLaneEntities.Dispose();
             }
 
-            m_PathLaneIndex = 0;
-            m_PathLaneScalar = 1.0f;
+            m_PathLaneIndex     = 0;
+            m_PathLaneScalar    = 1.0f;
             m_PathDesiredMsCache.Clear();
         }
 
