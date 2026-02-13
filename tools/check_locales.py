@@ -453,6 +453,9 @@ def main() -> int:
     ap.add_argument("--loc-dir", default="Localization", help="Localization directory (default: Localization)")
     ap.add_argument("--baseline", default="LocaleEN.cs", help="Baseline file inside loc-dir (default: LocaleEN.cs)")
     ap.add_argument("--pattern", default="Locale*.cs", help="Glob pattern inside loc-dir (default: Locale*.cs)")
+
+    ap.add_argument("--verbose", action="store_true", help="Print every locale result even if clean")
+
     args = ap.parse_args()
 
     repo_root = Path(__file__).resolve().parents[1]
@@ -477,6 +480,8 @@ def main() -> int:
     if not files:
         print(f"ERROR: No files match {loc_dir / args.pattern}")
         return 2
+
+        any_problem =False
 
     for p in files:
         try:
@@ -506,42 +511,54 @@ def main() -> int:
                 if pb != ph:
                     placeholder_warn[k_norm].append(f"placeholders differ: baseline={pb} locale={ph}")
 
-        print("\n" + "=" * 70)
-        print(p.name)
-        print(f"Keys: {len(m)} | Duplicates: {len(dup)} | Missing vs baseline: {len(missing)} | Extra vs baseline: {len(extra)}")
-        print(f"Marker warnings: {len(marker_warn)} | Placeholder warnings: {len(placeholder_warn)}")
+       has_problem = bool(dup or missing or extra or marker_warn or placeholder_warn)
 
-        if dup:
-            print("!! DUPLICATE KEYS (runtime crash risk):")
-            for k in dup:
-                print(f"   {pretty.get(k, k)}")
+if has_problem:
+    any_problem = True
 
-        if missing:
-            print("-- Missing keys:")
-            for k in missing:
-                print(f"   {base_pretty.get(k, k)}")
+# Quiet mode: skip printing clean files unless --verbose
+if (not args.verbose) and (not has_problem):
+    continue
 
-        if extra:
-            print("-- Extra keys:")
-            for k in extra:
-                print(f"   {pretty.get(k, k)}")
+print("\n" + "=" * 70)
+print(p.name)
+print(f"Keys: {len(m)} | Duplicates: {len(dup)} | Missing vs baseline: {len(missing)} | Extra vs baseline: {len(extra)}")
+print(f"Marker warnings: {len(marker_warn)} | Placeholder warnings: {len(placeholder_warn)}")
 
-        def show(title: str, d: Dict[str, List[str]]) -> None:
-            if not d:
+if dup:
+    print("!! DUPLICATE KEYS (runtime crash risk):")
+    for k in dup:
+        print(f"   {pretty.get(k, k)}")
+
+if missing:
+    print("-- Missing keys:")
+    for k in missing:
+        print(f"   {base_pretty.get(k, k)}")
+
+if extra:
+    print("-- Extra keys:")
+    for k in extra:
+        print(f"   {pretty.get(k, k)}")
+
+def show(title: str, d: Dict[str, List[str]]) -> None:
+    if not d:
+        return
+    print(f"-- {title}:")
+    shown = 0
+    for k in sorted(d.keys()):
+        label = pretty.get(k, k)
+        for msg in d[k]:
+            print(f"   {label}: {msg}")
+            shown += 1
+            if shown >= 30:
+                print("   ... (more omitted)")
                 return
-            print(f"-- {title}:")
-            shown = 0
-            for k in sorted(d.keys()):
-                label = pretty.get(k, k)
-                for msg in d[k]:
-                    print(f"   {label}: {msg}")
-                    shown += 1
-                    if shown >= 30:
-                        print("   ... (more omitted)")
-                        return
 
-        show("Marker issues", marker_warn)
-        show("Placeholder issues", placeholder_warn)
+show("Marker issues", marker_warn)
+show("Placeholder issues", placeholder_warn)
+
+if not any_problem and not args.verbose:
+    print("\nAll checks GOOD - no problems detected.")
 
     return 0
 
