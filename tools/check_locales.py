@@ -300,7 +300,7 @@ def decode_csharp_string_literal(token: str) -> str:
 def extract_string_literals(expr: str) -> str:
     """
     Concatenate all string literals found in expr (handles "..." and @"...").
-    If expr includes no literals, returns "" (we only validate markers on literal text).
+    If expr includes no literals, returns "" (only validates markers on literal text).
     """
     parts: List[str] = []
     i = 0
@@ -348,6 +348,54 @@ def placeholders(s: str) -> List[str]:
     return re.findall(r"\{(\d+)\}", s2)
 
 
+def _is_numberish(ch: str) -> bool:
+    return ch.isdigit() or ch == "."
+
+
+def count_markup_angle_brackets(s: str) -> Tuple[int, int]:
+    """
+    Count '<' and '>' intended as CS2 markup markers, ignoring numeric comparators like:
+      - < 0.75
+      - 1 < 2
+      - 1.25 < some words
+      - speed > 1.0
+    Rule: if a '<' or '>' has a number immediately to its left or right (ignoring whitespace),
+    treat it as a comparator and ignore it for markup balancing checks.
+    """
+    lt = 0
+    gt = 0
+    i = 0
+    n = len(s)
+
+    while i < n:
+        ch = s[i]
+        if ch == "<" or ch == ">":
+            # look left for number-ish
+            j = i - 1
+            while j >= 0 and s[j].isspace():
+                j -= 1
+            left_num = j >= 0 and _is_numberish(s[j])
+
+            # look right for number-ish
+            k = i + 1
+            while k < n and s[k].isspace():
+                k += 1
+            right_num = k < n and _is_numberish(s[k])
+
+            if left_num or right_num:
+                i += 1
+                continue
+
+            if ch == "<":
+                lt += 1
+            else:
+                gt += 1
+
+        i += 1
+
+    return lt, gt
+
+
 def marker_issues(s: str) -> List[str]:
     issues: List[str] = []
 
@@ -355,8 +403,7 @@ def marker_issues(s: str) -> List[str]:
     if bold % 2 != 0:
         issues.append(f'unbalanced "**" (count={bold})')
 
-    lt = s.count("<")
-    gt = s.count(">")
+    lt, gt = count_markup_angle_brackets(s)
     if lt != gt:
         issues.append(f'unbalanced "<" vs ">" (lt={lt}, gt={gt})')
 
@@ -396,7 +443,6 @@ def load_locale(path: Path) -> Tuple[Dict[str, str], List[str], Dict[str, str]]:
         keys_raw.append(k_norm)
         if k_norm not in pretty:
             pretty[k_norm] = key_expr.strip()
-        # last write wins (duplicates are reported separately)
         values[k_norm] = extract_string_literals(val_expr)
 
     return values, keys_raw, pretty

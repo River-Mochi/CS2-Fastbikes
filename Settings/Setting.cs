@@ -272,7 +272,7 @@ namespace FastBikes
         // ------------------------------------------------
         // - Called by Options UI binding system.
         // - Slider setters are invoked when the value is committed (updateOnDragEnd=true), not every drag tick.
-        // - AutomaticSettings applies the property value after this callback, so setters schedule work only.
+        // - AutomaticSettings applies the property value after this callback, so setters only schedule work.
         // - Epsilon guard avoids scheduling extra applies for tiny/no-op float changes.
 
         private void SetEnableFastBikes(bool value)

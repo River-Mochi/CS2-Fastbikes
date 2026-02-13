@@ -79,6 +79,14 @@
 		<None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<!-- Dev-only scripts: keep in repo, never copy to build output -->
+		<None Update="tools\**\*">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+			<Pack>false</Pack>
+		</None>
+	</ItemGroup>
+
 	<Target Name="UpdatePublishConfigVersion" BeforeTargets="Build" Condition="'$(Configuration)' != 'Debug' AND Exists('$(PublishConfigurationPath)')">
 
 		<!-- Update <ModVersion Value="..."/> in PublishConfiguration.xml -->
@@ -86,5 +94,5 @@
 
 		<Message Importance="High" Text="Updated $(PublishConfigurationPath) ModVersion to $(Version)" />
 	</Target>
-
+	
 </Project>
