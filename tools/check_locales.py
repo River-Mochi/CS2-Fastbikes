@@ -4,6 +4,15 @@
 # - Missing/extra keys vs baseline (default: LocaleEN.cs)
 # - Unbalanced markers in VALUES: **, < >, { }
 # - Placeholder mismatch vs baseline for each key: {0}, {1}, ...
+#
+# Output behavior:
+# - Default: print only locales with problems
+# - If no problems anywhere: print "All checks GOOD - no problems detected."
+# - Use --verbose to print every locale report
+#
+# Exit codes:
+# - 0 = no problems
+# - 1 = problems found (duplicates/missing/extra/marker/placeholder/parse errors)
 
 import argparse
 import re
@@ -443,9 +452,59 @@ def load_locale(path: Path) -> Tuple[Dict[str, str], List[str], Dict[str, str]]:
         keys_raw.append(k_norm)
         if k_norm not in pretty:
             pretty[k_norm] = key_expr.strip()
+        # last write wins; duplicates are separately reported
         values[k_norm] = extract_string_literals(val_expr)
 
     return values, keys_raw, pretty
+
+
+def _print_problem_report(
+    filename: str,
+    key_count: int,
+    dup: List[str],
+    missing: List[str],
+    extra: List[str],
+    marker_warn: Dict[str, List[str]],
+    placeholder_warn: Dict[str, List[str]],
+    pretty: Dict[str, str],
+    base_pretty: Dict[str, str],
+) -> None:
+    print("\n" + "=" * 70)
+    print(filename)
+    print(f"Keys: {key_count} | Duplicates: {len(dup)} | Missing vs baseline: {len(missing)} | Extra vs baseline: {len(extra)}")
+    print(f"Marker warnings: {len(marker_warn)} | Placeholder warnings: {len(placeholder_warn)}")
+
+    if dup:
+        print("!! DUPLICATE KEYS (runtime crash risk):")
+        for k in dup:
+            print(f"   {pretty.get(k, k)}")
+
+    if missing:
+        print("-- Missing keys:")
+        for k in missing:
+            print(f"   {base_pretty.get(k, k)}")
+
+    if extra:
+        print("-- Extra keys:")
+        for k in extra:
+            print(f"   {pretty.get(k, k)}")
+
+    def show(title: str, d: Dict[str, List[str]]) -> None:
+        if not d:
+            return
+        print(f"-- {title}:")
+        shown = 0
+        for k in sorted(d.keys()):
+            label = pretty.get(k, k)
+            for msg in d[k]:
+                print(f"   {label}: {msg}")
+                shown += 1
+                if shown >= 30:
+                    print("   ... (more omitted)")
+                    return
+
+    show("Marker issues", marker_warn)
+    show("Placeholder issues", placeholder_warn)
 
 
 def main() -> int:
@@ -453,9 +512,7 @@ def main() -> int:
     ap.add_argument("--loc-dir", default="Localization", help="Localization directory (default: Localization)")
     ap.add_argument("--baseline", default="LocaleEN.cs", help="Baseline file inside loc-dir (default: LocaleEN.cs)")
     ap.add_argument("--pattern", default="Locale*.cs", help="Glob pattern inside loc-dir (default: Locale*.cs)")
-
     ap.add_argument("--verbose", action="store_true", help="Print every locale result even if clean")
-
     args = ap.parse_args()
 
     repo_root = Path(__file__).resolve().parents[1]
@@ -481,12 +538,13 @@ def main() -> int:
         print(f"ERROR: No files match {loc_dir / args.pattern}")
         return 2
 
-        any_problem =False
+    any_problem = False
 
     for p in files:
         try:
             m, keys_raw, pretty = load_locale(p)
         except Exception as ex:
+            any_problem = True
             print("\n" + "=" * 70)
             print(p.name)
             print(f"ERROR parsing locale: {ex}")
@@ -496,8 +554,8 @@ def main() -> int:
         missing = sorted(base_keys - set(m.keys()))
         extra = sorted(set(m.keys()) - base_keys)
 
-        marker_warn = defaultdict(list)
-        placeholder_warn = defaultdict(list)
+        marker_warn: Dict[str, List[str]] = defaultdict(list)
+        placeholder_warn: Dict[str, List[str]] = defaultdict(list)
 
         for k_norm, val in m.items():
             if val:
@@ -511,56 +569,30 @@ def main() -> int:
                 if pb != ph:
                     placeholder_warn[k_norm].append(f"placeholders differ: baseline={pb} locale={ph}")
 
-       has_problem = bool(dup or missing or extra or marker_warn or placeholder_warn)
+        has_problem = bool(dup or missing or extra or marker_warn or placeholder_warn)
+        if has_problem:
+            any_problem = True
 
-if has_problem:
-    any_problem = True
+        # Quiet mode: skip printing clean files unless --verbose
+        if (not args.verbose) and (not has_problem):
+            continue
 
-# Quiet mode: skip printing clean files unless --verbose
-if (not args.verbose) and (not has_problem):
-    continue
+        _print_problem_report(
+            filename=p.name,
+            key_count=len(m),
+            dup=dup,
+            missing=missing,
+            extra=extra,
+            marker_warn=marker_warn,
+            placeholder_warn=placeholder_warn,
+            pretty=pretty,
+            base_pretty=base_pretty,
+        )
 
-print("\n" + "=" * 70)
-print(p.name)
-print(f"Keys: {len(m)} | Duplicates: {len(dup)} | Missing vs baseline: {len(missing)} | Extra vs baseline: {len(extra)}")
-print(f"Marker warnings: {len(marker_warn)} | Placeholder warnings: {len(placeholder_warn)}")
+    if not any_problem and not args.verbose:
+        print("\nAll checks GOOD - no problems detected.")
 
-if dup:
-    print("!! DUPLICATE KEYS (runtime crash risk):")
-    for k in dup:
-        print(f"   {pretty.get(k, k)}")
-
-if missing:
-    print("-- Missing keys:")
-    for k in missing:
-        print(f"   {base_pretty.get(k, k)}")
-
-if extra:
-    print("-- Extra keys:")
-    for k in extra:
-        print(f"   {pretty.get(k, k)}")
-
-def show(title: str, d: Dict[str, List[str]]) -> None:
-    if not d:
-        return
-    print(f"-- {title}:")
-    shown = 0
-    for k in sorted(d.keys()):
-        label = pretty.get(k, k)
-        for msg in d[k]:
-            print(f"   {label}: {msg}")
-            shown += 1
-            if shown >= 30:
-                print("   ... (more omitted)")
-                return
-
-show("Marker issues", marker_warn)
-show("Placeholder issues", placeholder_warn)
-
-if not any_problem and not args.verbose:
-    print("\nAll checks GOOD - no problems detected.")
-
-    return 0
+    return 1 if any_problem else 0
 
 
 if __name__ == "__main__":

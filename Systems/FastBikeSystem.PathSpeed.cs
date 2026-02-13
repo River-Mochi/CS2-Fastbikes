@@ -31,7 +31,7 @@ namespace FastBikes
             // Cached lane query used only when PathSpeedScalar changes (snapshot + batch update).
             m_PathLaneQuery = SystemAPI.QueryBuilder()
                 .WithAll<Game.Net.CarLane, Game.Common.Owner>()
-                .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp, Game.Common.Overridden>()
                 .Build();
         }
 

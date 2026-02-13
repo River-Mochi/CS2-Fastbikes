@@ -450,7 +450,7 @@ namespace FastBikes
 
             foreach ((RefRO<Game.Net.CarLane> laneRO, RefRO<Game.Common.Owner> ownerRO) in SystemAPI
                 .Query<RefRO<Game.Net.CarLane>, RefRO<Game.Common.Owner>>()
-                .WithNone<Game.Common.Deleted, Game.Tools.Temp>())
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp, Game.Common.Overridden>())
             {
                 lanes++;
 
