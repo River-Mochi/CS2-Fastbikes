@@ -1,6 +1,6 @@
 # Fast Bikes (Cities: Skylines II)
 
-Fast Bikes speeds up **bicycles** and **electric scooters** in Cities: Skylines II.
+Fast Bikes speeds up **bicycles** and **electric scooters**.
 
 It applies a speed multiplier and scales acceleration/braking so higher speeds stay usable instead of looking like “teleport + panic braking”.
 
@@ -34,15 +34,15 @@ Turns the mod ON/OFF.
 - **OFF**: restores vanilla values.
 
 ### Bike & scooter speed
-Scales **top speed**.  
-Acceleration and braking are adjusted for the selected speed.
+Scales **max speed** allowed.  
+Acceleration and braking are auto adjusted for the selected speed.
 
 - 0.30 = 30% of game default
 - 1.00 = game default
 
 Notes:
 - Road speed limits and game conditions may still apply.
-- For best results, consider installing **Road Speed Adjuster** to raise road limits too.
+- For best results, consider installing **Road Speed Adjuster** mod to raise road limits too.
 
 ### Stiffness
 Scalar for **sway amplitude**.
@@ -51,7 +51,7 @@ Scalar for **sway amplitude**.
 - Lower = more wobble
 
 Recommended at high speed: **1.25–1.75**  
-More wobble: **< 0.75**
+For more wobble: **< 0.75**
 
 ### Damping
 How quickly sway settles.
@@ -60,7 +60,7 @@ How quickly sway settles.
 - 1.0 = game defaults
 
 Recommended at high speed: **1.25–2.0+**  
-More wobble: **< 0.75**
+For more wobble: **< 0.75**
 
 ### Path speed limit
 Scales speed limits for **paths** (not roads).
@@ -69,19 +69,18 @@ Scales speed limits for **paths** (not roads).
 - Affects bike/ped paths and pedestrian-only paths
 - This setting is separate from road speed limit mods (as they change roads only and not paths).
 
-## Compatibility
-- Edits bicycle/scooter prefab data and path speed limit data.
-- If another mod edits the same values, whichever mod applies last will win.
-- Supports **11 languages**.
+## Languages
+- Supports **11 languages**
 
 ## Troubleshooting
-- **Nothing changes after adjusting sliders**
+
   - Load a city first.
   - Toggle **Enable Fast Bikes** OFF then ON.
   - Use **Bicycle Prefab Report** and confirm values change in the log.
+  - Delete the ModsSettings/FastBikes/FastBikes.coc file > then start the game, a new settings file is created with default values.
 
 - **After a game update**
-  - Run **Bicycle Prefab Report** and compare baseline values.
+  - Optinal: run **Bicycle Prefab Report** and compare baseline values.
 
 ## Links
 - Discord: https://discord.gg/HTav7ARPs2  
