@@ -46,7 +46,7 @@ namespace FastBikes
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "Turns the mod ON/OFF.\n" +
+                    "Turns the mod **ON/OFF**.\n" +
                     "When OFF, bicycle and scooter behavior is restored to game defaults."
                 },
 
@@ -67,16 +67,16 @@ namespace FastBikes
                     "**Higher = less leaning** (tighter look).\n" +
                     "**Lower = more wobble.**\n" +
                     "Note: scooters can still lean more because their defaults are different.\n" +
-                    "For more stable at high speed: 1.25–1.75.\n" +
-                    "For more wobble: < 0.75."
+                    "- For more stable at high speed: 1.25–1.75.\n" +
+                    "- For more wobble: < 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
                     "Higher = settles faster (oscillation dies faster).\n" +
                     "**1.0 = game defaults**\n" +
-                    "For more stable at high speed: 1.25–2.0+\n" +
-                    "For more wobble: < 0.75"
+                    "- For more stable at high speed: 1.25–2.0+\n" +
+                    "- For more wobble: < 0.75"
                 },
 
                 // Reset buttons
@@ -96,7 +96,11 @@ namespace FastBikes
                     "Scales **Path** speed limits (paths are not roads).\n" +
                     "**1.00 = game default**\n" +
                     "Affects: bike paths, divided pedestrian+bike, and pedestrian-only paths.\n" +
-                    "New Beta feature - please give feedback on Github or Forum links."
+                    "New Beta feature - please give feedback on Github or Forum links.\n" +
+                    "To uninstall the mod, reset this to 1.00 (and all values), load city, which restores path speed limits.\n" +
+                    "Then you can safely uninstall the mod. If you forgot to do this,\n" +
+                    "then all that happens is existing paths keep their current speed limits, but new paths will have vanilla default speed limits."
+
                 },
 
                 // About: Info

@@ -72,6 +72,13 @@ Scales speed limits for **paths** (not roads).
 ## Languages
 - Supports **11 languages**
 
+## Remove mod
+- Best way to uninstall: toggle **Enable Fast Bikes** OFF, load the city once, save once, then uninstall the mod.
+    - This ensures all values are reset to vanilla defaults (reset sliders to 1.0x also does this).
+    - If you never used Path Speed, then you can skip the load/save step and just uninstall after toggling off.
+- If you uninstall the mod without resetting Path Speed to 1x, then existing paths keep the modified speed limit and all new paths will be vanilla speed limits.
+
+
 ## Troubleshooting
 
   - Load a city first.

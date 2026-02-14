@@ -1,55 +1,47 @@
 // File: Systems/FastBikeSystem.PathSpeed.cs
-// Purpose: pathway speed-limit scaling (PathwayData + PathwayComposition + existing lane CarLane) using PathwayPrefab authoring as baseline.
-// CS2 Authoring is km/h; runtime fields are m/s.
+// Purpose: Pathway speed-limit scaling (PathwayData + PathwayComposition) using PathwayPrefab authoring as baseline,
+//          plus path-only runtime lane updates so already-placed paths get updated.
+// CS2 authoring is km/h; runtime fields are m/s.
 
 namespace FastBikes
 {
-    using Game.Common;              // Deleted, Owner
-    using Game.Prefabs;             // PrefabBase, PrefabData, PrefabRef, PathwayPrefab, PathwayData, PathwayComposition, NetCompositionData
-    using Game.Tools;               // Temp
-    using System.Collections.Generic; // Dictionary
-    using Unity.Collections;        // NativeArray, Allocator
-    using Unity.Entities;           // Entity, EntityQuery, RefRO, RefRW, SystemAPI
-    using Unity.Mathematics;        // math.*
+    using Game.Common;        // Deleted, Overridden
+    using Game.Net;           // Edge, Road, CarLane, SubLane
+    using Game.Prefabs;       // PrefabBase, PrefabData, PrefabRef, PathwayPrefab, PathwayData, PathwayComposition, NetCompositionData
+    using Game.Tools;         // Temp
+    using Unity.Collections;  // NativeArray, NativeList, Allocator
+    using Unity.Entities;     // Entity, DynamicBuffer, RefRO, RefRW, SystemAPI, BufferLookup, ComponentLookup
+    using Unity.Mathematics;  // math.*
 
     public sealed partial class FastBikeSystem
     {
-        // Budget for runtime lane updates per system update.
-        private const int kLaneBatchSize = 2048;
+        // Budget for runtime edge processing per system update.
+        private const int kEdgeBatchSize = 512;
 
-        private EntityQuery m_PathLaneQuery;
+        // Persistent snapshot of PATH edge entities only (roads excluded up front).
+        private NativeArray<Entity> m_PathEdgeEntities;
+        private int m_PathEdgeIndex;
 
-        private NativeArray<Entity> m_PathLaneEntities;
-        private int m_PathLaneIndex;
-        private float m_PathLaneScalar;
-
-        private readonly Dictionary<Entity, float> m_PathDesiredMsCache =
-            new Dictionary<Entity, float>();
-
-        private void CreatePathQueries()
+        private void CreatePathQueries( )
         {
-            // Cached lane query used only when PathSpeedScalar changes (snapshot + batch update).
-            m_PathLaneQuery = SystemAPI.QueryBuilder()
-                .WithAll<Game.Net.CarLane, Game.Common.Owner>()
-                .WithNone<Game.Common.Deleted, Game.Tools.Temp, Game.Common.Overridden>()
-                .Build();
+            // No cached EntityQuery required.
+            // Path edge snapshot is built on-demand when BeginPathLaneBatch runs.
         }
 
-        private bool IsPathBatchActive()
+        private bool IsPathBatchActive( )
         {
-            return m_PathLaneEntities.IsCreated;
+            return m_PathEdgeEntities.IsCreated;
         }
 
-        private void DisposePathBatch()
+        private void DisposePathBatch( )
         {
-            if (m_PathLaneEntities.IsCreated)
+            if (m_PathEdgeEntities.IsCreated)
             {
-                m_PathLaneEntities.Dispose();
+                m_PathEdgeEntities.Dispose();
+                m_PathEdgeEntities = default; // Clear to avoid accidental reuse.
             }
 
-            m_PathLaneIndex     = 0;
-            m_PathLaneScalar    = 1.0f;
-            m_PathDesiredMsCache.Clear();
+            m_PathEdgeIndex = 0;
         }
 
         /// <summary>
@@ -63,19 +55,25 @@ namespace FastBikes
             int updated = 0;
 
             // 1) PathwayData on pathway prefab entities.
-            foreach ((RefRW<PathwayData> pathRW, Entity prefabEntity) in SystemAPI
-                .Query<RefRW<PathwayData>>()
-                .WithAll<PrefabData>()
-                .WithNone<Deleted, Temp>()
+            foreach ((RefRW<Game.Prefabs.PathwayData> pathRW, Unity.Entities.Entity prefabEntity) in SystemAPI
+                .Query<RefRW<Game.Prefabs.PathwayData>>()
+                .WithAll<Game.Prefabs.PrefabData>()
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
                 .WithEntityAccess())
             {
-                if (!TryGetPathwayBase(prefabEntity, out PathwayPrefab pathwayPrefab))
+                if (!TryGetPathwayBase(prefabEntity, out Game.Prefabs.PathwayPrefab pathwayPrefab))
                 {
                     continue;
                 }
 
                 float baseMs = pathwayPrefab.m_SpeedLimit * (1f / 3.6f);
-                float newMs = (baseMs <= 0f) ? 0f : baseMs * s;
+                if (baseMs <= 0f)
+                {
+                    // Safety: no write when baseline is invalid.
+                    continue;
+                }
+
+                float newMs = baseMs * s;
 
                 ref PathwayData data = ref pathRW.ValueRW;
                 if (data.m_SpeedLimit != newMs)
@@ -99,7 +97,13 @@ namespace FastBikes
                 }
 
                 float baseMs = pathwayPrefab.m_SpeedLimit * (1f / 3.6f);
-                float newMs = (baseMs <= 0f) ? 0f : baseMs * s;
+                if (baseMs <= 0f)
+                {
+                    // Safety: no write when baseline is invalid.
+                    continue;
+                }
+
+                float newMs = baseMs * s;
 
                 ref PathwayComposition comp = ref compRW.ValueRW;
                 if (comp.m_SpeedLimit != newMs)
@@ -112,100 +116,153 @@ namespace FastBikes
             return updated;
         }
 
-        private void BeginPathLaneBatch(float scalar)
+        /// <summary>
+        /// Builds a snapshot of runtime PATH edge entities only.
+        /// Selection:
+        /// - Edge has PrefabRef
+        /// - Edge does not have Road
+        /// - Edge prefab entity has PathwayData
+        /// Lanes are collected later from each edge's SubLane buffer.
+        /// </summary>
+        private void BeginPathLaneBatch( )
         {
             DisposePathBatch();
 
-            m_PathLaneScalar = math.max(0.01f, scalar);
+            ComponentLookup<PathwayData> pathwayDataLookup =
+                SystemAPI.GetComponentLookup<PathwayData>(isReadOnly: true);
 
-            // Snapshot lanes once per apply, then update in small batches.
-            m_PathLaneEntities = m_PathLaneQuery.ToEntityArray(Allocator.Persistent);
-            m_PathLaneIndex = 0;
+            Unity.Collections.NativeList<Entity> pathEdges = new Unity.Collections.NativeList<Entity>(Unity.Collections.Allocator.Temp);
+
+            try
+            {
+                foreach ((RefRO<PrefabRef> prefabRefRO, DynamicBuffer<Game.Net.SubLane> subLanes, Unity.Entities.Entity edgeEntity) in SystemAPI
+                    .Query<RefRO<PrefabRef>, DynamicBuffer<Game.Net.SubLane>>()
+                    .WithAll<Game.Net.Edge>()
+                    .WithNone<Game.Net.Road>()
+                    .WithNone<Deleted, Temp, Overridden>()
+                    .WithEntityAccess())
+                {
+                    if (subLanes.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    Unity.Entities.Entity prefabEntity = prefabRefRO.ValueRO.m_Prefab;
+
+                    // Primary gate: path edges reference a prefab entity with PathwayData.
+                    if (!pathwayDataLookup.HasComponent(prefabEntity))
+                    {
+                        continue;
+                    }
+
+                    pathEdges.Add(edgeEntity);
+                }
+
+                if (pathEdges.Length == 0)
+                {
+                    return;
+                }
+
+                m_PathEdgeEntities = new Unity.Collections.NativeArray<Entity>(pathEdges.Length, Unity.Collections.Allocator.Persistent);
+                Unity.Collections.NativeArray<Entity>.Copy(pathEdges.AsArray(), m_PathEdgeEntities);
+                m_PathEdgeIndex = 0;
+            }
+            finally
+            {
+                pathEdges.Dispose();    // Dispose temp list even if we early-out with no path edges found.
+            }
         }
 
-        private void ContinuePathLaneBatch()
+        /// <summary>
+        /// Applies updated speed limits to runtime path lanes in small batches.
+        /// Speed source of truth: PathwayData on the edge prefab entity.
+        /// </summary>
+        private void ContinuePathLaneBatch( )
         {
-            if (!m_PathLaneEntities.IsCreated)
+            if (!m_PathEdgeEntities.IsCreated)
             {
                 return;
             }
 
-            int remaining = m_PathLaneEntities.Length - m_PathLaneIndex;
+            int remaining = m_PathEdgeEntities.Length - m_PathEdgeIndex;
             if (remaining <= 0)
             {
                 DisposePathBatch();
                 return;
             }
 
-            int count = math.min(kLaneBatchSize, remaining);
+            int count = math.min(kEdgeBatchSize, remaining);
 
-            ComponentLookup<Game.Net.CarLane> laneLookup = SystemAPI.GetComponentLookup<Game.Net.CarLane>(isReadOnly: false);
-            ComponentLookup<Game.Common.Owner> ownerLookup = SystemAPI.GetComponentLookup<Game.Common.Owner>(isReadOnly: true);
-            ComponentLookup<PrefabRef> prefabRefLookup = SystemAPI.GetComponentLookup<PrefabRef>(isReadOnly: true);
-            ComponentLookup<PathwayData> pathwayDataLookup = SystemAPI.GetComponentLookup<PathwayData>(isReadOnly: true);
+            ComponentLookup<PrefabRef> prefabRefLookup =
+                SystemAPI.GetComponentLookup<PrefabRef>(isReadOnly: true);
+
+            ComponentLookup<PathwayData> pathwayDataLookup =
+                SystemAPI.GetComponentLookup<PathwayData>(isReadOnly: true);
+
+            BufferLookup<Game.Net.SubLane> subLaneLookup =
+                SystemAPI.GetBufferLookup<Game.Net.SubLane>(isReadOnly: true);
+
+            ComponentLookup<Game.Net.CarLane> laneLookup =
+                SystemAPI.GetComponentLookup<Game.Net.CarLane>(isReadOnly: false);
 
             for (int i = 0; i < count; i++)
             {
-                Entity laneEntity = m_PathLaneEntities[m_PathLaneIndex++];
+                Entity edgeEntity = m_PathEdgeEntities[m_PathEdgeIndex++];
 
-                if (!ownerLookup.HasComponent(laneEntity))
+                if (!prefabRefLookup.HasComponent(edgeEntity))
                 {
                     continue;
                 }
 
-                Entity ownerEntity = ownerLookup[laneEntity].m_Owner;
-
-                if (!prefabRefLookup.HasComponent(ownerEntity))
+                if (!subLaneLookup.HasBuffer(edgeEntity))
                 {
                     continue;
                 }
 
-                Entity prefabEntity = prefabRefLookup[ownerEntity].m_Prefab;
+                Entity prefabEntity = prefabRefLookup[edgeEntity].m_Prefab;
 
-                float desiredMs = GetDesiredPathSpeedMs(prefabEntity, pathwayDataLookup, m_PathLaneScalar);
-
-                if (!laneLookup.HasComponent(laneEntity))
+                if (!pathwayDataLookup.HasComponent(prefabEntity))
                 {
                     continue;
                 }
 
-                ref Game.Net.CarLane lane = ref laneLookup.GetRefRW(laneEntity).ValueRW;
+                float desiredMs = pathwayDataLookup[prefabEntity].m_SpeedLimit;
 
-                if (lane.m_SpeedLimit != desiredMs || lane.m_DefaultSpeedLimit != desiredMs)
+                // Safety: never write 0 or negative speeds.
+                if (desiredMs <= 0f)
                 {
-                    lane.m_SpeedLimit = desiredMs;
-                    lane.m_DefaultSpeedLimit = desiredMs;
+                    continue;
+                }
+
+                DynamicBuffer<Game.Net.SubLane> subLanes = subLaneLookup[edgeEntity];
+
+                for (int j = 0; j < subLanes.Length; j++)
+                {
+                    Entity laneEntity = subLanes[j].m_SubLane;
+
+                    if (!laneLookup.HasComponent(laneEntity))
+                    {
+                        continue;
+                    }
+
+                    ref Game.Net.CarLane lane = ref laneLookup.GetRefRW(laneEntity).ValueRW;
+
+                    if (lane.m_SpeedLimit != desiredMs)
+                    {
+                        lane.m_SpeedLimit = desiredMs;
+                    }
+
+                    if (lane.m_DefaultSpeedLimit != desiredMs)
+                    {
+                        lane.m_DefaultSpeedLimit = desiredMs;
+                    }
                 }
             }
 
-            if (m_PathLaneIndex >= m_PathLaneEntities.Length)
+            if (m_PathEdgeIndex >= m_PathEdgeEntities.Length)
             {
                 DisposePathBatch();
             }
-        }
-
-        private float GetDesiredPathSpeedMs(Entity prefabEntity, ComponentLookup<PathwayData> pathwayDataLookup, float scalar)
-        {
-            if (pathwayDataLookup.HasComponent(prefabEntity))
-            {
-                return pathwayDataLookup[prefabEntity].m_SpeedLimit;
-            }
-
-            if (m_PathDesiredMsCache.TryGetValue(prefabEntity, out float cached))
-            {
-                return cached;
-            }
-
-            float desiredMs = 0f;
-
-            if (TryGetPathwayBase(prefabEntity, out PathwayPrefab pathwayPrefab))
-            {
-                float baseMs = pathwayPrefab.m_SpeedLimit * (1f / 3.6f);
-                desiredMs = (baseMs <= 0f) ? 0f : baseMs * math.max(0.01f, scalar);
-            }
-
-            m_PathDesiredMsCache[prefabEntity] = desiredMs;
-            return desiredMs;
         }
 
         private bool TryGetPathwayBase(Entity prefabEntity, out PathwayPrefab pathwayPrefab)

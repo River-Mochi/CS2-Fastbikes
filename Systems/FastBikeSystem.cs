@@ -9,8 +9,11 @@ namespace FastBikes
     using System.Collections.Generic;     // Dictionary
     using Unity.Entities;                 // Entity, RefRW, SystemAPI
     using Unity.Mathematics;              // math.*
+
     public sealed partial class FastBikeSystem : GameSystemBase
     {
+        // Dirty flags schedule work into the next OnUpdate.
+        // System remains disabled when no work is queued.
         private bool m_BikeDirty;
         private bool m_StabilityDirty;
         private bool m_PathDirty;
@@ -19,23 +22,26 @@ namespace FastBikes
         private PrefabSystem m_PrefabSystem = null!;
 
         // Key = bicycle prefab entity, Value = captured baseline SwayingData for this load session.
+        // Baseline must be per-load because prefab entities and data are recreated on world/city load.
         private readonly Dictionary<Entity, SwayingData> m_SwayingBaseline =
             new Dictionary<Entity, SwayingData>();
 
-        protected override void OnCreate()
+        protected override void OnCreate( )
         {
             base.OnCreate();
 
-            // On-demand only: system stays disabled unless a setting change or debug dump is requested.
+            // Run-once behavior: system stays disabled unless settings schedule work.
             Enabled = false;
+
             m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
 
             CreatePathQueries();
         }
 
-        protected override void OnDestroy()
+        protected override void OnDestroy( )
         {
             DisposePathBatch();
+
             base.OnDestroy();
         }
 
@@ -43,9 +49,12 @@ namespace FastBikes
         {
             base.OnGameLoadingComplete(purpose, mode);
 
+            // City load recreates prefab entities and runtime lanes.
+            // Cached baselines and batch snapshots must be cleared.
             m_SwayingBaseline.Clear();
             DisposePathBatch();
 
+            // Apply current settings on each city load (including city switching without restarting).
             if (Mod.Settings != null)
             {
                 ScheduleApplyAll();
@@ -56,7 +65,7 @@ namespace FastBikes
         // Scheduling
         // --------------------------------------------------------------------
 
-        public void ScheduleApplyAll()
+        public void ScheduleApplyAll( )
         {
             m_BikeDirty = true;
             m_StabilityDirty = true;
@@ -64,10 +73,11 @@ namespace FastBikes
             m_ResetVanilla = false;
 
             DisposePathBatch();
+
             Enabled = true;
         }
 
-        public void ScheduleApplyBicyclesAndStability()
+        public void ScheduleApplyBicyclesAndStability( )
         {
             m_BikeDirty = true;
             m_StabilityDirty = true;
@@ -76,16 +86,17 @@ namespace FastBikes
             Enabled = true;
         }
 
-        public void ScheduleApplyPaths()
+        public void ScheduleApplyPaths( )
         {
             m_PathDirty = true;
             m_ResetVanilla = false;
 
             DisposePathBatch();
+
             Enabled = true;
         }
 
-        public void ScheduleResetVanillaAll()
+        public void ScheduleResetVanillaAll( )
         {
             m_BikeDirty = true;
             m_StabilityDirty = true;
@@ -93,6 +104,7 @@ namespace FastBikes
             m_ResetVanilla = true;
 
             DisposePathBatch();
+
             Enabled = true;
         }
 
@@ -100,8 +112,9 @@ namespace FastBikes
         // Update
         // --------------------------------------------------------------------
 
-        protected override void OnUpdate()
+        protected override void OnUpdate( )
         {
+            // Fast exit: no scheduled work and no active batch.
             // Dump can run without apply (m_Dump lives in FastBikeSystem.Dump.cs).
             if (!m_BikeDirty && !m_StabilityDirty && !m_PathDirty && !m_ResetVanilla && !m_Dump && !IsPathBatchActive())
             {
@@ -112,6 +125,7 @@ namespace FastBikes
             Setting? setting = Mod.Settings;
             if (setting == null)
             {
+                // Settings not available: clear all work and stop.
                 m_BikeDirty = false;
                 m_StabilityDirty = false;
                 m_PathDirty = false;
@@ -136,6 +150,8 @@ namespace FastBikes
                         dampingScalar: setting.DampingScalar);
                 }
 
+                // Reset must win over all other state.
+                // Disable (EnableFastBikes=false) also forces vanilla.
                 bool forceVanilla = m_ResetVanilla || !setting.EnableFastBikes;
                 m_ResetVanilla = false;
 
@@ -143,31 +159,32 @@ namespace FastBikes
                 float stiffnessScalar = forceVanilla ? 1.0f : math.clamp(setting.StiffnessScalar, 0.30f, 5.0f);
                 float dampingScalar = forceVanilla ? 1.0f : math.clamp(setting.DampingScalar, 0.30f, 5.0f);
 
-                // Bicycle tuning
+                // Bicycle tuning (prefab entity writes; no structural changes).
                 if (m_BikeDirty)
                 {
                     m_BikeDirty = false;
                     ApplyBicycleTuning(speedScalar);
                 }
 
-                // Stability (swaying)
+                // Stability (prefab entity writes; per-load baselines).
                 if (m_StabilityDirty)
                 {
                     m_StabilityDirty = false;
                     ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
                 }
 
-                // Path updates (prefabs + compositions once, lanes batched)
+                // Path updates:
+                // - Prefab + composition writes are done once per apply.
+                // - Runtime lane speed updates are chunked over multiple updates using a persistent snapshot.
                 if (m_PathDirty && !IsPathBatchActive())
                 {
                     m_PathDirty = false;
 
                     float pathScalar = forceVanilla ? 1.0f : math.clamp(setting.PathSpeedScalar, 1.0f, 5.0f);
                     ApplyPathwayPrefabAndComposition(pathScalar);
-                    BeginPathLaneBatch(pathScalar);
+                    BeginPathLaneBatch();
                 }
 
-                // Continue lane batching if active
                 if (IsPathBatchActive())
                 {
                     ContinuePathLaneBatch();
@@ -175,15 +192,16 @@ namespace FastBikes
             }
             catch (System.Exception ex)
             {
-                Mod.WarnOnce("FB_SYSTEM_EXCEPTION", () =>
+                Mod.WarnOnce("FB_SYSTEM_EXCEPTION", ( ) =>
                     $"[FB] FastBikeSystem failed: {ex.GetType().Name}: {ex.Message}");
+
                 DisposePathBatch();
             }
             finally
             {
+                // Disable until next explicit schedule, unless an active batch remains.
                 if (!m_BikeDirty && !m_StabilityDirty && !m_PathDirty && !m_ResetVanilla && !m_Dump && !IsPathBatchActive())
                 {
-                    // Run-once behavior: disable until the next explicit schedule.
                     Enabled = false;
                 }
                 else
@@ -197,6 +215,8 @@ namespace FastBikes
         private int ApplyBicycleTuning(float speedScalar)
         {
             float speed = math.max(0f, speedScalar);
+
+            // Accel/brake scale uses sqrt() to avoid extreme values at high speed.
             float accelBrake = math.sqrt(math.max(0.01f, speed));
 
             int updated = 0;
@@ -246,6 +266,7 @@ namespace FastBikes
             {
                 SwayingData current = swayRW.ValueRO;
 
+                // Baseline capture: first seen value becomes baseline for this load session.
                 if (!m_SwayingBaseline.TryGetValue(prefabEntity, out SwayingData baseline))
                 {
                     baseline = current;
@@ -264,7 +285,10 @@ namespace FastBikes
 
                 SwayingData tuned = baseline;
 
+                // Higher stiffness reduces sway amplitude.
                 tuned.m_MaxPosition = baseline.m_MaxPosition / stiff;
+
+                // Higher damping settles sway faster.
                 tuned.m_DampingFactors = baseline.m_DampingFactors / damp;
                 tuned.m_DampingFactors = math.clamp(tuned.m_DampingFactors, 0.01f, 0.999f);
 
