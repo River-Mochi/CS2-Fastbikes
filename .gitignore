@@ -385,3 +385,7 @@ MemoryCaptures/
 # --- Project-specific ignores ---
 # keep docs local only
 docs/
+
+# Build-time safety backups created by Update-PublishConfig.ps1
+Properties/PublishConfiguration.xml.bak
+Properties/PublishConfiguration.xml.tmp

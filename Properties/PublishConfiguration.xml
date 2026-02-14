@@ -1,17 +1,17 @@
 <Publish>
-<!--This PublishConfiguration.xml is required to publish any mod on Paradox Mods website and is part of the CSII toolchain-->
-  <!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
-  <ModId Value="134067" />
-  <!--Name of the mod to display to players-->
-  <DisplayName Value="Fast Bikes" />
-  <!--Short description of the mod-->
-  <ShortDescription Value="Fast Bikes, Scooters, and Path Speeds :)" />
-  <!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
-  <!--LongDescription Value="Fast Bikes" /-->
-  <LongDescription>
+	<!--This PublishConfiguration.xml is required to publish any mod on Paradox Mods website and is part of the CSII toolchain-->
+	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
+	<ModId Value="134067" />
+	<!--Name of the mod to display to players-->
+	<DisplayName Value="Fast Bikes" />
+	<!--Short description of the mod-->
+	<ShortDescription Value="Fast Bikes, Scooters, and Path Speeds :)" />
+	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
+	<!--LongDescription Value="Fast Bikes" /-->
+	<LongDescription>
 Is your city stuck behind slow bikes? 🚴🚴🚗🚐🚚🚙
 
-🚲 Fast Bikes speeds up bicycles and scooters. 
+🚲 Fast Bikes speeds up bicycles and scooters.
 It applies a scalar and adjusts acceleration/braking so that high speeds don't look like "teleport + panic braking."
 
 🛣️ NEW: PATH speed limit - YES - now you can change bike paths (not the same as road speed limits)!
@@ -45,38 +45,39 @@ Report issues on Github / Forum / Discord.
 - Does not run continuously per-frame in cities to impact fps :)
 
 #### Credits
-- **River-mochi** - author
 
+- **River-mochi** - author
 
 tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life, change path speed, bike path.
 </LongDescription>
-<!--Thumbnail-->
-<Thumbnail Value="Properties/ThumbnailFastBikePath8.jpg" />
-<!--Screenshot, can be set multiple times-->
-<Screenshot Value="Properties/image10-Actions.jpg" />
-<Screenshot Value="Properties/image20-slowBike.jpg" />
-<Screenshot Value="Properties/image30-BikesParis.jpg" />
-<!--Tag, can be set multiple times-->
-<Tag Value="" />
-<!--Link to the forum post where the mod can be discussed-->
-<ForumLink Value="" />
-<!--Version of the mod-->
-<ModVersion Value="1.0.0" />
-<!--Recommended version of the base game to use the mod-->
-<GameVersion Value="1.5.*" />
-<!--Dependency for the mod, can be set multiple times-->
-<Dependency Id="" />
-<!--Required DLC, can be set multiple times. Supported values are "Landmark Buildings", "San Fransisco Set", "Beach Properties", "Urban Promenades", "Modern Architecture"-->
-<RequiredDLC Value="" />
-<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
-<ChangeLog>
+
+	<!--Thumbnail-->
+	<Thumbnail Value="Properties/ThumbnailFastBikePath8.jpg" />
+	<!--Screenshot, can be set multiple times-->
+	<Screenshot Value="Properties/image10-Actions.jpg" />
+	<Screenshot Value="Properties/image20-slowBike.jpg" />
+	<Screenshot Value="Properties/image30-BikesParis.jpg" />
+	<!--Tag, can be set multiple times-->
+	<Tag Value="" />
+	<!--Link to the forum post where the mod can be discussed-->
+	<ForumLink Value="" />
+	<!--Version of the mod-->
+	<ModVersion Value="1.0.2" />
+	<!--Recommended version of the base game to use the mod-->
+	<GameVersion Value="1.5.*" />
+	<!--Dependency for the mod, can be set multiple times-->
+	<Dependency Id="" />
+	<!--Required DLC, can be set multiple times. Supported values are "Landmark Buildings", "San Fransisco Set", "Beach Properties", "Urban Promenades", "Modern Architecture"-->
+	<RequiredDLC Value="" />
+	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
+	<ChangeLog>
 - Adds Path speed limit setting; this is separate from "road" speed limit mods which don't affect pedestrian or bicycle paths.
 - All Languages updated for changes.
 </ChangeLog>
-<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
-<ExternalLink Type="" Url="" />
-<ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
-<ExternalLink Type="github" Url="https://github.com/River-Mochi/CS2-Fastbikes" />
-<!--Supported values Public, Private, Unlisted-->
-<AccessLevel Value="Public" />
+	<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
+	<ExternalLink Type="" Url="" />
+	<ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
+	<ExternalLink Type="github" Url="https://github.com/River-Mochi/CS2-Fastbikes" />
+	<!--Supported values Public, Private, Unlisted-->
+	<AccessLevel Value="Public" />
 </Publish>

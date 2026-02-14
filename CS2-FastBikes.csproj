@@ -1,10 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<!-- File: FastBikes.csproj -->
 	<!-- Purpose: Build configuration for Fast Bikes mod using CSII toolchain.
-	     Notes: TargetFramework net48 and C# LangVersion 9.0 is set by toolchain Mod.props. -->
+	     Notes: TargetFramework net48, C# LangVersion 9.0, OutputType Library is set by toolchain Mod.props. -->
 	
 	<PropertyGroup>
-		<OutputType>Library</OutputType>
 		<Configurations>Debug;Release</Configurations>
 
 		<!-- The file where mod information required for publishing on PDX Mods is stored -->
@@ -91,12 +90,13 @@
 		</None>
 	</ItemGroup>
 
-	<Target Name="UpdatePublishConfigVersion" BeforeTargets="Build" Condition="'$(Configuration)' != 'Debug' AND Exists('$(PublishConfigurationPath)')">
+	<!-- AUTO UPDATE PublishConfiguration ModVersion using CSPROJ Version number -->
+	<Target Name="UpdatePublishConfigVersion"
+			BeforeTargets="Build"
+			Condition="'$(Configuration)' == 'Release' AND Exists('$(PublishConfigurationPath)')">
 
-		<!-- Update <ModVersion Value="..."/> in PublishConfiguration.xml -->
-		<XmlPoke XmlInputPath="$(PublishConfigurationPath)" Query="/Publish/ModVersion/@Value" Value="$(Version)" />
-
-		<Message Importance="High" Text="Updated $(PublishConfigurationPath) ModVersion to $(Version)" />
+		<Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\tools\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol crlf -LeftAlignBlocks" />
+		
 	</Target>
-	
+
 </Project>
