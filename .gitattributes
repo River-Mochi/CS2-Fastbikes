@@ -1,4 +1,5 @@
 # File: .gitattributes
+# controls checkout/commit behavior in Git
 # Policy:
 # - Treat text as text automatically.
 # - Check out LF for all text by default.
