@@ -1,43 +1,55 @@
-# .gitattributes
-# Repo policy: store normalized text; checkout LF everywhere by default.
+# File: .gitattributes
+# Policy:
+# - Git stores normalized LF in the repo/index for text.
+# - Windows/Visual Studio edited files use CRLF in the working tree.
+# - Cross-platform text stays LF in the working tree.
+
+# Default: treat files as text automatically; checkout as LF unless overridden below.
 * text=auto eol=lf
 
-# Keep these explicitly text (clarity)
-*.sln        text eol=lf
-*.csproj     text eol=lf
-*.props      text eol=lf
-*.targets    text eol=lf
-*.cs         text eol=lf
-*.csx        text eol=lf
-*.xml        text eol=lf
-*.config     text eol=lf
-*.editorconfig text eol=lf
+# --- Visual Studio / Windows-centric text: CRLF in working tree ---
+*.sln      text eol=crlf
+*.csproj   text eol=crlf
+*.props    text eol=crlf
+*.targets  text eol=crlf
+*.cs       text eol=crlf
+*.csx      text eol=crlf
+*.ps1      text eol=crlf
+*.cmd      text eol=crlf
+*.bat      text eol=crlf
 
-*.svg text eol=lf
+# --- Keep these LF in working tree (nice on GitHub / cross-platform tooling) ---
+*.md       text eol=lf
+*.json     text eol=lf
+*.yml      text eol=lf
+*.yaml     text eol=lf
+*.sh       text eol=lf
+*.bash     text eol=lf
+*.py       text eol=lf
 
-# Docs / data (LF is standard on GitHub)
-*.md         text eol=lf
-*.json       text eol=lf
-*.yml        text eol=lf
-*.yaml       text eol=lf
+# --- XML / config: pick one ---
+# If XML is edited in Visual Studio often, CRLF prevents VS from "fixing" it.
+*.xml      text eol=crlf
+*.config   text eol=crlf
+*.pubxml   text eol=crlf
 
-# Scripts (LF works fine on Windows for these)
-*.ps1        text eol=lf
-*.sh         text eol=lf
-*.bash       text eol=lf
+# --- Repo meta files: keep LF (avoids “mixed” warnings in these files themselves) ---
+.gitattributes text eol=lf
+.editorconfig  text eol=lf
+.gitignore     text eol=lf
 
-# Windows shell scripts that actually need CRLF
-*.bat        text eol=crlf
-*.cmd        text eol=crlf
+# --- Images / binaries (never touch line endings) ---
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.ico      binary
+*.zip      binary
+*.7z       binary
+*.dll      binary
+*.exe      binary
+*.pdb      binary
+*.pdn      binary
 
-# Binaries
-*.png        binary
-*.jpg        binary
-*.jpeg       binary
-*.gif        binary
-*.ico        binary
-*.zip        binary
-*.7z         binary
-*.dll        binary
-*.exe        binary
-*.pdb        binary
+# SVG: usually plain XML text. Keep as text if diffs are useful.
+*.svg      text eol=lf

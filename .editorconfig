@@ -12,9 +12,6 @@ insert_final_newline = true
 indent_style = space
 indent_size = 4
 
-[.editorconfig]
-end_of_line = lf
-
 
 # ---- General style ----
 dotnet_style_qualification_for_field = false:suggestion
@@ -108,6 +105,13 @@ dotnet_naming_rule.private_internal_const_fields_k_prefix.symbols = private_inte
 dotnet_naming_rule.private_internal_const_fields_k_prefix.style = k_prefix_pascal
 dotnet_naming_rule.private_internal_const_fields_k_prefix.severity = suggestion
 
+
+# Ensure VS saves these as LF too
 [.editorconfig]
 end_of_line = lf
 
+[*.ps1]
+end_of_line = lf
+
+[.gitattributes]
+end_of_line = lf
