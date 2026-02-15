@@ -2,7 +2,7 @@
 
 Fast Bikes speeds up **bicycles** and **electric scooters**.
 
-It applies a speed multiplier and scales acceleration/braking so higher speeds stay usable instead of looking like ìteleport + panic brakingî.
+It applies a speed multiplier and scales acceleration/braking so higher speeds stay usable instead of looking like ‚Äúteleport + panic braking‚Äù.
 
 ## Features
 - **Bike & scooter speed** multiplier (0.30x to 10.00x)
@@ -50,7 +50,7 @@ Scalar for **sway amplitude**.
 - Higher = less leaning / tighter look
 - Lower = more wobble
 
-Recommended at high speed: **1.25ñ1.75**  
+Recommended at high speed: **1.25‚Äì1.75**  
 For more wobble: **< 0.75**
 
 ### Damping
@@ -59,7 +59,7 @@ How quickly sway settles.
 - Higher = oscillation dies faster
 - 1.0 = game defaults
 
-Recommended at high speed: **1.25ñ2.0+**  
+Recommended at high speed: **1.25‚Äì2.0+**  
 For more wobble: **< 0.75**
 
 ### Path speed limit
@@ -94,4 +94,4 @@ Scales speed limits for **paths** (not roads).
 - GitHub: https://github.com/River-Mochi/CS2-Fastbikes  
 
 ## Credits
-**River-mochi** ó mod author
+**River-mochi** ‚Äî mod author
