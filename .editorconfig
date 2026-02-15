@@ -108,7 +108,6 @@ dotnet_naming_rule.private_internal_const_fields_k_prefix.symbols = private_inte
 dotnet_naming_rule.private_internal_const_fields_k_prefix.style = k_prefix_pascal
 dotnet_naming_rule.private_internal_const_fields_k_prefix.severity = suggestion
 
-
 [.editorconfig]
 end_of_line = lf
 

@@ -13,6 +13,8 @@
 *.config     text eol=lf
 *.editorconfig text eol=lf
 
+*.svg text eol=lf
+
 # Docs / data (LF is standard on GitHub)
 *.md         text eol=lf
 *.json       text eol=lf
@@ -34,7 +36,6 @@
 *.jpeg       binary
 *.gif        binary
 *.ico        binary
-*.svg        binary
 *.zip        binary
 *.7z         binary
 *.dll        binary
