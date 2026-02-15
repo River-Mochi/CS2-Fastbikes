@@ -1,17 +1,20 @@
 # File: .editorconfig  https://editorconfig.org
+# Controls how editor saves files.
 
 # top-most EditorConfig file
 root = true
 
 # All files
 [*]
-
+end_of_line = lf
 charset = utf-8
-# indent_size intentionally not specified in this section.
-indent_style = space # Use soft tabs (spaces) for indentation.
 insert_final_newline = true
 trim_trailing_whitespace = true
+# indent_size intentionally not specified in this section.
+indent_style = space # Use soft tabs (spaces) for indentation.
 
+[*.{bat,cmd}]
+end_of_line = crlf
 
 # JSON files
 [*.json]
