@@ -11,8 +11,8 @@ param(
   # Version string from csproj <Version>
   [Parameter(Mandatory = $true)][string]$Version,
 
-  # Enforced line ending style
-  [ValidateSet('crlf','lf')][string]$Eol = 'crlf',
+  # Enforced line ending style == PICK ONE ==
+  [ValidateSet('crlf','lf')][string]$Eol = 'lf',
 
   # Optional flag: if present, strip leading spaces/tabs *inside* LongDescription + ChangeLog blocks only
   [switch]$LeftAlignBlocks

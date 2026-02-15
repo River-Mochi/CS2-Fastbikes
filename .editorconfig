@@ -76,7 +76,7 @@ dotnet_naming_style.k_prefix_pascal.required_capitalization = pascal_case
 dotnet_naming_style.camel.required_capitalization = camel_case
 
 # =========================
-# Rules (symbols × styles)
+# Rules (symbols Ã— styles)
 # =========================
 # Interfaces: IName
 dotnet_naming_rule.interfaces_must_start_with_i.symbols = interfaces
@@ -112,8 +112,3 @@ dotnet_naming_rule.private_internal_const_fields_k_prefix.severity = suggestion
 [.editorconfig]
 end_of_line = lf
 
-
-[*.xml]
-end_of_line = crlf
-insert_final_newline = true
-charset = utf-8
