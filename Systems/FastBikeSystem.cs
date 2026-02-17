@@ -5,7 +5,9 @@ namespace FastBikes
 {
     using Colossal.Serialization.Entities; // Purpose
     using Game;                           // GameSystemBase, GameMode
+    using Game.Common;                    // Deleted, Overridden
     using Game.Prefabs;                   // PrefabSystem, PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, SwayingData
+    using Game.Tools;                     // Temp
     using System.Collections.Generic;     // Dictionary
     using Unity.Entities;                 // Entity, RefRW, SystemAPI
     using Unity.Mathematics;              // math.*
@@ -34,8 +36,6 @@ namespace FastBikes
             Enabled = false;
 
             m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
-
-            CreatePathQueries();
         }
 
         protected override void OnDestroy( )
@@ -223,7 +223,7 @@ namespace FastBikes
 
             foreach ((RefRW<CarData> carRW, Entity prefabEntity) in SystemAPI.Query<RefRW<CarData>>()
                 .WithAll<PrefabData, BicycleData>()
-                .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp, Game.Common.Overridden>()
                 .WithEntityAccess())
             {
                 if (!TryGetBicycleBase(prefabEntity, out BicyclePrefab bicyclePrefab))
@@ -261,7 +261,7 @@ namespace FastBikes
 
             foreach ((RefRW<SwayingData> swayRW, Entity prefabEntity) in SystemAPI.Query<RefRW<SwayingData>>()
                 .WithAll<PrefabData, BicycleData>()
-                .WithNone<Game.Common.Deleted, Game.Tools.Temp>()
+                .WithNone<Deleted, Temp, Overridden>()
                 .WithEntityAccess())
             {
                 SwayingData current = swayRW.ValueRO;

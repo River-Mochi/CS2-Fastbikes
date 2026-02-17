@@ -11,14 +11,13 @@ namespace FastBikes
     using Unity.Entities;            // World
     using UnityEngine;               // Application.OpenURL
 
-
     [FileLocation("ModsSettings/FastBikes/FastBikes")]    // Settings file path
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(
-        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsPathSpeedGrp,
+        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsStatusGrp, ActionsPathSpeedGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     [SettingsUIShowGroupName(
-        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsPathSpeedGrp,
+        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsStatusGrp, ActionsPathSpeedGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     public sealed class Setting : ModSetting
     {
@@ -28,6 +27,7 @@ namespace FastBikes
         public const string ActionsSpeedGrp = "Speed";
         public const string ActionsStabilityGrp = "Stability";
         public const string ActionsResetGrp = "Reset";
+        public const string ActionsStatusGrp = "Status";
 
         // PathSpeed group at bottom of Actions.
         public const string ActionsPathSpeedGrp = "PathSpeed";
@@ -38,7 +38,6 @@ namespace FastBikes
 
         private const string UrlParadox =
             "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
-
 
         private const float Vanilla = 1.0f;   // game default multipliers.
 
@@ -55,12 +54,12 @@ namespace FastBikes
 
         public Setting(IMod mod) : base(mod)
         {
-            EnableFastBikes     = DefaultEnabled;
-            SpeedScalar         = DefaultSpeed;
-            StiffnessScalar     = DefaultStiffness;
-            DampingScalar       = DefaultDamping;
+            EnableFastBikes = DefaultEnabled;
+            SpeedScalar = DefaultSpeed;
+            StiffnessScalar = DefaultStiffness;
+            DampingScalar = DefaultDamping;
 
-            PathSpeedScalar     = DefaultPathSpeedScalar;
+            PathSpeedScalar = DefaultPathSpeedScalar;
         }
 
         // -------------------------------------------------
@@ -69,18 +68,23 @@ namespace FastBikes
 
         [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
         [SettingsUISetter(typeof(Setting), nameof(SetEnableFastBikes))]
-        public bool EnableFastBikes { get; set; }
+        public bool EnableFastBikes
+        {
+            get; set;
+        }
 
         // ------------------------
         // Actions: Speed
         // ------------------------
 
-        // SettingsUIHideByCondition(..., invert: true) hides controls when the condition is false.
         [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
         [SettingsUISlider(min = 0.30f, max = 10.00f, step = 0.10f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
         [SettingsUISetter(typeof(Setting), nameof(SetSpeedScalar))]
-        public float SpeedScalar { get; set; }
+        public float SpeedScalar
+        {
+            get; set;
+        }
 
         // ------------------------
         // Actions: Stability
@@ -90,13 +94,19 @@ namespace FastBikes
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
         [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.10f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
         [SettingsUISetter(typeof(Setting), nameof(SetStiffnessScalar))]
-        public float StiffnessScalar { get; set; }
+        public float StiffnessScalar
+        {
+            get; set;
+        }
 
         [SettingsUISection(ActionsTab, ActionsStabilityGrp)]
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
         [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.10f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
         [SettingsUISetter(typeof(Setting), nameof(SetDampingScalar))]
-        public float DampingScalar { get; set; }
+        public float DampingScalar
+        {
+            get; set;
+        }
 
         // ------------------------
         // Actions: Reset buttons
@@ -137,6 +147,42 @@ namespace FastBikes
         }
 
         // -----------------------------
+        // Actions: Status (read-only)
+        // -----------------------------
+
+        [SettingsUISection(ActionsTab, ActionsStatusGrp)]
+        public string StatusSummary1
+        {
+            get
+            {
+                try
+                {
+                    return FastBikeStatus.BikesRow;
+                }
+                catch
+                {
+                    return "Status not loaded.";
+                }
+            }
+        }
+
+        [SettingsUISection(ActionsTab, ActionsStatusGrp)]
+        public string StatusSummary2
+        {
+            get
+            {
+                try
+                {
+                    return FastBikeStatus.CarsRow;
+                }
+                catch
+                {
+                    return "Status not loaded.";
+                }
+            }
+        }
+
+        // -----------------------------
         // Actions: Path speed
         // -----------------------------
 
@@ -144,7 +190,10 @@ namespace FastBikes
         [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
         [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
         [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
-        public float PathSpeedScalar { get; set; }
+        public float PathSpeedScalar
+        {
+            get; set;
+        }
 
         // ------------------------
         // About: Info
@@ -178,7 +227,6 @@ namespace FastBikes
                 }
                 catch (Exception)
                 {
-                    // Silent catch; worst case the link does nothing.
                 }
             }
         }
@@ -206,7 +254,7 @@ namespace FastBikes
         // Defaults
         // --------------------------------------------------------------------
 
-        public override void SetDefaults()
+        public override void SetDefaults( )
         {
             EnableFastBikes = DefaultEnabled;
             SpeedScalar = DefaultSpeed;
@@ -220,7 +268,7 @@ namespace FastBikes
         // Helpers
         // --------------------------------------------------------------------
 
-        private static World? GetWorld()
+        private static World? GetWorld( )
         {
             World world = World.DefaultGameObjectInjectionWorld;
             if (world == null || !world.IsCreated)
@@ -231,7 +279,7 @@ namespace FastBikes
             return world;
         }
 
-        private static FastBikeSystem? GetSystem()
+        private static FastBikeSystem? GetSystem( )
         {
             World? world = GetWorld();
             if (world == null)
@@ -242,27 +290,27 @@ namespace FastBikes
             return world.GetOrCreateSystemManaged<FastBikeSystem>();
         }
 
-        private static void ScheduleApplyAll()
+        private static void ScheduleApplyAll( )
         {
             GetSystem()?.ScheduleApplyAll();
         }
 
-        private static void ScheduleApplyBicyclesAndStability()
+        private static void ScheduleApplyBicyclesAndStability( )
         {
             GetSystem()?.ScheduleApplyBicyclesAndStability();
         }
 
-        private static void ScheduleApplyPaths()
+        private static void ScheduleApplyPaths( )
         {
             GetSystem()?.ScheduleApplyPaths();
         }
 
-        private static void ScheduleResetVanillaAll()
+        private static void ScheduleResetVanillaAll( )
         {
             GetSystem()?.ScheduleResetVanillaAll();
         }
 
-        private static void RequestDump()
+        private static void RequestDump( )
         {
             GetSystem()?.ScheduleDump();
         }
@@ -270,10 +318,6 @@ namespace FastBikes
         // ------------------------------------------------
         // UI setter handlers
         // ------------------------------------------------
-        // - Called by Options UI binding system.
-        // - Slider setters are invoked when the value is committed (updateOnDragEnd=true), not every drag tick.
-        // - AutomaticSettings applies the property value after this callback, so setters only schedule work.
-        // - Epsilon guard avoids scheduling extra applies for tiny/no-op float changes.
 
         private void SetEnableFastBikes(bool value)
         {
@@ -282,7 +326,6 @@ namespace FastBikes
                 return;
             }
 
-            // AutomaticSettings sets the property after this callback.
             if (value)
             {
                 ScheduleApplyAll();
@@ -345,7 +388,7 @@ namespace FastBikes
             }
         }
 
-        private void DoResetToVanilla()
+        private void DoResetToVanilla( )
         {
             SpeedScalar = Vanilla;
             StiffnessScalar = Vanilla;
@@ -353,12 +396,11 @@ namespace FastBikes
 
             PathSpeedScalar = Vanilla;
 
-         
-            ApplyAndSave();             // Bool buttons do not auto-save; persist explicitly.
-            ScheduleResetVanillaAll();  // Explicit vanilla restore is used to revert exactly to cached baselines.
+            ApplyAndSave();
+            ScheduleResetVanillaAll();
         }
 
-        private void DoResetToModDefaults()
+        private void DoResetToModDefaults( )
         {
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
@@ -366,8 +408,7 @@ namespace FastBikes
 
             PathSpeedScalar = DefaultPathSpeedScalar;
 
-            ApplyAndSave();             // Bool buttons do not auto-save; persist explicitly.
-
+            ApplyAndSave();
             ScheduleApplyAll();
         }
     }

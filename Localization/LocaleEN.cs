@@ -4,6 +4,7 @@
 namespace FastBikes
 {
     using Colossal; // IDictionarySource, IDictionaryEntryError
+    using Colossal.IO.AssetDatabase.Internal;
     using System.Collections.Generic; // IEnumerable, Dictionary, KeyValuePair
 
     public sealed class LocaleEN : IDictionarySource
@@ -102,6 +103,27 @@ namespace FastBikes
                     "then all that happens is existing paths keep their current speed limits, but new paths will have vanilla default speed limits."
 
                 },
+ 
+                // Status fields
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStatusGrp), "Status Personal Vehicles" },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary1)), "Bikes group" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary1)),
+                    "Percent = share of ALL personal vehicles.\n" +
+                    "Bikes+scooters are gated by **BicycleData** on the prefab."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "Cars group" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary2)),
+                    "Percent = share of ALL personal vehicles.\n" +
+                    "Scan runs only while Options is open."
+                },
+
+                { "FAST_STATUS_NOT_LOADED", "Status not loaded." },
+                { "FAST_STATS_NOT_AVAIL", "No city... ¯\\_(ツ)_/¯ ...No stats" },
+
+                { "FAST_STATS_BIKES_ROW1", "{0}% ({1}) bikes | {2}% ({3}) scooter |  {4} / {5} parked/total" },
+                { "FAST_STATS_CARS_ROW2",  "{0}% ({1}) runs | {2} / {3} parked/total | updated {4}" },
 
                 // About: Info
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
