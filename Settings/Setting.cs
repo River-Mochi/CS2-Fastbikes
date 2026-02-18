@@ -155,14 +155,15 @@ namespace FastBikes
         {
             get
             {
+                // Refresh cache when Options UI asks for the string.
+                // Frame guard inside RefreshIfNeeded prevents double work.
                 try
                 {
-                    return FastBikeStatus.BikesRow;
+                    FastBikeStatus.RefreshIfNeeded();
                 }
-                catch
-                {
-                    return "Status not loaded.";
-                }
+                catch { }
+                // Always return a non-null string (Options UI getters must never throw).
+                return FastBikeStatus.BikesRow ?? string.Empty;
             }
         }
 
@@ -171,14 +172,13 @@ namespace FastBikes
         {
             get
             {
+                // Same refresh call for row2; frame guard prevents repeated snapshot.
                 try
                 {
-                    return FastBikeStatus.CarsRow;
+                    FastBikeStatus.RefreshIfNeeded();
                 }
-                catch
-                {
-                    return "Status not loaded.";
-                }
+                catch { }
+                return FastBikeStatus.CarsRow ?? string.Empty;
             }
         }
 

@@ -1,35 +1,46 @@
 // File: Systems/FastBikeSystem.Dump.cs
-// Purpose: Dump bicycle/scooter prefab values (authoring + current prefab-entity data) and path prefab/composition speed limits.
+// Purpose: Dump bicycle-group prefab names + patch-day sanity + Scooter01 instance count + sample entity ids.
 // Notes:
 // - Dump is read-only.
-// - No runtime lane (Game.Net.*) scans are performed here; runtime verification remains via SE mod.
-// - Output is summary-first and logs per-item only when mismatches are detected.
+// - No Burst usage.
+// - No chunk jobs.
+// - Debug-only mismatch examples; Release logs counts only.
 
 namespace FastBikes
 {
-    using Game.Common;        // Deleted, Overridden
-    using Game.Prefabs;       // PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, SwayingData, PathwayPrefab, PathwayData, PathwayComposition, PrefabRef, NetCompositionData, RoadData
-    using Game.Tools;         // Temp
-    using System;             // StringComparison
-    using Unity.Entities;     // Entity, RefRO, SystemAPI
-    using Unity.Mathematics;  // math.*
+    using Colossal.Entities;          // EntityManager
+    using Game.Common;                // Deleted, Overridden
+    using Game.Prefabs;               // PrefabBase, BicyclePrefab, BicycleData, CarData, SwayingData, PathwayPrefab, PathwayData, PathwayComposition, PrefabData, PrefabRef, NetCompositionData, RoadData
+    using Game.Tools;                 // Temp
+    using Game.Vehicles;              // Car, ParkedCar
+    using System;
+    using System.Collections.Generic;
+    using Unity.Entities;
+    using Unity.Mathematics;
+    using UnityEngine.Profiling;
 
     public sealed partial class FastBikeSystem
     {
         private bool m_Dump;
 
-        // Mismatch thresholds.
-        private const float kSpeedMismatchPct = 0.05f;   // 5%
-        private const float kAccelMismatchPct = 0.10f;   // 10%
-        private const float kBrakeMismatchPct = 0.10f;   // 10%
+        private static readonly string[] s_ExpectedBicycleGroupNames =
+        {
+            "Bicycle01",
+            "Bicycle02",
+            "Bicycle03",
+            "ElectricScooter01",
+        };
 
-        private const float kSwayMaxPosMismatchPct = 0.10f;   // 10%
-        private const float kSwayDampingMismatchPct = 0.15f;  // 15%
+        private const float kSpeedMismatchPct = 0.05f;
+        private const float kAccelMismatchPct = 0.10f;
+        private const float kBrakeMismatchPct = 0.10f;
 
-        private const float kPathMismatchPct = 0.02f;         // 2%
-        private const float kCompAbsMismatchMs = 0.10f;       // ~0.36 km/h
+        private const float kSwayMaxPosMismatchPct = 0.10f;
+        private const float kSwayDampingMismatchPct = 0.15f;
 
-        // Limits log spam; summary still reports totals.
+        private const float kPathMismatchPct = 0.05f;
+        private const float kCompAbsMismatchMs = 0.10f;
+
         private const int kMaxMismatchExamples = 12;
 
         public void ScheduleDump( )
@@ -45,6 +56,8 @@ namespace FastBikes
         private static float KmhToMph(float kmh) => kmh * 0.621371f;
 
         private static string F3(float3 v) => $"({v.x:0.###},{v.y:0.###},{v.z:0.###})";
+
+        private static string FormatIndexVersion(Entity e) => $"{e.Index}:{e.Version}";
 
         private static bool IsScooterName(string name)
         {
@@ -85,6 +98,7 @@ namespace FastBikes
             return false;
         }
 
+        // Signature must match call site using named args.
         private void DumpBicyclePrefabs(bool enableFastBikes, float speedScalar, float stiffnessScalar, float dampingScalar)
         {
             float effectiveSpeed = enableFastBikes ? math.clamp(speedScalar, 0.30f, 10.0f) : 1.0f;
@@ -102,15 +116,23 @@ namespace FastBikes
                 pathScalar = math.clamp(rawPathSpeed, 1.0f, 5.0f);
             }
 
+            bool pathBatchActive = IsPathBatchActive();
+            string pathBatchLine = pathBatchActive
+                ? $"Path lane batch: RUNNING (EdgesRemaining={m_PathEdgeEntities.Length - m_PathEdgeIndex}/{m_PathEdgeEntities.Length})"
+                : "Path lane batch: IDLE (no queued work)";
+
             Mod.LogSafe(( ) =>
-                "==================== [FB] DUMP SUMMARY ====================\n" +
+                "\n==================== [FB] Scalar SUMMARY ====================\n" +
+                "Meaning: quick sanity of scalars + group membership + patch/custom changes.\n" +
                 $"EnableFastBikes={enableFastBikes}\n" +
-                $"BikeSpeedScalar={speedScalar:0.##} (Effective={effectiveSpeed:0.##})\n" +
-                $"StiffnessScalar={stiffnessScalar:0.##} (Effective={effectiveStiff:0.##})\n" +
-                $"DampingScalar={dampingScalar:0.##} (Effective={effectiveDamp:0.##})\n" +
-                $"PathSpeedScalar={rawPathSpeed:0.##} (Effective={pathScalar:0.##})\n" +
-                $"PathLaneBatchActive={IsPathBatchActive()}" +
-                (IsPathBatchActive() ? $" (EdgesRemaining={m_PathEdgeEntities.Length - m_PathEdgeIndex}/{m_PathEdgeEntities.Length})" : string.Empty));
+                $"Bike Speed Scalar={speedScalar:0.##} (Effective={effectiveSpeed:0.##})\n" +
+                $"Stiffness Scalar={stiffnessScalar:0.##} (Effective={effectiveStiff:0.##})\n" +
+                $"Damping Scalar={dampingScalar:0.##} (Effective={effectiveDamp:0.##})\n" +
+                $"Path Speed Scalar={rawPathSpeed:0.##} (Effective={pathScalar:0.##})\n" +
+                pathBatchLine);
+
+            var groupNames = new List<string>(16);
+            var groupNameSet = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
 
             int total = 0;
             int bikes = 0;
@@ -127,12 +149,14 @@ namespace FastBikes
             int mismatchSwayPos = 0;
             int mismatchSwayDamp = 0;
 
-            int examples = 0;
+#if DEBUG
+            int examplesLogged = 0;
+#endif
 
-            foreach ((Unity.Entities.RefRO<Game.Prefabs.PrefabData> _, Unity.Entities.Entity prefabEntity) in SystemAPI
-                .Query<Unity.Entities.RefRO<Game.Prefabs.PrefabData>>()
-                .WithAll<Game.Prefabs.BicycleData>()
-                .WithNone<Game.Common.Deleted, Game.Tools.Temp, Game.Common.Overridden>()
+            foreach ((RefRO<PrefabData> _, Entity prefabEntity) in SystemAPI
+                .Query<RefRO<PrefabData>>()
+                .WithAll<BicycleData>()
+                .WithNone<Deleted, Temp, Overridden>()
                 .WithEntityAccess())
             {
                 total++;
@@ -140,11 +164,16 @@ namespace FastBikes
                 string name = "(PrefabBase not found)";
                 string typeName = "(unknown)";
 
-                bool hasPrefabBase = m_PrefabSystem.TryGetPrefab(prefabEntity, out Game.Prefabs.PrefabBase prefabBase);
+                bool hasPrefabBase = m_PrefabSystem.TryGetPrefab(prefabEntity, out PrefabBase prefabBase);
                 if (hasPrefabBase)
                 {
-                    name = prefabBase.name;
+                    name = prefabBase.name ?? "(null name)";
                     typeName = prefabBase.GetType().Name;
+
+                    if (groupNameSet.Add(name))
+                    {
+                        groupNames.Add(name);
+                    }
                 }
                 else
                 {
@@ -153,16 +182,12 @@ namespace FastBikes
 
                 bool isScooter = IsScooterName(name);
                 if (isScooter)
-                {
                     scooters++;
-                }
                 else
-                {
                     bikes++;
-                }
 
-                bool hasAuthoring = hasPrefabBase && prefabBase is Game.Prefabs.BicyclePrefab;
-                Game.Prefabs.BicyclePrefab bikeAuthoring = hasAuthoring ? (Game.Prefabs.BicyclePrefab)prefabBase : null!;
+                bool hasAuthoring = hasPrefabBase && prefabBase is BicyclePrefab;
+                BicyclePrefab bikeAuthoring = hasAuthoring ? (BicyclePrefab)prefabBase : null!;
 
                 float expectedMaxMs = 0f;
                 float expectedAccel = 0f;
@@ -176,8 +201,8 @@ namespace FastBikes
                     expectedBrake = bikeAuthoring.m_Braking * effectiveAccelBrake;
                 }
 
-                bool hasCarData = SystemAPI.HasComponent<Game.Prefabs.CarData>(prefabEntity);
-                Game.Prefabs.CarData car = default;
+                bool hasCarData = SystemAPI.HasComponent<CarData>(prefabEntity);
+                CarData car = default;
 
                 bool speedMismatch = false;
                 bool accelMismatch = false;
@@ -185,7 +210,7 @@ namespace FastBikes
 
                 if (hasCarData)
                 {
-                    car = SystemAPI.GetComponent<Game.Prefabs.CarData>(prefabEntity);
+                    car = SystemAPI.GetComponent<CarData>(prefabEntity);
 
                     if (hasAuthoring)
                     {
@@ -199,11 +224,11 @@ namespace FastBikes
                     missingCarData++;
                 }
 
-                bool hasSway = SystemAPI.HasComponent<Game.Prefabs.SwayingData>(prefabEntity);
-                Game.Prefabs.SwayingData sw = default;
+                bool hasSway = SystemAPI.HasComponent<SwayingData>(prefabEntity);
+                SwayingData sw = default;
 
                 bool baselineCached = false;
-                Game.Prefabs.SwayingData baselineSw = default;
+                SwayingData baselineSw = default;
 
                 bool swayMaxPosMismatch = false;
                 bool swayDampingMismatch = false;
@@ -213,7 +238,7 @@ namespace FastBikes
 
                 if (hasSway)
                 {
-                    sw = SystemAPI.GetComponent<Game.Prefabs.SwayingData>(prefabEntity);
+                    sw = SystemAPI.GetComponent<SwayingData>(prefabEntity);
 
                     baselineCached = m_SwayingBaseline.TryGetValue(prefabEntity, out baselineSw);
                     if (!baselineCached)
@@ -253,53 +278,45 @@ namespace FastBikes
 
                 mismatchAny++;
                 if (speedMismatch)
-                {
                     mismatchSpeed++;
-                }
                 if (accelMismatch)
-                {
                     mismatchAccel++;
-                }
                 if (brakeMismatch)
-                {
                     mismatchBrake++;
-                }
                 if (swayMaxPosMismatch)
-                {
                     mismatchSwayPos++;
-                }
                 if (swayDampingMismatch)
-                {
                     mismatchSwayDamp++;
-                }
 
-                if (examples >= kMaxMismatchExamples)
+#if DEBUG
+                if (examplesLogged >= kMaxMismatchExamples)
                 {
                     continue;
                 }
 
-                examples++;
+                examplesLogged++;
 
                 string kind = isScooter ? "Scooter" : "Bicycle";
 
-                Mod.LogSafe(( ) =>
-                    "-------------------- [FB] BIKE MISMATCH --------------------\n" +
-                    $"Kind={kind} Name='{name}' Type={typeName} Entity={prefabEntity.Index}:{prefabEntity.Version}");
+                Mod.LogSafe(() =>
+                    "-------------------- [FB] BIKE MISMATCH (DEBUG) --------------------\n" +
+                    "Meaning: mismatch suggests overwrite-after-run, mod not running, or CO behavior change.\n" +
+                    $"Kind={kind} Name='{name}' Type={typeName} Entity={FormatIndexVersion(prefabEntity)}");
 
                 if (hasAuthoring)
                 {
-                    Mod.LogSafe(( ) =>
+                    Mod.LogSafe(() =>
                         $"AuthoringMax={bikeAuthoring.m_MaxSpeed:0.###} km/h ({KmhToMph(bikeAuthoring.m_MaxSpeed):0.###} mph)\n" +
                         $"ExpectedMax≈{MsToKmh(expectedMaxMs):0.###} km/h ({MsToMph(expectedMaxMs):0.###} mph)");
                 }
                 else
                 {
-                    Mod.LogSafe(( ) => "Authoring: (missing or not BicyclePrefab)");
+                    Mod.LogSafe(() => "Authoring: (missing or not BicyclePrefab)");
                 }
 
                 if (hasCarData && hasAuthoring)
                 {
-                    Mod.LogSafe(( ) =>
+                    Mod.LogSafe(() =>
                         $"CarDataMax={MsToKmh(car.m_MaxSpeed):0.###} km/h ({MsToMph(car.m_MaxSpeed):0.###} mph)\n" +
                         $"Diffs: Speed={FormatPct(RelativeDiff(expectedMaxMs, car.m_MaxSpeed))}, " +
                         $"Accel={FormatPct(RelativeDiff(expectedAccel, car.m_Acceleration))}, " +
@@ -307,92 +324,292 @@ namespace FastBikes
                 }
                 else if (!hasCarData)
                 {
-                    Mod.LogSafe(( ) => "CarData: (missing)");
+                    Mod.LogSafe(() => "CarData: (missing)");
                 }
 
                 if (hasSway)
                 {
-                    Mod.LogSafe(( ) =>
+                    Mod.LogSafe(() =>
                         $"SwayBaselineCached={baselineCached}\n" +
                         $"Baseline MaxPos={F3(baselineSw.m_MaxPosition)} Damping={F3(baselineSw.m_DampingFactors)}\n" +
                         $"Current  MaxPos={F3(sw.m_MaxPosition)} Damping={F3(sw.m_DampingFactors)}");
 
                     if (baselineCached)
                     {
-                        Mod.LogSafe(( ) =>
+                        Mod.LogSafe(() =>
                             $"Expected MaxPos≈{F3(expectedMaxPos)} Damping≈{F3(expectedDamping)}\n" +
                             $"Diffs: MaxPos(max)={FormatPct(RelativeDiffMax(expectedMaxPos, sw.m_MaxPosition))}, " +
                             $"Damping(max)={FormatPct(RelativeDiffMax(expectedDamping, sw.m_DampingFactors))}");
                     }
                 }
+#endif
+            }
+
+            groupNames.Sort(System.StringComparer.OrdinalIgnoreCase);
+
+            var missingExpected = new List<string>(4);
+            for (int i = 0; i < s_ExpectedBicycleGroupNames.Length; i++)
+            {
+                if (!groupNameSet.Contains(s_ExpectedBicycleGroupNames[i]))
+                {
+                    missingExpected.Add(s_ExpectedBicycleGroupNames[i]);
+                }
+            }
+
+            var extras = new List<string>(16);
+            for (int i = 0; i < groupNames.Count; i++)
+            {
+                if (!IsExpectedBicycleGroupName(groupNames[i]))
+                {
+                    extras.Add(groupNames[i]);
+                }
+            }
+
+            bool clean =
+                missingExpected.Count == 0 &&
+                extras.Count == 0 &&
+                missingPrefabBase == 0 &&
+                missingCarData == 0 &&
+                missingSwaying == 0 &&
+                mismatchAny == 0;
+
+#if !DEBUG
+            if (clean)
+            {
+                Mod.LogSafe(( ) =>
+                    $"[FB] BIKE SUMMARY: ALL GOOD (Total={total}, Bicycles={bikes}, Scooters={scooters}).");
+            }
+            else
+            {
+                Mod.LogSafe(( ) =>
+                {
+                    var sb = new System.Text.StringBuilder();
+                    sb.AppendLine("==================== [FB] BIKE SUMMARY ====================");
+                    sb.AppendLine("Meaning: group membership + missing/extra names + mismatch counts.");
+                    sb.AppendLine($"Total={total} (Bicycles={bikes}, Scooters={scooters})");
+                    sb.AppendLine($"BicycleGroupNames={string.Join(", ", groupNames)}");
+
+                    if (missingExpected.Count > 0)
+                    {
+                        sb.AppendLine($"WARNING MissingExpectedNames={string.Join(", ", missingExpected)}");
+                    }
+
+                    if (extras.Count > 0)
+                    {
+                        sb.AppendLine($"NOTE ExtraNames(patch/custom assets)={string.Join(", ", extras)}");
+                    }
+
+                    sb.AppendLine($"MissingPrefabBase={missingPrefabBase}, MissingCarData={missingCarData}, MissingSwayingData={missingSwaying}");
+                    sb.AppendLine($"MismatchAny={mismatchAny} (Speed={mismatchSpeed}, Accel={mismatchAccel}, Brake={mismatchBrake}, SwayMaxPos={mismatchSwayPos}, SwayDamping={mismatchSwayDamp})");
+                    sb.AppendLine("Release build: mismatch details suppressed (counts only).");
+
+                    return sb.ToString();
+                });
+            }
+#else
+            Mod.LogSafe(() =>
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("==================== [FB] BIKE SUMMARY ====================");
+                sb.AppendLine("Meaning: group membership + missing/extra names + mismatch counts.");
+                sb.AppendLine($"Total={total} (Bicycles={bikes}, Scooters={scooters})");
+                sb.AppendLine($"BicycleGroupNames={string.Join(", ", groupNames)}");
+
+                if (missingExpected.Count > 0)
+                {
+                    sb.AppendLine($"WARNING MissingExpectedNames={string.Join(", ", missingExpected)}");
+                }
+
+                if (extras.Count > 0)
+                {
+                    sb.AppendLine($"NOTE ExtraNames(patch/custom assets)={string.Join(", ", extras)}");
+                }
+
+                sb.AppendLine($"MissingPrefabBase={missingPrefabBase}, MissingCarData={missingCarData}, MissingSwayingData={missingSwaying}");
+                sb.AppendLine($"MismatchAny={mismatchAny} (Speed={mismatchSpeed}, Accel={mismatchAccel}, Brake={mismatchBrake}, SwayMaxPos={mismatchSwayPos}, SwayDamping={mismatchSwayDamp})");
+                sb.AppendLine($"DEBUG MismatchExamplesLogged={examplesLogged}/{kMaxMismatchExamples}");
+
+                return sb.ToString();
+            });
+#endif
+
+            DumpPathSpeedReport(pathScalar);
+            DumpScooter01Report();
+        }
+
+        private static bool IsExpectedBicycleGroupName(string name)
+        {
+            for (int i = 0; i < s_ExpectedBicycleGroupNames.Length; i++)
+            {
+                if (string.Equals(name, s_ExpectedBicycleGroupNames[i], StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+        private void DumpScooter01Report( )
+        {
+            Mod.LogSafe(( ) =>
+                "\n==================== [FB] SCOOTER01 (FUEL) ====================\n" +
+                "Usage: locate Scooter01 prefab by name, count live instances, log up to 15 samples for SE Mod.");
+
+            const int kMaxSamples = 15; // 15 sameple entities.
+            Entity scooterPrefabEntity = Entity.Null;
+
+            foreach ((RefRO<PrefabData> _, Entity prefabEntity) in SystemAPI
+                .Query<RefRO<PrefabData>>()
+                .WithNone<Deleted, Temp, Overridden>()
+                .WithEntityAccess())
+            {
+                if (!m_PrefabSystem.TryGetPrefab(prefabEntity, out PrefabBase prefabBase))
+                {
+                    continue;
+                }
+
+                if (string.Equals(prefabBase.name, "Scooter01", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    scooterPrefabEntity = prefabEntity;
+                    break;
+                }
+            }
+
+            if (scooterPrefabEntity == Entity.Null)
+            {
+                Mod.LogSafe(( ) => "[FB] Scooter01 prefab not found (PrefabSystem).");
+                return;
+            }
+
+
+
+            int total = 0;
+            int parked = 0;
+            int active = 0;
+            int other = 0;
+
+            var samples = new System.Collections.Generic.List<Entity>(kMaxSamples);
+
+            foreach ((RefRO<PrefabRef> prefabRefRO, Entity vehicleEntity) in SystemAPI
+                .Query<RefRO<PrefabRef>>()
+                .WithAll<Car>()
+                .WithNone<Deleted, Temp>()
+                .WithEntityAccess())
+            {
+                if (prefabRefRO.ValueRO.m_Prefab != scooterPrefabEntity)
+                {
+                    continue;
+                }
+
+                total++;
+
+                bool isParked = SystemAPI.HasComponent<ParkedCar>(vehicleEntity);
+                bool isActive = SystemAPI.HasComponent<CarCurrentLane>(vehicleEntity);
+
+                if (isParked)
+                {
+                    parked++;
+                }
+                else if (isActive)
+                {
+                    active++;
+                }
+                else
+                {
+                    other++;
+                }
+
+                if (samples.Count < kMaxSamples)
+                {
+                    samples.Add(vehicleEntity);
+                }
             }
 
             Mod.LogSafe(( ) =>
-                "==================== [FB] BIKE SUMMARY ====================\n" +
-                $"Total={total} (Bicycles={bikes}, Scooters={scooters})\n" +
-                $"MissingPrefabBase={missingPrefabBase}, MissingCarData={missingCarData}, MissingSwayingData={missingSwaying}\n" +
-                $"MismatchAny={mismatchAny} (Speed={mismatchSpeed}, Accel={mismatchAccel}, Brake={mismatchBrake}, " +
-                $"SwayMaxPos={mismatchSwayPos}, SwayDamping={mismatchSwayDamp})\n" +
-                $"MismatchExamplesLogged={examples}/{kMaxMismatchExamples}");
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine($"[FB] Scooter01 prefab entity={FormatIndexVersion(scooterPrefabEntity)}");
+                sb.AppendLine($"[FB] Scooter01 instances: Total={total}, Active={active}, Parked={parked}, Other={other}");
 
-            DumpPathSpeedReport(pathScalar);
+                if (samples.Count == 0)
+                {
+                    sb.AppendLine("[FB] Scooter01 sample Index:Version = <none>");
+                }
+                else
+                {
+                    sb.Append("[FB] Scooter01 sample Index:Version = ");
+                    for (int i = 0; i < samples.Count; i++)
+                    {
+                        if (i > 0)
+                        {
+                            sb.Append(", ");
+                        }
+
+                        sb.Append(FormatIndexVersion(samples[i])); // prints Index:Version for SE mod use.
+                    }
+
+                    sb.AppendLine();
+                }
+
+                return sb.ToString();
+            });
         }
+
 
         private void DumpPathSpeedReport(float pathScalar)
         {
             Mod.LogSafe(( ) =>
-                "==================== [FB] PATH SPEED SUMMARY ====================\n" +
+                "\n==================== [FB] PATH SPEED SUMMARY ====================\n" +
+                "Meaning: PathwayData speed limit tracks authoring * scalar.\n" +
                 $"EffectivePathScalar={pathScalar:0.##}");
 
-            // -------------------------------
-            // PathwayData (prefab entities)
-            // -------------------------------
             int prefabs = 0;
             int prefabMissingBase = 0;
             int prefabNotPathwayPrefab = 0;
             int prefabInvalidAuthoring = 0;
             int prefabMismatch = 0;
 
-            // Read-only contamination checks.
             int prefabAlsoHasRoadData = 0;
 
             float prefabMin = float.PositiveInfinity;
             float prefabMax = float.NegativeInfinity;
 
+#if DEBUG
             int prefabMismatchExamples = 0;
+#endif
 
-            foreach ((Unity.Entities.RefRO<Game.Prefabs.PathwayData> pathRO, Unity.Entities.Entity prefabEntity) in SystemAPI
-                .Query<Unity.Entities.RefRO<Game.Prefabs.PathwayData>>()
-                .WithAll<Game.Prefabs.PrefabData>()
-                .WithNone<Game.Common.Deleted, Game.Tools.Temp, Game.Common.Overridden>()
+            foreach ((RefRO<PathwayData> pathRO, Entity prefabEntity) in SystemAPI
+                .Query<RefRO<PathwayData>>()
+                .WithAll<PrefabData>()
+                .WithNone<Deleted, Temp, Overridden>()
                 .WithEntityAccess())
             {
                 prefabs++;
 
-                // Current runtime-on-prefab value (m/s).
                 float currentMs = pathRO.ValueRO.m_SpeedLimit;
 
                 prefabMin = math.min(prefabMin, currentMs);
                 prefabMax = math.max(prefabMax, currentMs);
 
-                if (SystemAPI.HasComponent<Game.Prefabs.RoadData>(prefabEntity))
+                if (SystemAPI.HasComponent<RoadData>(prefabEntity))
                 {
                     prefabAlsoHasRoadData++;
                 }
 
-                if (!m_PrefabSystem.TryGetPrefab(prefabEntity, out Game.Prefabs.PrefabBase prefabBase))
+                if (!m_PrefabSystem.TryGetPrefab(prefabEntity, out PrefabBase prefabBase))
                 {
                     prefabMissingBase++;
                     continue;
                 }
 
-                if (prefabBase is not Game.Prefabs.PathwayPrefab pathPrefab)
+                if (prefabBase is not PathwayPrefab pathPrefab)
                 {
                     prefabNotPathwayPrefab++;
                     continue;
                 }
 
-                // Authoring baseline (km/h) must be valid.
                 if (pathPrefab.m_SpeedLimit <= 0f)
                 {
                     prefabInvalidAuthoring++;
@@ -405,32 +622,31 @@ namespace FastBikes
                 {
                     prefabMismatch++;
 
-                    if (prefabMismatchExamples < kMaxMismatchExamples)
+#if DEBUG
+                    if (prefabMismatchExamples < 3)
                     {
                         prefabMismatchExamples++;
 
-                        Mod.LogSafe(( ) =>
-                            "-------------------- [FB] PATH PREFAB MISMATCH --------------------\n" +
+                        Mod.LogSafe(() =>
+                            "-------------------- [FB] PATH PREFAB MISMATCH (DEBUG) --------------------\n" +
                             $"Name='{prefabBase.name}'\n" +
                             $"Authoring={pathPrefab.m_SpeedLimit:0.###} km/h\n" +
                             $"Expected={MsToKmh(expectedMs):0.###} km/h\n" +
                             $"Current ={MsToKmh(currentMs):0.###} km/h\n" +
                             $"Diff    ={FormatPct(RelativeDiff(expectedMs, currentMs))}");
                     }
+#endif
                 }
             }
 
             Mod.LogSafe(( ) =>
-                "-------------------- [FB] PATH PREFABS --------------------\n" +
+                "\n-------------------- [FB] PATH PREFABS --------------------\n" +
                 $"Count={prefabs}\n" +
                 $"SpeedMin={MsToKmh(prefabMin):0.###} km/h, SpeedMax={MsToKmh(prefabMax):0.###} km/h\n" +
                 $"MissingPrefabBase={prefabMissingBase}, NotPathwayPrefab={prefabNotPathwayPrefab}, InvalidAuthoring={prefabInvalidAuthoring}\n" +
-                $"Mismatch>{kPathMismatchPct * 100f:0.##}%={prefabMismatch} (ExamplesLogged={prefabMismatchExamples}/{kMaxMismatchExamples})\n" +
+                $"Mismatch>{kPathMismatchPct * 100f:0.##}%={prefabMismatch}\n" +
                 $"ContaminationCheck: PathwayDataPrefabsAlsoHaveRoadData={prefabAlsoHasRoadData}");
 
-            // -------------------------------
-            // PathwayComposition (net composition entities)
-            // -------------------------------
             int comps = 0;
             int compMissingPathwayData = 0;
             int compMismatch = 0;
@@ -438,12 +654,10 @@ namespace FastBikes
             float compMin = float.PositiveInfinity;
             float compMax = float.NegativeInfinity;
 
-            int compMismatchExamples = 0;
-
-            foreach ((Unity.Entities.RefRO<Game.Prefabs.PathwayComposition> compRO, Unity.Entities.RefRO<Game.Prefabs.PrefabRef> prefabRefRO) in SystemAPI
-                .Query<Unity.Entities.RefRO<Game.Prefabs.PathwayComposition>, Unity.Entities.RefRO<Game.Prefabs.PrefabRef>>()
-                .WithAll<Game.Prefabs.NetCompositionData>()
-                .WithNone<Game.Common.Deleted, Game.Tools.Temp, Game.Common.Overridden>())
+            foreach ((RefRO<PathwayComposition> compRO, RefRO<PrefabRef> prefabRefRO) in SystemAPI
+                .Query<RefRO<PathwayComposition>, RefRO<PrefabRef>>()
+                .WithAll<NetCompositionData>()
+                .WithNone<Deleted, Temp, Overridden>())
             {
                 comps++;
 
@@ -452,39 +666,28 @@ namespace FastBikes
                 compMin = math.min(compMin, compMs);
                 compMax = math.max(compMax, compMs);
 
-                Unity.Entities.Entity prefabEntity = prefabRefRO.ValueRO.m_Prefab;
+                Entity prefabEntity = prefabRefRO.ValueRO.m_Prefab;
 
-                if (!SystemAPI.HasComponent<Game.Prefabs.PathwayData>(prefabEntity))
+                if (!SystemAPI.HasComponent<PathwayData>(prefabEntity))
                 {
                     compMissingPathwayData++;
                     continue;
                 }
 
-                float desiredMs = SystemAPI.GetComponent<Game.Prefabs.PathwayData>(prefabEntity).m_SpeedLimit;
+                float desiredMs = SystemAPI.GetComponent<PathwayData>(prefabEntity).m_SpeedLimit;
 
                 if (math.abs(compMs - desiredMs) > kCompAbsMismatchMs)
                 {
                     compMismatch++;
-
-                    if (compMismatchExamples < kMaxMismatchExamples)
-                    {
-                        compMismatchExamples++;
-
-                        Mod.LogSafe(( ) =>
-                            "-------------------- [FB] PATH COMPOSITION MISMATCH --------------------\n" +
-                            $"Composition={MsToKmh(compMs):0.###} km/h\n" +
-                            $"Desired    ={MsToKmh(desiredMs):0.###} km/h\n" +
-                            $"AbsDiff    ={math.abs(compMs - desiredMs):0.###} m/s");
-                    }
                 }
             }
 
             Mod.LogSafe(( ) =>
-                "-------------------- [FB] PATH COMPOSITIONS --------------------\n" +
+                "\n-------------------- [FB] PATH COMPOSITIONS --------------------\n" +
                 $"Count={comps}\n" +
                 $"SpeedMin={MsToKmh(compMin):0.###} km/h, SpeedMax={MsToKmh(compMax):0.###} km/h\n" +
                 $"MissingPathwayDataOnPrefabRef={compMissingPathwayData}\n" +
-                $"MismatchAbs>{kCompAbsMismatchMs:0.###} m/s={compMismatch} (ExamplesLogged={compMismatchExamples}/{kMaxMismatchExamples})");
+                $"MismatchAbs>{kCompAbsMismatchMs:0.###} m/s={compMismatch}");
         }
     }
 }

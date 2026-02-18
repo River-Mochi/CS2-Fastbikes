@@ -7,33 +7,32 @@
 
 namespace FastBikes
 {
-    using Colossal.Localization;
-    using Game;               // IsGame()
-    using Game.SceneFlow;     // GameManager
-    using System;             // DateTime, TimeSpan, Math, Exception, FormatException
-    using Unity.Entities;     // World
-    using UnityEngine;        // Time.frameCount
+    using CS2HonuShared;          // LocaleUtils
+    using Game;                   // IsGame()
+    using Game.SceneFlow;         // GameManager
+    using System;                 // DateTime, TimeSpan
+    using Unity.Entities;         // World
+    using UnityEngine;            // Time.frameCount
 
     public static class FastBikeStatus
     {
-        // Throttle refresh while Options UI is open.
-        // NOTE: Do not set to 0 (would refresh every UI poll).
         public static int RefreshIntervalSeconds { get; set; } = 10;
 
         internal const string KeyStatusNotLoaded = "FAST_STATUS_NOT_LOADED";
         internal const string KeyStatsNotAvail = "FAST_STATS_NOT_AVAIL";
+        internal const string KeyCarsNotAvail = "FAST_STATS_CARS_NOT_AVAIL";
         internal const string KeyBikesRow = "FAST_STATS_BIKES_ROW1";
         internal const string KeyCarsRow = "FAST_STATS_CARS_ROW2";
 
         private const string FallbackStatusNotLoaded = "Status not loaded.";
         private const string FallbackStatsNotAvail = "No city... ¯\\_(ツ)_/¯ ...No stats";
+        private const string FallbackCarsNotAvail = "run the city a few minutes for data.";
 
         private const string FallbackBikesRow =
-            "{0}% ({1}) bikes | {2}% ({3}) scooter | {4} / {5} parked/total";
+            "{0} active | {1} bikes | {2} e-scooter | {3} / {4} parked/total";
 
         private const string FallbackCarsRow =
-            "{0}% ({1}) runs | {2} / {3} parked/total | updated {5}";
-
+            "{0} active | {1} parked | {2} total | updated {3}";
 
         public static string BikesRow { get; private set; } = string.Empty;
         public static string CarsRow { get; private set; } = string.Empty;
@@ -49,8 +48,8 @@ namespace FastBikes
             s_LastRefreshTicksUtc = 0;
             s_LastUiFrame = -1;
 
-            BikesRow = Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
-            CarsRow = string.Empty;
+            BikesRow = LocaleUtils.Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
+            CarsRow = LocaleUtils.Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
         }
 
         public static void MarkDirty( )
@@ -67,7 +66,6 @@ namespace FastBikes
                 return;
             }
 
-            // Frame guard: multiple Setting.cs getters can call this in the same UI draw.
             int frame = Time.frameCount;
             if (frame == s_LastUiFrame)
             {
@@ -78,7 +76,12 @@ namespace FastBikes
 
             if (string.IsNullOrEmpty(BikesRow))
             {
-                BikesRow = Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
+                BikesRow = LocaleUtils.SafeFormat(KeyStatusNotLoaded, FallbackStatusNotLoaded);
+            }
+
+            if (string.IsNullOrEmpty(CarsRow))
+            {
+                CarsRow = LocaleUtils.SafeFormat(KeyStatusNotLoaded, FallbackStatusNotLoaded);
             }
 
             GameManager gm = GameManager.instance;
@@ -92,8 +95,8 @@ namespace FastBikes
 
             if (!isGame)
             {
-                BikesRow = Localize(KeyStatsNotAvail, FallbackStatsNotAvail);
-                CarsRow = Localize(KeyStatsNotAvail, FallbackStatsNotAvail);
+                BikesRow = LocaleUtils.SafeFormat(KeyStatsNotAvail, FallbackStatsNotAvail);
+                CarsRow = LocaleUtils.SafeFormat(KeyCarsNotAvail, FallbackCarsNotAvail);
                 return;
             }
 
@@ -131,8 +134,8 @@ namespace FastBikes
             }
             catch
             {
-                BikesRow = Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
-                CarsRow = string.Empty;
+                BikesRow = LocaleUtils.Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
+                CarsRow = LocaleUtils.Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
             }
         }
 
@@ -141,85 +144,26 @@ namespace FastBikes
             FastBikeStatusSystem sys = world.GetOrCreateSystemManaged<FastBikeStatusSystem>();
             FastBikeStatusSystem.Snapshot snap = sys.BuildSnapshot();
 
-            long total = snap.TotalPersonalVehicles;
-
-            int pctBikes = Percent(snap.BikeOnlyTotal, total);
-            int pctScooters = Percent(snap.ScooterTotal, total);
-            int pctCarRuns = Percent(snap.CarGroupRunning, total);
-            int pctCarParked = Percent(snap.CarGroupParked, total);
+            BikesRow = LocaleUtils.SafeFormat(
+                KeyBikesRow,
+                fallbackFormat: FallbackBikesRow,
+                LocaleUtils.FormatN0(snap.BikeGroupActive),    // {0}
+                LocaleUtils.FormatN0(snap.BikeOnlyTotal),      // {1}
+                LocaleUtils.FormatN0(snap.ScooterTotal),       // {2}
+                LocaleUtils.FormatN0(snap.BikeGroupParked),    // {3}
+                LocaleUtils.FormatN0(snap.BikeGroupTotal)      // {4}
+            );
 
             string updated = snap.SnapshotTimeLocal.ToString("HH:mm:ss");
 
-            BikesRow = SafeFormat(
-                KeyBikesRow,
-                fallbackFormat: FallbackBikesRow,
-                pctBikes,                     // {0}
-                Format0(snap.BikeOnlyTotal),  // {1}
-                pctScooters,                  // {2}
-                Format0(snap.ScooterTotal),   // {3}
-                Format0(snap.BikeGroupParked),// {4}
-                Format0(snap.BikeGroupTotal)  // {5}
-            );
-
-            CarsRow = SafeFormat(
+            CarsRow = LocaleUtils.SafeFormat(
                 KeyCarsRow,
                 fallbackFormat: FallbackCarsRow,
-                pctCarRuns,                    // {0}
-                Format0(snap.CarGroupRunning), // {1}
-                pctCarParked,                  // {2}
-                Format0(snap.CarGroupParked),  // {3}
-                Format0(snap.CarGroupTotal),   // {4}
-                updated                        // {5}
+                LocaleUtils.FormatN0(snap.CarGroupActive),     // {0}
+                LocaleUtils.FormatN0(snap.CarGroupParked),     // {1}
+                LocaleUtils.FormatN0(snap.CarGroupTotal),      // {2}
+                updated                                        // {3}
             );
         }
-
-        private static int Percent(long part, long total)
-        {
-            if (total <= 0)
-            {
-                return 0;
-            }
-
-            double v = 100.0 * part / total;
-            return (int) Math.Round(v, MidpointRounding.AwayFromZero);
-        }
-
-        private static string Localize(string entryId, string fallback)
-        {
-            LocalizationDictionary? dict = GameManager.instance?.localizationManager?.activeDictionary;
-            if (dict != null && dict.TryGetValue(entryId, out string value) && !string.IsNullOrEmpty(value))
-            {
-                return value;
-            }
-
-            return fallback;
-        }
-
-        private static string SafeFormat(string key, string fallbackFormat, params object[] args)
-        {
-            string format = Localize(key, fallbackFormat);
-
-            try
-            {
-                return string.Format(format, args);
-            }
-            catch (FormatException)
-            {
-                try
-                {
-                    return string.Format(fallbackFormat, args);
-                }
-                catch
-                {
-                    return fallbackFormat;
-                }
-            }
-            catch
-            {
-                return fallbackFormat;
-            }
-        }
-
-        private static string Format0(long v) => v.ToString("N0");
     }
 }

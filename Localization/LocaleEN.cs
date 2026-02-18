@@ -31,18 +31,18 @@ namespace FastBikes
                 { m_Setting.GetSettingsLocaleID(), title },
 
                 // Tabs
-                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "Actions" },
-                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "About" },
+                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab),       "Actions" },
+                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab),         "About" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp), "Speed" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp),     "Speed" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp), "Stability" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp), "Reset" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp),     "Reset" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp), "Paths" },
 
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Mod info" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp), "Links" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp), "Debug" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp),   "Mod info" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp),  "Links" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp),  "Debug" },
 
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable Fast Bikes" },
@@ -54,7 +54,7 @@ namespace FastBikes
                 // Speed
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Bike & scooter speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
-                    "**Scales top speed**\n" +
+                    "**Scales max speed**\n" +
                     "Smooth acceleration and braking formula is used for high speeds.\n" +
                     "**0.30 = 30%** of game default\n" +
                     "**1.00 = game default**\n" +
@@ -88,7 +88,7 @@ namespace FastBikes
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Game defaults" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
-                    "Sets all sliders back to **100%** and restores game defaults."
+                    "Sets all sliders back to **100%** and restores game defaults (vanilla)."
                 },
 
                 // Path Speed
@@ -96,40 +96,44 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
                     "Scales **Path** speed limits (paths are not roads).\n" +
                     "**1.00 = game default**\n" +
-                    "Affects: bike paths, divided pedestrian+bike, and pedestrian-only paths.\n" +
-                    "New Beta feature - please give feedback on Github or Forum links.\n" +
+                    "Affects: bike paths, divided pedestrian+bike, and pedestrian paths.\n" +
                     "To uninstall the mod, reset this to 1.00 (and all values), load city, which restores path speed limits.\n" +
-                    "Then you can safely uninstall the mod. If you forgot to do this,\n" +
-                    "then all that happens is existing paths keep their current speed limits, but new paths will have vanilla default speed limits."
-
+                    "Then the mod can be safely uninstalled. If you skipped this step,\n" +
+                    "existing paths keep the current speed limits, and all new paths use vanilla default speed limits."
                 },
  
                 // Status fields
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStatusGrp), "Status Personal Vehicles" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStatusGrp), "Status personal vehicles" },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary1)), "Bikes group" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary1)), "Bike group" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary1)),
-                    "Percent = share of ALL personal vehicles.\n" +
-                    "Bikes+scooters are gated by **BicycleData** on the prefab."
+                    "Bikes and Electric scooters.\n" +
+                    "**Active** = entities with a current lane (moving).\n" +
+                    "**Parked** = entities with **ParkedCar**.\n" +
+                    "Bike group is gated by **BicycleData** on the prefab.\n" +
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "Cars group" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "Car group" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary2)),
-                    "Percent = share of ALL personal vehicles.\n" +
-                    "Scan runs only while Options is open."
+                    "Personal cars only (excludes the Bike group above).\n" +
+                    "**Active** = entities with a current lane (moving).\n" +
+                    "**Parked** = entities with **ParkedCar** (includes roadside/curbside).\n" +
+                    "Note: will not match in-game info panel parked numbers because we count all parked not just ones in a parking lot. \n" +
+                    "Scan runs only while Options menu is open (not per-frame in city for the best performance)."
                 },
 
                 { "FAST_STATUS_NOT_LOADED", "Status not loaded." },
                 { "FAST_STATS_NOT_AVAIL", "No city... ¯\\_(ツ)_/¯ ...No stats" },
+                { "FAST_STATS_CARS_NOT_AVAIL", "run the city a few minutes for data." },
 
-                { "FAST_STATS_BIKES_ROW1", "{0}% ({1}) bikes | {2}% ({3}) scooter |  {4} / {5} parked/total" },
-                { "FAST_STATS_CARS_ROW2",  "{0}% ({1}) runs | {2} / {3} parked/total | updated {4}" },
+                { "FAST_STATS_BIKES_ROW1", "{0} active | {1} bikes | {2} scooter | {3} / {4} parked/total" },
+                { "FAST_STATS_CARS_ROW2",  "{0} active | {1} parked | {2} total | updated {3}" },
 
                 // About: Info
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Display name." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Version" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Current version." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),      "Mod" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)),       "Display name." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)),   "Version" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)),    "Current version." },
 
                 // Links
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
@@ -146,7 +150,7 @@ namespace FastBikes
             };
         }
 
-        public void Unload()
+        public void Unload( )
         {
         }
     }

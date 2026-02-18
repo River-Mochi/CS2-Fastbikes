@@ -25,6 +25,9 @@
 	<!-- Imports must be after PropertyGroup -->
 	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props" />
 	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
+	<ItemGroup>
+	  <Compile Remove="Systems\OLD-FastBikeSystem.Dump.cs" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="Game">
@@ -92,8 +95,9 @@
 
 	<!-- AUTO UPDATE PublishConfiguration ModVersion using CSPROJ Version number -->
 	<Target Name="UpdatePublishConfigVersion"
-			BeforeTargets="Build"
-			Condition="'$(Configuration)' == 'Release' AND Exists('$(PublishConfigurationPath)')">
+            BeforeTargets="Build"
+            Condition="'$(Configuration)' == 'Release'
+                      AND Exists('$(PublishConfigurationPath)')">
 
 		<Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\tools\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol lf -LeftAlignBlocks" />
 		

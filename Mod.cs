@@ -50,12 +50,12 @@ namespace FastBikes
             if (!s_BannerLogged)
             {
                 s_BannerLogged = true;
-                LogSafe(() => $"{ModName} v{ModVersion} OnLoad {buildTag}");
+                LogSafe(( ) => $"{ModName} v{ModVersion} OnLoad {buildTag}");
             }
 
             if (GameManager.instance == null)
             {
-                WarnSafe(() => "GameManager.instance is null in Mod.OnLoad.");
+                WarnSafe(( ) => "GameManager.instance is null in Mod.OnLoad.");
                 return;
             }
 
@@ -86,7 +86,7 @@ namespace FastBikes
             }
             catch (Exception ex)
             {
-                WarnSafe(() => $"Settings/UI init failed: {ex.GetType().Name}: {ex.Message}");
+                WarnSafe(( ) => $"Settings/UI init failed: {ex.GetType().Name}: {ex.Message}");
             }
 
             // System Scheduling/init.
@@ -97,18 +97,21 @@ namespace FastBikes
             }
             catch (Exception ex)
             {
-                WarnSafe(() => $"System scheduling/init failed: {ex.GetType().Name}: {ex.Message}");
+                WarnSafe(( ) => $"System scheduling/init failed: {ex.GetType().Name}: {ex.Message}");
             }
         }
 
-        public void OnDispose()
+        public void OnDispose( )
         {
-            LogSafe(() => "OnDispose");
+            LogSafe(( ) => "OnDispose");
 
             if (Settings != null)
             {
-                try { Settings.UnregisterInOptionsUI(); }
-                catch (Exception ex) { WarnSafe(() => $"UnregisterInOptionsUI failed: {ex.GetType().Name}: {ex.Message}"); }
+                try
+                {
+                    Settings.UnregisterInOptionsUI();
+                }
+                catch (Exception ex) { WarnSafe(( ) => $"UnregisterInOptionsUI failed: {ex.GetType().Name}: {ex.Message}"); }
 
                 Settings = null;
             }
@@ -128,14 +131,17 @@ namespace FastBikes
             LocalizationManager? lm = GameManager.instance?.localizationManager;
             if (lm == null)
             {
-                WarnSafe(() => $"AddLocaleSource: No LocalizationManager; cannot add source for '{localeId}'.");
+                WarnSafe(( ) => $"AddLocaleSource: No LocalizationManager; cannot add source for '{localeId}'.");
                 return;
             }
 
-            try { lm.AddSource(localeId, source); }
+            try
+            {
+                lm.AddSource(localeId, source);
+            }
             catch (Exception ex)
             {
-                WarnSafe(() => $"AddLocaleSource: AddSource for '{localeId}' failed: {ex.GetType().Name}: {ex.Message}");
+                WarnSafe(( ) => $"AddLocaleSource: AddSource for '{localeId}' failed: {ex.GetType().Name}: {ex.Message}");
             }
         }
     }
