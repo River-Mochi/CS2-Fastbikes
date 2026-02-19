@@ -12,36 +12,35 @@
 Is your city stuck behind slow bikes? 🚴🚴🚗🚐🚚🚙
 
 🚲 Fast Bikes speeds up bicycles and scooters.
-It applies a scalar and adjusts acceleration/braking so that high speeds don't look like "teleport + panic braking."
 
-🛣️ NEW: PATH speed limit - YES - now you can change bike paths (not the same as road speed limits)!
+🛣️ NEW: PATH speed limit - YES - now you can change bike paths (paths are independent of road speed limits)!
 
 - No known road mod lets you set "path" speeds so this is unique to this mod.
 
 #### Features
 
 ✅  Speed ⬆️ ⬇️
-✅  Smoothing math for acceleration + braking
+✅  Smoothing math for acceleration + braking (no teleport and panic braking)
 ✅  Optional stability tuning (affects swaying)
 ✅  One-click Reset buttons.
 
 #### Tech notes
 
 - Road speed limits and game conditions may still cap speeds.
-- Compatible with "Road Speed Adjuster" mod (it does normal roads and not paths).
-- Path speed is **new**, please report issues.
-- To disable the mod without uninstalling, uncheck [ ] the box.
-- Safe to remove (Reset button first for cleanest return to game defaults).
+- Compatible with "Road Speed Adjuster" mod (as that does normal roads and not paths).
+- Path speed is **new** beta feature, please report issues.
+- To disable the mod without uninstalling, uncheck [ ] the enable box.
+- Safe to remove (Reset button first for fast return to game defaults, then save city, and uninstall).
 - Has 11 Languages
 
 #### Support and Feedback
 
-If the mod helps, drop a Like :)
-Report issues on Github / Forum / Discord.
+- If the mod helps, drop a Like :)
+- Report issues on Github / Forum / Discord.
 
 #### Performant design
 
-- Effort made to ensure this runs only when you change mod menu settings.
+- This runs only when you change mod menu settings.
 - Does not run continuously per-frame in cities to impact fps :)
 
 #### Credits

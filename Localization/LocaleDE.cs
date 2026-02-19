@@ -1,5 +1,5 @@
 // File: Localization/LocaleDE.cs
-// Purpose: English entries for FastBikes.
+// Purpose: German entries for FastBikes.
 
 namespace FastBikes
 {
@@ -30,105 +30,109 @@ namespace FastBikes
                 { m_Setting.GetSettingsLocaleID(), title },
 
                 // Tabs
-                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "Aktionen" },
-                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab), "Über" },
+                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab),       "Aktionen" },
+                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab),        "Über" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp), "Geschwindigkeit" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp),     "Geschwindigkeit" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp), "Stabilität" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp), "Zurücksetzen" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp),     "Zurücksetzen" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp), "Wege" },
 
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp), "Mod-Info" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp), "Links" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp), "Debug" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp),   "Mod-Info" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp),  "Links" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp),  "Debug" },
 
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Fast Bikes aktivieren" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "Schaltet den Mod **EIN/AUS**.\n" +
-                    "Wenn AUS, werden Fahrrad- und Scooter-Verhalten auf Spielstandard zurückgesetzt."
+                    "Schaltet den Mod **ON/OFF**.\n" +
+                    "Wenn OFF, werden Fahrrad- und Rollerwerte auf die Standardwerte des Spiels zurückgesetzt."
                 },
 
                 // Speed
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Fahrrad- & Scooter-Tempo" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Fahrrad- & Roller-Geschwindigkeit" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
-                    "**Skaliert die Höchstgeschwindigkeit**\n" +
-                    "Für hohe Geschwindigkeiten wird eine sanfte Beschleunigungs- und Bremsformel verwendet.\n" +
-                    "**0,30 = 30%** des Spielstandards\n" +
-                    "**1,00 = Spielstandard**\n" +
-                    "Hinweis: Tempolimits und Spielbedingungen können weiterhin gelten."
+                    "**Skaliert die Maximalgeschwindigkeit**\n" +
+                    "Für hohe Geschwindigkeiten wird eine weichere Beschleunigungs-/Bremsformel verwendet.\n" +
+                    "**0.30 = 30%** der Spiel-Standardwerte\n" +
+                    "**1.00 = Spiel-Standard**\n" +
+                    "Hinweis: Tempolimits der Straßen und Spielbedingungen können weiterhin gelten."
                 },
 
                 // Stability
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Steifigkeit" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Skalar für **Schwankamplitude**.\n" +
-                    "**Höher = weniger Neigung** (strafferer Look).\n" +
+                    "Skalar für die **Schwank-Amplitude**.\n" +
+                    "**Höher = weniger Neigung** (wirkt straffer).\n" +
                     "**Niedriger = mehr Wackeln.**\n" +
-                    "Hinweis: Scooter können weiterhin stärker neigen, weil ihre Standardwerte anders sind.\n" +
-                    "- Für stabiler bei hohem Tempo: 1,25–1,75.\n" +
-                    "- Für mehr Wackeln: < 0,75."
+                    "Hinweis: Roller können stärker kippen, da ihre Standardwerte anders sind.\n" +
+                    "- Für mehr Stabilität bei hoher Geschwindigkeit: 1.25–1.75.\n" +
+                    "- Für mehr Wackeln: < 0.75."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Dämpfung" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Höher = beruhigt sich schneller (Schwingung klingt schneller ab).\n" +
-                    "**1,0 = Spielstandard**\n" +
-                    "- Für stabiler bei hohem Tempo: 1,25–2,0+\n" +
-                    "- Für mehr Wackeln: < 0,75"
+                    "Höher = beruhigt sich schneller (Oszillation klingt schneller ab).\n" +
+                    "**1.0 = Spiel-Standardwerte**\n" +
+                    "- Für mehr Stabilität bei hoher Geschwindigkeit: 1.25–2.0+\n" +
+                    "- Für mehr Wackeln: < 0.75"
                 },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod-Standardwerte" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
-                    "Wendet die Standard-Tuningwerte des Mods an."
+                    "Wendet die empfohlenen Standardwerte des Mods an."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Spiel-Standardwerte" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
-                    "Setzt alle Regler wieder auf **100%** und stellt die Spiel-Standardwerte wieder her."
+                    "Setzt alle Regler auf **100%** zurück und stellt die Spiel-Standardwerte (vanilla) wieder her."
                 },
 
                 // Path Speed
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Weg-Tempolimit" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Weg-Geschwindigkeitslimit" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
-                    "Skaliert **Weg**-Tempolimits (Wege sind keine Straßen).\n" +
-                    "**1,00 = Spielstandard**\n" +
-                    "Betrifft: Radwege, geteilte Fußgänger+Rad-Wege und reine Fußwege.\n" +
-                    "Neue Beta-Funktion - bitte Feedback über Github- oder Forum-Links.\n" +
-                    "Zum Deinstallieren: auf 1,00 zurücksetzen (und alle Werte), Stadt laden, wodurch Weg-Tempolimits wiederhergestellt werden.\n" +
-                    "Dann kann der Mod sicher deinstalliert werden. Falls vergessen,\n" +
-                    "bleiben vorhandene Wege bei ihrem aktuellen Tempolimit, aber neue Wege haben wieder die Standard-Tempolimits."
-
+                    "Skaliert die Geschwindigkeitslimits von **Wegen** (Wege sind keine Straßen).\n" +
+                    "**1.00 = Spiel-Standard**\n" +
+                    "Betrifft: Radwege, getrennte Fuß+Radwege und Fußwege.\n" +
+                    "Zum Deinstallieren: auf 1.00 zurücksetzen (und alle Werte), Stadt laden (setzt Weg-Limits zurück).\n" +
+                    "Danach kann der Mod sicher deinstalliert werden. Wenn dieser Schritt übersprungen wurde,\n" +
+                    "behalten bestehende Wege die aktuellen Limits, und neue Wege nutzen die Vanilla-Standardlimits."
                 },
 
                 // Status fields
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStatusGrp), "Status: Privatfahrzeuge" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStatusGrp), "Status persönliche Fahrzeuge" },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary1)), "Fahrrad-Gruppe" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary1)), "Fahrradgruppe" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary1)),
-                    "Prozent = Anteil an ALLEN Privatfahrzeugen.\n" +
-                    "Fahrräder+Scooter werden über **BicycleData** am Prefab gefiltert."
+                    "Fahrräder und E-Roller.\n" +
+                    "**Aktiv** = Entitäten mit aktueller Spur (in Bewegung).\n" +
+                    "**Geparkt** = Entitäten mit **ParkedCar**.\n" +
+                    "Die Fahrradgruppe wird über **BicycleData** am Prefab gefiltert."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "Auto-Gruppe" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "Autogruppe" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary2)),
-                    "Prozent = Anteil an ALLEN Privatfahrzeugen.\n" +
-                    "Scan läuft nur, solange Optionen offen sind."
+                    "Nur private Autos (schließt die Fahrradgruppe oben aus).\n" +
+                    "**Aktiv** = Entitäten mit aktueller Spur (in Bewegung).\n" +
+                    "**Geparkt** = Entitäten mit **ParkedCar** (inkl. Straßenrand).\n" +
+                    "Hinweis: stimmt nicht mit dem Info-Panel überein, da dort nur Parkplatz-Fahrzeuge gezählt werden.\n" +
+                    "Scan läuft nur, solange das Optionsmenü offen ist (nicht pro Frame in der Stadt, beste Performance)."
                 },
 
                 { "FAST_STATUS_NOT_LOADED", "Status nicht geladen." },
                 { "FAST_STATS_NOT_AVAIL", "Keine Stadt... ¯\\_(ツ)_/¯ ...Keine Stats" },
+                { "FAST_STATS_CARS_NOT_AVAIL", "Lass die Stadt ein paar Minuten laufen, um Daten zu erhalten." },
 
-                { "FAST_STATS_BIKES_ROW1", "{0}% ({1}) Bikes | {2}% ({3}) Scooter |  {4} / {5} geparkt/gesamt" },
-                { "FAST_STATS_CARS_ROW2",  "{0}% ({1}) fährt | {2} / {3} geparkt/gesamt | aktualisiert {4}" },
+                { "FAST_STATS_BIKES_ROW1", "{0} aktiv | {1} Fahrräder | {2} Scooter | {3} / {4} geparkt/gesamt" },
+                { "FAST_STATS_CARS_ROW2",  "{0} aktiv | {1} geparkt | {2} gesamt | aktualisiert {3}" },
 
                 // About: Info
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)), "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)), "Anzeigename." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Version" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)), "Aktuelle Version." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),      "Mod" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)),       "Anzeigename." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)),   "Version" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)),    "Aktuelle Version." },
 
                 // Links
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
@@ -137,10 +141,10 @@ namespace FastBikes
                 // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Bike-Debugbericht" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "Einmaliger Log-Bericht zu fahrradrelevanten Werten.\n" +
-                    "Für normales Spielen nicht nötig.\n\n" +
-                    "Hilfreich, um Prefabs nach Spiel-Updates zu prüfen oder beim Debugging.\n" +
-                    "Stadt zuerst laden, dann klicken; Daten gehen an **Logs/FastBikes.log**"
+                    "Einmaliger Log-Bericht mit relevanten Fahrradwerten.\n" +
+                    "Nicht nötig für normales Gameplay.\n\n" +
+                    "Nützlich, um Prefabs nach Spiel-Updates zu prüfen oder beim Debugging.\n" +
+                    "Stadt zuerst laden; Daten werden in **Logs/FastBikes.log** geschrieben"
                 },
             };
         }

@@ -5,33 +5,33 @@
 // - Bicycle-group gate uses Game.Prefabs.BicycleData on the prefab entity.
 // - In-world definition:
 //   - Parked = Game.Vehicles.ParkedCar
-//   - Active = Game.Vehicles.CarCurrentLane
-// - Total = Parked || Active (excludes registry-only/unspawned vehicles).
+//   - Active = Game.Vehicles.CarCurrentLane (Parked wins if both)
+// - Total counts all matched PersonalCar instances (Active/Parked are subsets).
 
 namespace FastBikes
 {
     using Game;                // GameSystemBase
-    using Game.Common;         // Deleted
+    using Game.Common;         // Deleted, Destroyed
     using Game.Prefabs;        // BicycleData, PrefabBase, PrefabRef, PrefabSystem
     using Game.Tools;          // Temp
-    using Game.Vehicles;       // CarCurrentLane, ParkedCar, PersonalCar
+    using Game.Vehicles;       // CarCurrentLane, ParkedCar
     using System;              // DateTime, StringComparison
     using Unity.Collections;   // Allocator, NativeArray
-    using Unity.Entities;      // Entity, EntityQuery, ComponentLookup, ComponentType
+    using Unity.Entities;      // Entity, EntityQuery, SystemAPI
 
     public sealed partial class FastBikeStatusSystem : GameSystemBase
     {
         public readonly struct Snapshot
         {
-            public readonly long BikeGroupTotal;      // In-world bikes + e-scooters
-            public readonly long BikeGroupParked;     // ParkedCar subset
-            public readonly long BikeGroupActive;     // CarCurrentLane subset
-            public readonly long ScooterTotal;        // ElectricScooter* subset
-            public readonly long BikeOnlyTotal;       // BikeGroupTotal - ScooterTotal
+            public readonly long BikeGroupTotal;
+            public readonly long BikeGroupParked;
+            public readonly long BikeGroupActive;
+            public readonly long ScooterTotal;
+            public readonly long BikeOnlyTotal;
 
-            public readonly long CarGroupTotal;       // In-world PersonalCar NOT in bike group
-            public readonly long CarGroupParked;      // ParkedCar subset
-            public readonly long CarGroupActive;      // CarCurrentLane subset
+            public readonly long CarGroupTotal;
+            public readonly long CarGroupParked;
+            public readonly long CarGroupActive;
 
             public readonly DateTime SnapshotTimeLocal;
 
@@ -69,11 +69,11 @@ namespace FastBikes
 
             m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
 
-            m_PersonalVehicleQuery = GetEntityQuery(
-                ComponentType.ReadOnly<PrefabRef>(),
-                ComponentType.ReadOnly<Game.Vehicles.PersonalCar>(),
-                ComponentType.Exclude<Deleted>(),
-                ComponentType.Exclude<Temp>());
+            // must fully-qualify PersonalCar to avoid Prefabs ambiguity.
+            m_PersonalVehicleQuery = SystemAPI.QueryBuilder()
+                .WithAll<PrefabRef, Game.Vehicles.PersonalCar>()
+                .WithNone<Deleted, Temp, Destroyed>()
+                .Build();
 
             Enabled = false;
         }
@@ -84,10 +84,9 @@ namespace FastBikes
 
         public Snapshot BuildSnapshot( )
         {
-            ComponentLookup<PrefabRef> prefabRefLookup = GetComponentLookup<PrefabRef>(isReadOnly: true);
-            ComponentLookup<BicycleData> bicycleDataLookup = GetComponentLookup<BicycleData>(isReadOnly: true);
-
-            ComponentLookup<ParkedCar> parkedLookup = GetComponentLookup<ParkedCar>(isReadOnly: true);
+            ComponentLookup<PrefabRef>   prefabRefLookup = GetComponentLookup<PrefabRef>          (isReadOnly: true);
+            ComponentLookup<BicycleData> bicycleDataLookup = GetComponentLookup<BicycleData>      (isReadOnly: true);
+            ComponentLookup<ParkedCar>   parkedLookup = GetComponentLookup<ParkedCar>             (isReadOnly: true);
             ComponentLookup<CarCurrentLane> currentLaneLookup = GetComponentLookup<CarCurrentLane>(isReadOnly: true);
 
             long bikeGroupTotal = 0;
@@ -119,12 +118,6 @@ namespace FastBikes
                     bool isParked = parkedLookup.HasComponent(e);
                     bool isActive = !isParked && currentLaneLookup.HasComponent(e);
 
-
-                    if (!isParked && !isActive)
-                    {
-                        continue;
-                    }
-
                     bool isBikeGroup = bicycleDataLookup.HasComponent(prefabEntity);
 
                     if (isBikeGroup)
@@ -135,8 +128,7 @@ namespace FastBikes
                         {
                             bikeGroupParked++;
                         }
-
-                        if (isActive)
+                        else if (isActive)
                         {
                             bikeGroupActive++;
                         }
@@ -145,20 +137,19 @@ namespace FastBikes
                         {
                             scooterTotal++;
                         }
-
-                        continue;
                     }
-
-                    carGroupTotal++;
-
-                    if (isParked)
+                    else
                     {
-                        carGroupParked++;
-                    }
+                        carGroupTotal++;
 
-                    if (isActive)
-                    {
-                        carGroupActive++;
+                        if (isParked)
+                        {
+                            carGroupParked++;
+                        }
+                        else if (isActive)
+                        {
+                            carGroupActive++;
+                        }
                     }
                 }
             }
@@ -198,3 +189,4 @@ namespace FastBikes
         }
     }
 }
+

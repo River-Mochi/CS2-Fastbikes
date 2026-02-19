@@ -214,10 +214,10 @@ namespace FastBikes
         /// <summary>Tunes CarData on bicycle prefab entities using BicyclePrefab authoring as baseline.</summary>
         private int ApplyBicycleTuning(float speedScalar)
         {
-            float speed = math.max(0f, speedScalar);
+            float speed = Unity.Mathematics.math.max(0f, speedScalar);
 
             // Accel/brake scale uses sqrt() to avoid extreme values at high speed.
-            float accelBrake = math.sqrt(math.max(0.01f, speed));
+            float accelBrake = Unity.Mathematics.math.sqrt(Unity.Mathematics.math.max(0.01f, speed));
 
             int updated = 0;
 
@@ -233,7 +233,7 @@ namespace FastBikes
 
                 float baseMaxMs = bicyclePrefab.m_MaxSpeed * (1f / 3.6f);
 
-                float newMaxSpeed = baseMaxMs <= 0f ? 0f : math.max(0.01f, baseMaxMs * speed);
+                float newMaxSpeed = baseMaxMs <= 0f ? 0f : Unity.Mathematics.math.max(0.01f, baseMaxMs * speed);
                 float newAccel = bicyclePrefab.m_Acceleration <= 0f ? 0f : bicyclePrefab.m_Acceleration * accelBrake;
                 float newBrake = bicyclePrefab.m_Braking <= 0f ? 0f : bicyclePrefab.m_Braking * accelBrake;
 
@@ -254,8 +254,8 @@ namespace FastBikes
         /// <summary>Tunes SwayingData on bicycle prefab entities using cached per-prefab baselines.</summary>
         private int ApplyBicycleSwaying(bool forceVanilla, float stiffnessScalar, float dampingScalar)
         {
-            float stiff = math.max(0.01f, stiffnessScalar);
-            float damp = math.max(0.01f, dampingScalar);
+            float stiff = Unity.Mathematics.math.max(0.01f, stiffnessScalar);
+            float damp = Unity.Mathematics.math.max(0.01f, dampingScalar);
 
             int updated = 0;
 
@@ -290,7 +290,7 @@ namespace FastBikes
 
                 // Higher damping settles sway faster.
                 tuned.m_DampingFactors = baseline.m_DampingFactors / damp;
-                tuned.m_DampingFactors = math.clamp(tuned.m_DampingFactors, 0.01f, 0.999f);
+                tuned.m_DampingFactors = Unity.Mathematics.math.clamp(tuned.m_DampingFactors, 0.01f, 0.999f);
 
                 if (!tuned.Equals(current))
                 {

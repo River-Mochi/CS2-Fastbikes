@@ -11,6 +11,7 @@ namespace FastBikes
     using Game.Net;           // Edge, Road, CarLane, SubLane
     using Game.Prefabs;       // PathwayPrefab, PathwayData, PathwayComposition, NetCompositionData
     using Game.Tools;         // Temp
+    using System.Collections.Generic; // HashSet<>, List<>
     using Unity.Collections;  // NativeArray, NativeList, Allocator
     using Unity.Entities;     // RefRO, RefRW, SystemAPI, BufferLookup, ComponentLookup
     using Unity.Mathematics;  // math.*
@@ -46,7 +47,7 @@ namespace FastBikes
 
         private int ApplyPathwayPrefabAndComposition(float scalar)
         {
-            float s = math.max(0.01f, scalar);
+            float s = Unity.Mathematics.math.max(0.01f, scalar);
             int updated = 0;
 
             // -------------------------------
@@ -197,7 +198,7 @@ namespace FastBikes
             }
 
             // Process a slice of edges this frame.
-            int count = math.min(kEdgeBatchSize, remaining);
+            int count = Unity.Mathematics.math.min(kEdgeBatchSize, remaining);
 
             ComponentLookup<PrefabRef> prefabRefLookup =
                 SystemAPI.GetComponentLookup<PrefabRef>(isReadOnly: true);
@@ -256,7 +257,9 @@ namespace FastBikes
                         continue;
                     }
 
-                    ref Game.Net.CarLane lane = ref laneLookup.GetRefRW(laneEntity).ValueRW;
+                    RefRW<Game.Net.CarLane> laneRW = laneLookup.GetRefRW(laneEntity);
+                    // Writable ref to the CarLane component stored in ECS chunk memory (in-place writes, no copy).
+                    ref Game.Net.CarLane lane = ref laneRW.ValueRW;
 
                     // Write both current and default so the lane stays consistent.
                     if (lane.m_SpeedLimit != desiredMs)

@@ -4,7 +4,6 @@
 namespace FastBikes
 {
     using Colossal; // IDictionarySource, IDictionaryEntryError
-    using Colossal.IO.AssetDatabase.Internal;
     using System.Collections.Generic; // IEnumerable, Dictionary, KeyValuePair
 
     public sealed class LocaleEN : IDictionarySource
@@ -32,7 +31,7 @@ namespace FastBikes
 
                 // Tabs
                 { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab),       "Actions" },
-                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab),         "About" },
+                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab),        "About" },
 
                 // Groups
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp),     "Speed" },
@@ -40,9 +39,9 @@ namespace FastBikes
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp),     "Reset" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp), "Paths" },
 
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp),   "Mod info" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp),  "Links" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp),  "Debug" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp),  "Mod info" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp), "Links" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp), "Debug" },
 
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable Fast Bikes" },
@@ -101,7 +100,7 @@ namespace FastBikes
                     "Then the mod can be safely uninstalled. If you skipped this step,\n" +
                     "existing paths keep the current speed limits, and all new paths use vanilla default speed limits."
                 },
- 
+
                 // Status fields
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStatusGrp), "Status personal vehicles" },
 
@@ -110,7 +109,7 @@ namespace FastBikes
                     "Bikes and Electric scooters.\n" +
                     "**Active** = entities with a current lane (moving).\n" +
                     "**Parked** = entities with **ParkedCar**.\n" +
-                    "Bike group is gated by **BicycleData** on the prefab.\n" +
+                    "Bike group is gated by **BicycleData** on the prefab."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "Car group" },
@@ -130,10 +129,10 @@ namespace FastBikes
                 { "FAST_STATS_CARS_ROW2",  "{0} active | {1} parked | {2} total | updated {3}" },
 
                 // About: Info
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),      "Mod" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)),       "Display name." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)),   "Version" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)),    "Current version." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),     "Mod" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)),      "Display name." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)),  "Version" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)),   "Current version." },
 
                 // Links
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
@@ -146,7 +145,7 @@ namespace FastBikes
                     "Not needed for normal gameplay.\n\n" +
                     "Useful to verify prefabs after game updates or when debugging.\n" +
                     "Load city first before clicking; data sent to **Logs/FastBikes.log**"
-                },
+                }
             };
         }
 
