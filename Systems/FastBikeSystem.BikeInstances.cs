@@ -24,11 +24,12 @@ namespace FastBikes
         {
             Mod.LogSafe(( ) =>
                 "\n==================== [FB] CAR GROUP INSTANCES (LIVE) ====================\n" +
-                "Meaning: counts of live PersonalCar instances excluding BicycleData prefabs.\n" +
+                "Meaning: live PersonalCar instances excluding BicycleData prefabs.\n" +
                 "Live excludes: Deleted, Temp, Destroyed.\n" +
-                "Classification:\n" +
+                "Status classification:\n" +
                 "  Parked = ParkedCar\n" +
-                "  Active = CarCurrentLane (Parked wins if both)\n");
+                "  Active = CarCurrentLane (Parked wins)\n" +
+                "  Pending = neither ParkedCar nor CarCurrentLane (diagnostic only; not intended for UI totals)\n");
 
             // Build bicycle-group prefab set (BicycleData on prefab).
             var bikeGroupPrefabs = new HashSet<Entity>();
@@ -42,12 +43,29 @@ namespace FastBikes
                 bikeGroupPrefabs.Add(prefabEntity);
             }
 
-            int total = 0;
-            int active = 0;
+            int allLiveTotal = 0;
             int parked = 0;
+            int active = 0;
+            int pending = 0;
 
+            int statusTotal = 0; // parked + active only
+
+            int unspawnedTotal = 0;
+            int parkedAndUnspawned = 0;
+            int activeAndUnspawned = 0;
+            int pendingAndUnspawned = 0;
+
+            int pendingAndAccident = 0;
+            int movingNoLane = 0;
             int parkedAndLane = 0;
-            int activeUnspawned = 0;
+
+#if DEBUG
+            const int kMaxSamples = 12;
+            var sampleParkedUnspawned = new List<Entity>(kMaxSamples);
+            var samplePending = new List<Entity>(kMaxSamples);
+            var samplePendingAccident = new List<Entity>(kMaxSamples);
+            var sampleMovingNoLane = new List<Entity>(kMaxSamples);
+#endif
 
             foreach ((RefRO<PrefabRef> prefabRefRO, Entity e) in SystemAPI
                 .Query<RefRO<PrefabRef>>()
@@ -57,7 +75,7 @@ namespace FastBikes
             {
                 Entity prefabEntity = prefabRefRO.ValueRO.m_Prefab;
 
-                // Exclude bicycles + scooters.
+                // Exclude bicycles + e-scooters (bike row owns those).
                 if (bikeGroupPrefabs.Contains(prefabEntity))
                 {
                     continue;
@@ -65,26 +83,39 @@ namespace FastBikes
 
                 bool hasParked = SystemAPI.HasComponent<ParkedCar>(e);
                 bool hasLane = SystemAPI.HasComponent<CarCurrentLane>(e);
-                bool hasUnspawned = SystemAPI.HasComponent<Game.Objects.Unspawned>(e);
 
+                bool hasUnspawned = SystemAPI.HasComponent<Unspawned>(e);
+                bool hasMoving = SystemAPI.HasComponent<Moving>(e);
+                bool hasAccident = SystemAPI.HasComponent<Game.Events.InvolvedInAccident>(e);
+
+                // Status-aligned classification (Parked wins)
                 bool isParked = hasParked;
                 bool isActive = !isParked && hasLane;
+                bool isPending = !isParked && !isActive;
 
-                // Match Status semantics: only count cars that are parked or active.
-                if (!isParked && !isActive)
-                {
-                    continue;
-                }
-
-                total++;
+                allLiveTotal++;
 
                 if (isParked)
-                {
                     parked++;
-                }
-                else
-                {
+                else if (isActive)
                     active++;
+                else
+                    pending++;
+
+                // UI-intended total (conservative): parked + active only.
+                if (!isPending)
+                    statusTotal++;
+
+                if (hasUnspawned)
+                {
+                    unspawnedTotal++;
+
+                    if (isParked)
+                        parkedAndUnspawned++;
+                    else if (isActive)
+                        activeAndUnspawned++;
+                    else
+                        pendingAndUnspawned++;
                 }
 
                 if (hasParked && hasLane)
@@ -92,16 +123,68 @@ namespace FastBikes
                     parkedAndLane++;
                 }
 
-                if (hasLane && hasUnspawned)
+                // Diagnostic: cars that are moving but have no lane often correlate with accidents/cleanup oddities.
+                if (hasMoving && !hasLane)
                 {
-                    activeUnspawned++;
+                    movingNoLane++;
+#if DEBUG
+                    if (sampleMovingNoLane.Count < kMaxSamples)
+                        sampleMovingNoLane.Add(e);
+#endif
                 }
+
+                if (isPending && hasAccident)
+                {
+                    pendingAndAccident++;
+#if DEBUG
+                    if (samplePendingAccident.Count < kMaxSamples)
+                        samplePendingAccident.Add(e);
+#endif
+                }
+
+#if DEBUG
+                if (isPending && samplePending.Count < kMaxSamples)
+                    samplePending.Add(e);
+
+                if (hasUnspawned && isParked && sampleParkedUnspawned.Count < kMaxSamples)
+                    sampleParkedUnspawned.Add(e);
+#endif
             }
 
             Mod.LogSafe(( ) =>
-                $"[FB] CarGroup: Total={total}, Active={active}, Parked={parked}\n" +
-                $"[FB] Sanity: ParkedCar&&CarCurrentLane={parkedAndLane}, CarCurrentLane&&Unspawned={activeUnspawned}");
+            {
+                var sb = new System.Text.StringBuilder();
+
+                sb.AppendLine($"[FB] CarGroup AllLive: Total={allLiveTotal}, Parked={parked}, Active={active}, Pending={pending}");
+                sb.AppendLine($"[FB] CarGroup StatusTotal(Parked+Active)={statusTotal}");
+                sb.AppendLine($"[FB] Unspawned: Total={unspawnedTotal} (Parked={parkedAndUnspawned}, Active={activeAndUnspawned}, Pending={pendingAndUnspawned})");
+                sb.AppendLine($"[FB] Pending diagnostics: Pending&&InvolvedInAccident={pendingAndAccident}, Moving&&!CarCurrentLane={movingNoLane}");
+                sb.AppendLine($"[FB] Sanity: ParkedCar&&CarCurrentLane={parkedAndLane}");
+
+#if DEBUG
+                sb.AppendLine("[FB] DEBUG Samples (Index:Version):");
+
+                sb.Append("  Parked&&Unspawned: ");
+                AppendSamples(sb, sampleParkedUnspawned);
+                sb.AppendLine();
+
+                sb.Append("  Pending: ");
+                AppendSamples(sb, samplePending);
+                sb.AppendLine();
+
+                sb.Append("  Pending&&Accident: ");
+                AppendSamples(sb, samplePendingAccident);
+                sb.AppendLine();
+
+                sb.Append("  MovingNoLane: ");
+                AppendSamples(sb, sampleMovingNoLane);
+                sb.AppendLine();
+#endif
+
+                return sb.ToString();
+            });
         }
+
 
         // ====== BIKES Stuff ======
         private void DumpBikeInstancesReport( )
