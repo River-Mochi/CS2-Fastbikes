@@ -2,21 +2,18 @@
 // Purpose: Dump bicycle-group prefab names + patch-day sanity + Scooter01 instance count + sample entity ids.
 // Notes:
 // - Dump is read-only.
-// - No Burst usage.
-// - No chunk jobs.
 // - Debug-only mismatch examples; Release logs counts only.
 
 namespace FastBikes
 {
-    using Colossal.Entities;          // EntityManager
     using Game.Common;                // Deleted, Overridden
-    using Game.Prefabs;               // PrefabBase, BicyclePrefab, BicycleData, CarData, SwayingData, PathwayPrefab, PathwayData, PathwayComposition, PrefabData, PrefabRef, NetCompositionData, RoadData
+    using Game.Prefabs;               // BicyclePrefab, BicycleData, CarData, SwayingData, PathwayPrefab, PathwayData, PathwayComposition, NetCompositionData, RoadData
     using Game.Tools;                 // Temp
     using Game.Vehicles;              // Car, ParkedCar
-    using System;
-    using System.Collections.Generic;
-    using Unity.Entities;
-    using Unity.Mathematics;
+    using System;                     // DateTime, StringComparison
+    using System.Collections.Generic; // List, HashSet
+    using Unity.Entities;             // Entity, SystemAPI, RefRO
+    using Unity.Mathematics;          // math, float3
 
     public sealed partial class FastBikeSystem
     {
@@ -370,10 +367,6 @@ namespace FastBikes
                 missingSwaying == 0 &&
                 mismatchAny == 0;
 
-
-            // Reminder this keeps:
-            // - Release: logs short
-            // - Debug  : print full mismatch breakdown + name lists for debugging.
             if (clean)
             {
                 Mod.LogSafe(( ) =>
@@ -407,17 +400,17 @@ namespace FastBikes
                     return sb.ToString();
                 });
 #else
-    // Release build: one-line signal only.
-    Mod.LogSafe(() =>
-        $"[FB] BIKE SUMMARY: ISSUES (Total={total}, MissingPrefabBase={missingPrefabBase}, MissingCarData={missingCarData}, MissingSwayingData={missingSwayingData}).");
+                Mod.LogSafe(( ) =>
+                    $"[FB] BIKE SUMMARY: ISSUES (Total={total}, MissingPrefabBase={missingPrefabBase}, MissingCarData={missingCarData}, MissingSwayingData={missingSwaying}).");
 #endif
             }
 
             DumpPathSpeedReport(pathScalar);
             DumpScooter01Report();
+
+            // Defined in Systems/FastBikeSystem.BikeInstances.cs (keep logic there).
             DumpBikeInstancesReport();
             DumpCarGroupInstancesReport();
-
         }
 
         private static bool IsExpectedBicycleGroupName(string name)
@@ -433,14 +426,13 @@ namespace FastBikes
             return false;
         }
 
-
         private void DumpScooter01Report( )
         {
             Mod.LogSafe(( ) =>
                 "\n==================== [FB] SCOOTER01 (FUEL) ====================\n" +
-                "Usage: locate Scooter01 prefab by name, count live instances, log up to 15 samples for SE Mod.");
+                "Usage: locate Scooter01 prefab by name, count live instances, log up to 10 samples for SE Mod.");
 
-            const int kMaxSamples = 15; // 15 sample entities.
+            const int kMaxSamples = 10;
             Entity scooterPrefabEntity = Entity.Null;
 
             foreach ((RefRO<PrefabData> _, Entity prefabEntity) in SystemAPI
@@ -466,14 +458,12 @@ namespace FastBikes
                 return;
             }
 
-
-
             int total = 0;
             int parked = 0;
             int active = 0;
             int other = 0;
 
-            var samples = new System.Collections.Generic.List<Entity>(kMaxSamples);
+            var samples = new List<Entity>(kMaxSamples);
 
             foreach ((RefRO<PrefabRef> prefabRefRO, Entity vehicleEntity) in SystemAPI
                 .Query<RefRO<PrefabRef>>()
@@ -492,17 +482,11 @@ namespace FastBikes
                 bool isActive = SystemAPI.HasComponent<CarCurrentLane>(vehicleEntity);
 
                 if (isParked)
-                {
                     parked++;
-                }
                 else if (isActive)
-                {
                     active++;
-                }
                 else
-                {
                     other++;
-                }
 
                 if (samples.Count < kMaxSamples)
                 {
@@ -530,7 +514,7 @@ namespace FastBikes
                             sb.Append(", ");
                         }
 
-                        sb.Append(FormatIndexVersion(samples[i])); // prints Index:Version for SE mod use.
+                        sb.Append(FormatIndexVersion(samples[i]));
                     }
 
                     sb.AppendLine();
@@ -539,7 +523,6 @@ namespace FastBikes
                 return sb.ToString();
             });
         }
-
 
         private void DumpPathSpeedReport(float pathScalar)
         {

@@ -1,106 +1,83 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<!-- File: FastBikes.csproj -->
-	<!-- Purpose: Build configuration for Fast Bikes mod using CSII toolchain.
+  <!-- File: FastBikes.csproj -->
+  <!-- Purpose: Build configuration for Fast Bikes mod using CSII toolchain.
 	     Notes: TargetFramework net48, C# LangVersion 9.0, OutputType Library is set by toolchain Mod.props. -->
-	
-	<PropertyGroup>
-		<Configurations>Debug;Release</Configurations>
 
-		<!-- The file where mod information required for publishing on PDX Mods is stored -->
-		<PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
+  <PropertyGroup>
+    <Configurations>Debug;Release</Configurations>
 
-		<!-- DLL name and default namespace -->
-		<AssemblyName>FastBikes</AssemblyName>
-		<RootNamespace>FastBikes</RootNamespace>
+    <!-- The file where mod information required for publishing on PDX Mods is stored -->
+    <PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
 
-		<!-- Enable nullable reference types project-wide -->
-		<Nullable>enable</Nullable>
+    <!-- DLL name and default namespace -->
+    <AssemblyName>FastBikes</AssemblyName>
+    <RootNamespace>FastBikes</RootNamespace>
 
-		<!-- Single source of truth for version number -->
-		<Version>1.0.2</Version>
-		<AssemblyVersion>$(Version).0</AssemblyVersion>
-		<FileVersion>$(Version).0</FileVersion>
-	</PropertyGroup>
+    <!-- Enable nullable reference types project-wide -->
+    <Nullable>enable</Nullable>
 
-	<!-- Imports must be after PropertyGroup -->
-	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props" />
-	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
-	<ItemGroup>
-	  <Compile Remove="Systems\OLD-FastBikeSystem.Dump.cs" />
-	</ItemGroup>
+    <!-- Single source of truth for version number -->
+    <Version>1.0.2</Version>
+    <AssemblyVersion>$(Version).0</AssemblyVersion>
+    <FileVersion>$(Version).0</FileVersion>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<Reference Include="Game">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.Core">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.Logging">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.IO.AssetDatabase">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.UI">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.UI.Binding">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Colossal.Localization">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="UnityEngine.CoreModule">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Unity.Burst">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Unity.Collections">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Unity.Entities">
-			<Private>false</Private>
-		</Reference>
-		<Reference Include="Unity.Mathematics">
-			<Private>false</Private>
-		</Reference>
-	</ItemGroup>
+  <!-- Imports must be after PropertyGroup -->
+  <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props" />
+  <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
 
-	<ItemGroup>
-		<Reference Update="System">
-			<Private>false</Private>
-		</Reference>
-		<Reference Update="System.Core">
-			<Private>false</Private>
-		</Reference>
-		<Reference Update="System.Data">
-			<Private>false</Private>
-		</Reference>
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Systems\OLD-FastBikeSystem.Dump.cs" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<None Include="$(ModPropsFile)" Link="Properties\Mod.props" />
-		<None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
-	</ItemGroup>
+  <ItemGroup>
+    <Reference Include="Game"><Private>false</Private></Reference>
+    <Reference Include="Colossal.Core"><Private>false</Private></Reference>
+    <Reference Include="Colossal.Logging"> <Private>false</Private></Reference>
+    <Reference Include="Colossal.IO.AssetDatabase">  <Private>false</Private></Reference>
+    <Reference Include="Colossal.UI"><Private>false</Private></Reference>
+    <Reference Include="Colossal.UI.Binding"><Private>false</Private></Reference>
+    <Reference Include="Colossal.Localization"><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><Private>false</Private></Reference>
+    <Reference Include="Unity.Burst"> <Private>false</Private></Reference>
+    <Reference Include="Unity.Collections"><Private>false</Private> </Reference>
+    <Reference Include="Unity.Entities"><Private>false</Private> </Reference>
+    <Reference Include="Unity.Mathematics"> <Private>false</Private> </Reference>
+  </ItemGroup>
 
-	<ItemGroup>
-		<!-- Dev-only scripts: keep in repo, never copy to build output -->
-		<None Update="tools\**\*">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-			<Pack>false</Pack>
-		</None>
-	</ItemGroup>
+  <ItemGroup>
+    <Reference Update="System">
+      <Private>false</Private>
+    </Reference>
+    <Reference Update="System.Core">
+      <Private>false</Private>
+    </Reference>
+    <Reference Update="System.Data">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
 
-	<!-- AUTO UPDATE PublishConfiguration ModVersion using CSPROJ Version number -->
-	<Target Name="UpdatePublishConfigVersion"
-            BeforeTargets="Build"
-            Condition="'$(Configuration)' == 'Release'
-                      AND Exists('$(PublishConfigurationPath)')">
+  <ItemGroup>
+    <None Include="$(ModPropsFile)" Link="Properties\Mod.props" />
+    <None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
+  </ItemGroup>
 
-		<Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\tools\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol lf -LeftAlignBlocks" />
-		
-	</Target>
+  <ItemGroup>
+    <!-- Dev-only scripts: keep in repo, never copy to build output -->
+    <None Update="tools\**\*">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <Pack>false</Pack>
+    </None>
+  </ItemGroup>
+
+  <!-- AUTO UPDATE PublishConfiguration ModVersion using CSPROJ Version number -->
+  <Target Name="UpdatePublishConfigVersion"
+	        BeforeTargets="Build"
+	        Condition="'$(Configuration)' == 'Release'
+	                  AND Exists('$(MSBuildProjectDirectory)\tools\Update-PublishConfig.ps1')
+	                  AND Exists('$(MSBuildProjectDirectory)\$(PublishConfigurationPath)')">
+
+    <Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\tools\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol lf -LeftAlignBlocks" />
+  </Target>
 
 </Project>

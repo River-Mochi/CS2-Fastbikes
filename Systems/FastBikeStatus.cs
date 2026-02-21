@@ -28,7 +28,7 @@ namespace FastBikes
 
         private const string FallbackStatusNotLoaded = "Status not loaded.";
         private const string FallbackStatsNotAvail = "No city... ¯\\_(ツ)_/¯ ...No stats";
-        private const string FallbackCarsNotAvail = "run the city a few minutes for data change.";
+        private const string FallbackCarsNotAvail = "run the city a few minutes for data.";
 
         private const string FallbackBikesRow =
             "{0} active | {1} bikes | {2} e-scooter | {3} / {4} parked/total";
@@ -109,7 +109,9 @@ namespace FastBikes
             {
                 BikesRow = LocaleUtils.SafeFormat(KeyStatsNotAvail, FallbackStatsNotAvail);
                 CarsRow = LocaleUtils.SafeFormat(KeyCarsNotAvail, FallbackCarsNotAvail);
-                CarsRow3 = LocaleUtils.SafeFormat(KeyCarsNotAvail, FallbackCarsNotAvail);
+
+                // Prevent duplicate "run city" line in the UI.
+                CarsRow3 = string.Empty;
                 return;
             }
 
@@ -179,12 +181,13 @@ namespace FastBikes
 
             string updated = snap.SnapshotTimeLocal.ToString("HH:mm:ss");
 
+            // Format string expects Buildings first, Border second.
             CarsRow3 = LocaleUtils.SafeFormat(
                 KeyCarsRow3,
                 fallbackFormat: FallbackCarsRow3,
-                LocaleUtils.FormatN0(snap.CarHiddenAtBorder),      // {0}
-                LocaleUtils.FormatN0(snap.CarHiddenInBuildings),   // {1}
-                updated                                            // {2}
+                LocaleUtils.FormatN0(snap.CarHiddenInBuildings), // {0}
+                LocaleUtils.FormatN0(snap.CarHiddenAtBorder),    // {1}
+                updated                                          // {2}
             );
         }
     }

@@ -1,8 +1,7 @@
 # Fast Bikes (Cities: Skylines II)
 
 Fast Bikes speeds up **bicycles** and **electric scooters**.
-
-It applies a speed multiplier and scales acceleration/braking so higher speeds stay usable instead of looking like “teleport + panic braking”.
+Path speed limits can also be raised to match the faster bikes.
 
 ## Features
 - **Bike & scooter speed** multiplier (0.30x to 10.00x)
@@ -18,12 +17,6 @@ It applies a speed multiplier and scales acceleration/braking so higher speeds s
 - Debug:
   - **Bicycle Prefab Report** (writes to `Logs/FastBikes.log`)
 
-> Default install values:
-> - Enabled: ON  
-> - Speed: 2.0x  
-> - Stiffness: 1.50x  
-> - Damping: 1.50x  
-> - Path speed limit: 2.0x  
 
 ## Options
 

@@ -26,9 +26,9 @@ namespace FastBikes
         private static bool s_BannerLogged;
 
 #if DEBUG
-        private const string buildTag = "[DEBUG]";
+        private const string BuildTag = "[DEBUG]";
 #else
-        private const string buildTag = "[RELEASE]";
+        private const string BuildTag = "[RELEASE]";
 #endif
 
         public static readonly ILog s_Log =
@@ -50,7 +50,7 @@ namespace FastBikes
             if (!s_BannerLogged)
             {
                 s_BannerLogged = true;
-                LogSafe(( ) => $"{ModName} v{ModVersion} OnLoad {buildTag}");
+                LogSafe(( ) => $"{ModName} v{ModVersion} OnLoad {BuildTag}");
             }
 
             if (GameManager.instance == null)
@@ -59,10 +59,9 @@ namespace FastBikes
                 return;
             }
 
-            var setting = new Setting(this);
+            Setting setting = new Setting(this);
             Settings = setting;
 
-            // Locales are best-effort; never crash mod load.
             AddLocaleSource("en-US", new LocaleEN(setting));
             AddLocaleSource("fr-FR", new LocaleFR(setting));
             AddLocaleSource("es-ES", new LocaleES(setting));
@@ -75,13 +74,9 @@ namespace FastBikes
             AddLocaleSource("zh-HANS", new LocaleZH_CN(setting));    // Simplified Chinese
             AddLocaleSource("zh-HANT", new LocaleZH_HANT(setting));  // Traditional Chinese
 
-            // Settings + Options UI
             try
             {
-
-                // LoadSettings(sectionName, instance, defaultInstance)
-                AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this)); // Saving settings is automatic on changes
-
+                AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
                 setting.RegisterInOptionsUI();
             }
             catch (Exception ex)
@@ -89,7 +84,6 @@ namespace FastBikes
                 WarnSafe(( ) => $"Settings/UI init failed: {ex.GetType().Name}: {ex.Message}");
             }
 
-            // System Scheduling/init.
             try
             {
                 updateSystem.UpdateAfter<FastBikeSystem>(SystemUpdatePhase.PrefabUpdate);
@@ -111,7 +105,10 @@ namespace FastBikes
                 {
                     Settings.UnregisterInOptionsUI();
                 }
-                catch (Exception ex) { WarnSafe(( ) => $"UnregisterInOptionsUI failed: {ex.GetType().Name}: {ex.Message}"); }
+                catch (Exception ex)
+                {
+                    WarnSafe(( ) => $"UnregisterInOptionsUI failed: {ex.GetType().Name}: {ex.Message}");
+                }
 
                 Settings = null;
             }

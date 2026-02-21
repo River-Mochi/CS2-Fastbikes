@@ -31,7 +31,6 @@ namespace CS2HonuShared
             }
             catch
             {
-                // Silent fallback.
             }
 
             return fallback;

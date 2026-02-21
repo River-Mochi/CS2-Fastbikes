@@ -11,7 +11,7 @@ namespace FastBikes
     using Unity.Entities;            // World
     using UnityEngine;               // Application.OpenURL
 
-    [FileLocation("ModsSettings/FastBikes/FastBikes")]    // Settings file path
+    [FileLocation("ModsSettings/FastBikes/FastBikes")]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(
         ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsStatusGrp, ActionsPathSpeedGrp,
@@ -28,8 +28,6 @@ namespace FastBikes
         public const string ActionsStabilityGrp = "Stability";
         public const string ActionsResetGrp = "Reset";
         public const string ActionsStatusGrp = "Status";
-
-        // PathSpeed group at bottom of Actions.
         public const string ActionsPathSpeedGrp = "PathSpeed";
 
         public const string AboutInfoGrp = "Mod info";
@@ -39,17 +37,14 @@ namespace FastBikes
         private const string UrlParadox =
             "https://mods.paradoxplaza.com/authors/River-mochi/cities_skylines_2?games=cities_skylines_2&orderBy=desc&sortBy=best&time=alltime";
 
-        private const float Vanilla = 1.0f;   // game default multipliers.
+        private const float Vanilla = 1.0f;
 
-        // Mod defaults (first install), 1.0 = off (vanilla game).
         private const bool DefaultEnabled = true;
         private const float DefaultSpeed = 2.0f;
         private const float DefaultStiffness = 1.50f;
         private const float DefaultDamping = 1.50f;
-
         private const float DefaultPathSpeedScalar = 2.0f;
 
-        // Float compare guard to avoid scheduling extra applies on near identical values.
         private const float FloatEpsilon = 0.0001f;
 
         public Setting(IMod mod) : base(mod)
@@ -58,7 +53,6 @@ namespace FastBikes
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
-
             PathSpeedScalar = DefaultPathSpeedScalar;
         }
 
@@ -147,19 +141,6 @@ namespace FastBikes
         }
 
         // -----------------------------
-        // Actions: Path speed
-        // -----------------------------
-
-        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
-        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
-        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
-        public float PathSpeedScalar
-        {
-            get; set;
-        }
-
-        // -----------------------------
         // Actions: Status (read-only)
         // -----------------------------
 
@@ -168,14 +149,7 @@ namespace FastBikes
         {
             get
             {
-                // Refresh cache when Options UI asks for the string.
-                // Frame guard inside RefreshIfNeeded prevents double work.
-                try
-                {
-                    FastBikeStatus.RefreshIfNeeded();
-                }
-                catch { }
-                // Always return a non-null string (Options UI getters must never throw).
+                RefreshStatusSafe();
                 return FastBikeStatus.BikesRow ?? string.Empty;
             }
         }
@@ -185,12 +159,7 @@ namespace FastBikes
         {
             get
             {
-                // Same refresh call for row2; frame guard prevents repeated snapshot.
-                try
-                {
-                    FastBikeStatus.RefreshIfNeeded();
-                }
-                catch { }
+                RefreshStatusSafe();
                 return FastBikeStatus.CarsRow ?? string.Empty;
             }
         }
@@ -200,12 +169,7 @@ namespace FastBikes
         {
             get
             {
-                try
-                {
-                    FastBikeStatus.RefreshIfNeeded();
-                }
-                catch { }
-
+                RefreshStatusSafe();
                 return FastBikeStatus.CarsRow3 ?? string.Empty;
             }
         }
@@ -221,10 +185,29 @@ namespace FastBikes
                     return;
                 }
 
-                LogBorderHiddenCarsNow();
+                World world = World.DefaultGameObjectInjectionWorld;
+                if (world == null || !world.IsCreated)
+                {
+                    return;
+                }
+
+                world.GetOrCreateSystemManaged<FastBikeStatusSystem>()
+                    .LogBorderParkedSamples(headCount: 10, tailCount: 10);
             }
         }
 
+        // -----------------------------
+        // Actions: Path speed
+        // -----------------------------
+
+        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
+        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
+        public float PathSpeedScalar
+        {
+            get; set;
+        }
 
         // ------------------------
         // About: Info
@@ -277,7 +260,7 @@ namespace FastBikes
                     return;
                 }
 
-                RequestDump();
+                GetSystem()?.ScheduleDump();
             }
         }
 
@@ -291,13 +274,23 @@ namespace FastBikes
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
-
             PathSpeedScalar = DefaultPathSpeedScalar;
         }
 
         // --------------------------------------------------------------------
         // Helpers
         // --------------------------------------------------------------------
+
+        private static void RefreshStatusSafe( )
+        {
+            try
+            {
+                FastBikeStatus.RefreshIfNeeded();
+            }
+            catch
+            {
+            }
+        }
 
         private static World? GetWorld( )
         {
@@ -321,45 +314,6 @@ namespace FastBikes
             return world.GetOrCreateSystemManaged<FastBikeSystem>();
         }
 
-        private static void ScheduleApplyAll( )
-        {
-            GetSystem()?.ScheduleApplyAll();
-        }
-
-        private static void ScheduleApplyBicyclesAndStability( )
-        {
-            GetSystem()?.ScheduleApplyBicyclesAndStability();
-        }
-
-        private static void ScheduleApplyPaths( )
-        {
-            GetSystem()?.ScheduleApplyPaths();
-        }
-
-        private static void ScheduleResetVanillaAll( )
-        {
-            GetSystem()?.ScheduleResetVanillaAll();
-        }
-
-
-        private static void LogBorderHiddenCarsNow( )
-        {
-            World? world = GetWorld();
-            if (world == null)
-            {
-                return;
-            }
-
-            FastBikeStatusSystem sys = world.GetOrCreateSystemManaged<FastBikeStatusSystem>();
-            sys.LogBorderParkedSamples(headCount: 10, tailCount: 10);
-        }
-
-
-        private static void RequestDump( )
-        {
-            GetSystem()?.ScheduleDump();
-        }
-
         // ------------------------------------------------
         // UI setter handlers
         // ------------------------------------------------
@@ -373,11 +327,11 @@ namespace FastBikes
 
             if (value)
             {
-                ScheduleApplyAll();
+                GetSystem()?.ScheduleApplyAll();
             }
             else
             {
-                ScheduleResetVanillaAll();
+                GetSystem()?.ScheduleResetVanillaAll();
             }
         }
 
@@ -390,7 +344,7 @@ namespace FastBikes
 
             if (EnableFastBikes)
             {
-                ScheduleApplyBicyclesAndStability();
+                GetSystem()?.ScheduleApplyBicyclesAndStability();
             }
         }
 
@@ -403,7 +357,7 @@ namespace FastBikes
 
             if (EnableFastBikes)
             {
-                ScheduleApplyBicyclesAndStability();
+                GetSystem()?.ScheduleApplyBicyclesAndStability();
             }
         }
 
@@ -416,7 +370,7 @@ namespace FastBikes
 
             if (EnableFastBikes)
             {
-                ScheduleApplyBicyclesAndStability();
+                GetSystem()?.ScheduleApplyBicyclesAndStability();
             }
         }
 
@@ -429,7 +383,7 @@ namespace FastBikes
 
             if (EnableFastBikes)
             {
-                ScheduleApplyPaths();
+                GetSystem()?.ScheduleApplyPaths();
             }
         }
 
@@ -438,11 +392,10 @@ namespace FastBikes
             SpeedScalar = Vanilla;
             StiffnessScalar = Vanilla;
             DampingScalar = Vanilla;
-
             PathSpeedScalar = Vanilla;
 
             ApplyAndSave();
-            ScheduleResetVanillaAll();
+            GetSystem()?.ScheduleResetVanillaAll();
         }
 
         private void DoResetToModDefaults( )
@@ -450,11 +403,10 @@ namespace FastBikes
             SpeedScalar = DefaultSpeed;
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
-
             PathSpeedScalar = DefaultPathSpeedScalar;
 
             ApplyAndSave();
-            ScheduleApplyAll();
+            GetSystem()?.ScheduleApplyAll();
         }
     }
 }

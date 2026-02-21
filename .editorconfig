@@ -13,6 +13,9 @@ trim_trailing_whitespace = true
 # indent_size intentionally not specified in this section.
 indent_style = space # Use soft tabs (spaces) for indentation.
 
+[*.cs]
+end_of_line = lf
+
 [*.{bat,cmd}]
 end_of_line = crlf
 

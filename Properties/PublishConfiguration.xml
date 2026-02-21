@@ -9,11 +9,9 @@
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="Fast Bikes" /-->
 	<LongDescription>
-Is your city stuck behind slow bikes? 🚴🚴🚗🚐🚚🚙
-
 🚲 Fast Bikes speeds up bicycles and scooters.
 
-🛣️ NEW: PATH speed limit - YES - now you can change bike paths (paths are independent of road speed limits)!
+🚴 NEW: PATH speed limit - YES - now you can change bike paths (paths are independent of road speed limits)!
 
 - No known road mod lets you set "path" speeds so this is unique to this mod.
 
@@ -70,8 +68,7 @@ tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life, chan
 	<RequiredDLC Value="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 	<ChangeLog>
-- Adds Path speed limit setting; this is separate from "road" speed limit mods which don't affect pedestrian or bicycle paths.
-- Add Status Report data.
+- Adds expanded Status Report data and error checks.
 - All Languages updated for changes.
 </ChangeLog>
 	<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
