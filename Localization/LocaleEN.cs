@@ -98,7 +98,7 @@ namespace FastBikes
                     "**1.00 = game default**\n" +
                     "Affects: bike paths, divided pedestrian+bike, and pedestrian paths.\n" +
                     "To uninstall the mod, reset this to 1.00 (and all values), load city, which restores path speed limits.\n" +
-                    "Then the mod can be safely uninstalled. If you skipped this step,\n" +
+                    "Then the mod can be safely uninstalled. If you skipped this step, \n" +
                     "existing paths keep the current speed limits, and all new paths use vanilla default speed limits."
                 },
 
@@ -108,9 +108,9 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary1)), "Bike group" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary1)),
                     "Bikes and Electric scooters.\n" +
-                    "**Active** = entities with a current lane (moving).\n" +
-                    "**Parked** = entities with **ParkedCar**.\n" +
-                    "Bike group is gated by **BicycleData** on the prefab."
+                    "**Active** = in a current lane (moving).\n" +
+                    "**Parked** = has a **ParkedCar** flag.\n" +
+                    "Tech notes: Bike group uses **BicycleData** filter."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "Car group" },
@@ -119,15 +119,33 @@ namespace FastBikes
                     "**Active** = entities with a current lane (moving).\n" +
                     "**Parked** = entities with **ParkedCar** (includes roadside/curbside).\n" +
                     "Note: will not match in-game info panel parked numbers because we count all parked not just ones in a parking lot. \n" +
-                    "Scan runs only while Options menu is open (not per-frame in city for the best performance)."
+                    "Scan runs only when Options menu is open (not per-frame in city so it won't affect city performance)."
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary3)), "" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary3)),
+                    "Hidden parked vehicles:\n" +
+                    "**Parked in buildings** = normal inside buildings/garages (it exists and has Unspawned flag because it's not currently visible).\n" +
+                    "**Hidden at border** = parked at Outside Connection (OC),\n" +
+                    "with an Owner who is most likely inside the city.\n" +
+                    "  - Not sure of cause; info is for those who want to invstigate\n." +
+                    "  - This could be a dev short cut to stage them there or something else.\n" +
+                    "  - Use the <Log OC Cars> button to get a sample list"
+                },
+
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LogBorderHiddenCars)), "Log OC cars" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.LogBorderHiddenCars)),
+                    "Writes a small report to **Logs/FastBikes.log** with head+tail samples.\n" +
+                    "Then use Scene Explorer mod to Jump To the listed Vehicle entity IDs and investigate."
                 },
 
                 { "FAST_STATUS_NOT_LOADED", "Status not loaded." },
                 { "FAST_STATS_NOT_AVAIL", "No city... ¯\\_(ツ)_/¯ ...No stats" },
-                { "FAST_STATS_CARS_NOT_AVAIL", "run the city a few minutes for data." },
+                { "FAST_STATS_CARS_NOT_AVAIL", "run the city a few minutes for data change." },
 
                 { "FAST_STATS_BIKES_ROW1", "{0} active | {1} bikes | {2} scooter | {3} / {4} parked/total" },
-                { "FAST_STATS_CARS_ROW2",  "{0} active | {1} parked | {2} total | updated {3}" },
+                { "FAST_STATS_CARS_ROW2",  "{0} active | {1} parked | {2} total | {3} trailers" },
+                { "FAST_STATS_CARS_ROW3",  "{0} parked in buildings | {1} hidden at border OC | updated {2}" },
 
                 // About: Info
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),     "Mod" },

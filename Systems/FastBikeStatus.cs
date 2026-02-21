@@ -2,7 +2,7 @@
 // Purpose: UI-facing cached status lines for Options UI.
 // Notes:
 // - Refresh driven by Setting.cs getters (runs only while Options is open).
-// - Cache invalidates on main-menu <-> city transitions (prevents stale after city switching).
+// - Cache invalidates on main-menu <-> city transitions.
 // - Localization + formatting safety is handled here; FastBikeStatusSystem returns raw numbers only.
 
 namespace FastBikes
@@ -21,21 +21,27 @@ namespace FastBikes
         internal const string KeyStatusNotLoaded = "FAST_STATUS_NOT_LOADED";
         internal const string KeyStatsNotAvail = "FAST_STATS_NOT_AVAIL";
         internal const string KeyCarsNotAvail = "FAST_STATS_CARS_NOT_AVAIL";
+
         internal const string KeyBikesRow = "FAST_STATS_BIKES_ROW1";
         internal const string KeyCarsRow = "FAST_STATS_CARS_ROW2";
+        internal const string KeyCarsRow3 = "FAST_STATS_CARS_ROW3";
 
         private const string FallbackStatusNotLoaded = "Status not loaded.";
         private const string FallbackStatsNotAvail = "No city... ¯\\_(ツ)_/¯ ...No stats";
-        private const string FallbackCarsNotAvail = "run the city a few minutes for data.";
+        private const string FallbackCarsNotAvail = "run the city a few minutes for data change.";
 
         private const string FallbackBikesRow =
             "{0} active | {1} bikes | {2} e-scooter | {3} / {4} parked/total";
 
         private const string FallbackCarsRow =
-            "{0} active | {1} parked | {2} total | updated {3}";
+            "{0} active | {1} parked | {2} total | {3} trailers";
+
+        private const string FallbackCarsRow3 =
+            "{0} parked in buildings | {1} hidden at border OC | updated {2}";
 
         public static string BikesRow { get; private set; } = string.Empty;
         public static string CarsRow { get; private set; } = string.Empty;
+        public static string CarsRow3 { get; private set; } = string.Empty;
 
         private static bool s_WasInGame;
         private static bool s_HasSnapshotThisCity;
@@ -50,6 +56,7 @@ namespace FastBikes
 
             BikesRow = LocaleUtils.Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
             CarsRow = LocaleUtils.Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
+            CarsRow3 = LocaleUtils.Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
         }
 
         public static void MarkDirty( )
@@ -84,6 +91,11 @@ namespace FastBikes
                 CarsRow = LocaleUtils.SafeFormat(KeyStatusNotLoaded, FallbackStatusNotLoaded);
             }
 
+            if (string.IsNullOrEmpty(CarsRow3))
+            {
+                CarsRow3 = LocaleUtils.SafeFormat(KeyStatusNotLoaded, FallbackStatusNotLoaded);
+            }
+
             GameManager gm = GameManager.instance;
             bool isGame = (gm != null && gm.gameMode.IsGame());
 
@@ -97,6 +109,7 @@ namespace FastBikes
             {
                 BikesRow = LocaleUtils.SafeFormat(KeyStatsNotAvail, FallbackStatsNotAvail);
                 CarsRow = LocaleUtils.SafeFormat(KeyCarsNotAvail, FallbackCarsNotAvail);
+                CarsRow3 = LocaleUtils.SafeFormat(KeyCarsNotAvail, FallbackCarsNotAvail);
                 return;
             }
 
@@ -136,6 +149,7 @@ namespace FastBikes
             {
                 BikesRow = LocaleUtils.Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
                 CarsRow = LocaleUtils.Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
+                CarsRow3 = LocaleUtils.Localize(KeyStatusNotLoaded, FallbackStatusNotLoaded);
             }
         }
 
@@ -154,15 +168,23 @@ namespace FastBikes
                 LocaleUtils.FormatN0(snap.BikeGroupTotal)      // {4}
             );
 
-            string updated = snap.SnapshotTimeLocal.ToString("HH:mm:ss");
-
             CarsRow = LocaleUtils.SafeFormat(
                 KeyCarsRow,
                 fallbackFormat: FallbackCarsRow,
                 LocaleUtils.FormatN0(snap.CarGroupActive),     // {0}
                 LocaleUtils.FormatN0(snap.CarGroupParked),     // {1}
                 LocaleUtils.FormatN0(snap.CarGroupTotal),      // {2}
-                updated                                        // {3}
+                LocaleUtils.FormatN0(snap.TrailerTotal)        // {3}
+            );
+
+            string updated = snap.SnapshotTimeLocal.ToString("HH:mm:ss");
+
+            CarsRow3 = LocaleUtils.SafeFormat(
+                KeyCarsRow3,
+                fallbackFormat: FallbackCarsRow3,
+                LocaleUtils.FormatN0(snap.CarHiddenAtBorder),      // {0}
+                LocaleUtils.FormatN0(snap.CarHiddenInBuildings),   // {1}
+                updated                                            // {2}
             );
         }
     }

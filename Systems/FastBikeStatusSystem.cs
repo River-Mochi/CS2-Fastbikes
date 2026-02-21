@@ -1,7 +1,7 @@
 // File: Systems/FastBikeStatusSystem.cs
 // Purpose: On-demand in-world runtime counts for personal vehicles.
 // Notes:
-// - Snapshot built on-demand (Options UI), not from OnUpdate.
+// - Snapshot built on-demand button (Options UI).
 // - EntityQuery + ComponentLookup used to avoid per-frame work.
 // - Base filter uses Game.Vehicles.PersonalCar (includes bicycles + e-scooters).
 // - Bicycle-group gate uses Game.Prefabs.BicycleData on the prefab entity.
@@ -10,15 +10,20 @@
 //   - Active = Game.Vehicles.CarCurrentLane (Parked wins if both)
 // - Total shown in UI = Parked + Active (pending excluded by design).
 // - Trailers are excluded (Game.Vehicles.CarTrailer) so car totals reflect drivable cars.
+// - Border-hidden detection uses ParkedCar.m_Lane having Game.Net.ConnectionLane.
 
 namespace FastBikes
 {
     using Game;                // GameSystemBase
-    using Game.Common;         // Deleted, Destroyed
+    using Game.Citizens;       // TouristHousehold
+    using Game.Common;         // Deleted, Destroyed, Owner
+    using Game.Net;            // ConnectionLane
+    using Game.Objects;        // Unspawned
     using Game.Prefabs;        // BicycleData, PrefabBase, PrefabRef, PrefabSystem
     using Game.Tools;          // Temp
     using Game.Vehicles;       // CarCurrentLane, CarTrailer, ParkedCar
     using System;              // DateTime, StringComparison
+    using System.Collections.Generic;
     using Unity.Collections;   // Allocator, NativeArray
     using Unity.Entities;      // Entity, EntityQuery, ComponentLookup, ComponentType
 
@@ -36,6 +41,10 @@ namespace FastBikes
             public readonly long CarGroupParked;
             public readonly long CarGroupActive;
 
+            public readonly long TrailerTotal;        // CarTrailer entities (separate)
+            public readonly long CarHiddenAtBorder;   // Parked+Unspawned+Owner, lane is ConnectionLane
+            public readonly long CarHiddenInBuildings;// Parked+Unspawned+Owner, lane is not ConnectionLane
+
             public readonly DateTime SnapshotTimeLocal;
 
             public Snapshot(
@@ -47,6 +56,9 @@ namespace FastBikes
                 long carGroupTotal,
                 long carGroupParked,
                 long carGroupActive,
+                long trailerTotal,
+                long carHiddenAtBorder,
+                long carHiddenInBuildings,
                 DateTime snapshotTimeLocal)
             {
                 BikeGroupTotal = bikeGroupTotal;
@@ -59,12 +71,17 @@ namespace FastBikes
                 CarGroupParked = carGroupParked;
                 CarGroupActive = carGroupActive;
 
+                TrailerTotal = trailerTotal;
+                CarHiddenAtBorder = carHiddenAtBorder;
+                CarHiddenInBuildings = carHiddenInBuildings;
+
                 SnapshotTimeLocal = snapshotTimeLocal;
             }
         }
 
         private PrefabSystem m_PrefabSystem = null!;
         private EntityQuery m_PersonalVehicleQuery;
+        private EntityQuery m_TrailerQuery;
 
         protected override void OnCreate( )
         {
@@ -72,11 +89,20 @@ namespace FastBikes
 
             m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
 
-            // Trailers carry PersonalCar but are not a drivable "car" for status purposes.
+            // Drivable personal vehicles (trailers excluded).
             m_PersonalVehicleQuery = GetEntityQuery(
                 ComponentType.ReadOnly<PrefabRef>(),
                 ComponentType.ReadOnly<Game.Vehicles.PersonalCar>(),
                 ComponentType.Exclude<CarTrailer>(),
+                ComponentType.Exclude<Deleted>(),
+                ComponentType.Exclude<Temp>(),
+                ComponentType.Exclude<Destroyed>());
+
+            // Trailers (separate count).
+            m_TrailerQuery = GetEntityQuery(
+                ComponentType.ReadOnly<PrefabRef>(),
+                ComponentType.ReadOnly<Game.Vehicles.PersonalCar>(),
+                ComponentType.ReadOnly<CarTrailer>(),
                 ComponentType.Exclude<Deleted>(),
                 ComponentType.Exclude<Temp>(),
                 ComponentType.Exclude<Destroyed>());
@@ -96,6 +122,10 @@ namespace FastBikes
             ComponentLookup<ParkedCar> parkedLookup = GetComponentLookup<ParkedCar>(isReadOnly: true);
             ComponentLookup<CarCurrentLane> currentLaneLookup = GetComponentLookup<CarCurrentLane>(isReadOnly: true);
 
+            ComponentLookup<Unspawned> unspawnedLookup = GetComponentLookup<Unspawned>(isReadOnly: true);
+            ComponentLookup<Owner> ownerLookup = GetComponentLookup<Owner>(isReadOnly: true);
+            ComponentLookup<Game.Net.ConnectionLane> connectionLaneLookup = GetComponentLookup<Game.Net.ConnectionLane>(isReadOnly: true);
+
             long bikeGroupTotal = 0;
             long bikeGroupParked = 0;
             long bikeGroupActive = 0;
@@ -104,6 +134,9 @@ namespace FastBikes
             long carGroupTotal = 0;
             long carGroupParked = 0;
             long carGroupActive = 0;
+
+            long carHiddenAtBorder = 0;
+            long carHiddenInBuildings = 0;
 
             using (NativeArray<Entity> entities = m_PersonalVehicleQuery.ToEntityArray(Allocator.Temp))
             {
@@ -150,7 +183,28 @@ namespace FastBikes
                         carGroupParked++;
                     else if (isActive)
                         carGroupActive++;
+
+                    if (isParked && unspawnedLookup.HasComponent(e) && ownerLookup.HasComponent(e))
+                    {
+                        Owner o = ownerLookup[e];
+                        if (o.m_Owner != Entity.Null)
+                        {
+                            ParkedCar pc = parkedLookup[e];
+                            Entity lane = pc.m_Lane;
+
+                            if (lane != Entity.Null && connectionLaneLookup.HasComponent(lane))
+                                carHiddenAtBorder++;
+                            else
+                                carHiddenInBuildings++;
+                        }
+                    }
                 }
+            }
+
+            long trailerTotal = 0;
+            using (NativeArray<Entity> trailerEntities = m_TrailerQuery.ToEntityArray(Allocator.Temp))
+            {
+                trailerTotal = trailerEntities.Length;
             }
 
             long bikeOnlyTotal = bikeGroupTotal - scooterTotal;
@@ -166,7 +220,134 @@ namespace FastBikes
                 carGroupTotal: carGroupTotal,
                 carGroupParked: carGroupParked,
                 carGroupActive: carGroupActive,
+                trailerTotal: trailerTotal,
+                carHiddenAtBorder: carHiddenAtBorder,
+                carHiddenInBuildings: carHiddenInBuildings,
                 snapshotTimeLocal: DateTime.Now);
+        }
+
+        public void LogBorderParkedSamples(int headCount = 10, int tailCount = 10)
+        {
+            if (headCount < 1)
+                headCount = 10;
+            if (tailCount < 1)
+                tailCount = 10;
+
+            ComponentLookup<PrefabRef> prefabRefLookup = GetComponentLookup<PrefabRef>(isReadOnly: true);
+            ComponentLookup<BicycleData> bicycleDataLookup = GetComponentLookup<BicycleData>(isReadOnly: true);
+
+            ComponentLookup<ParkedCar> parkedLookup = GetComponentLookup<ParkedCar>(isReadOnly: true);
+            ComponentLookup<Unspawned> unspawnedLookup = GetComponentLookup<Unspawned>(isReadOnly: true);
+            ComponentLookup<Owner> ownerLookup = GetComponentLookup<Owner>(isReadOnly: true);
+            ComponentLookup<Game.Net.ConnectionLane> connectionLaneLookup = GetComponentLookup<Game.Net.ConnectionLane>(isReadOnly: true);
+            ComponentLookup<TouristHousehold> touristHouseholdLookup = GetComponentLookup<TouristHousehold>(isReadOnly: true);
+
+            int totalBorderHidden = 0;
+            int touristOwners = 0;
+            int residentOwners = 0;
+
+            var head = new List<Entity>(headCount);
+            var tail = new List<Entity>(tailCount);
+
+            using (NativeArray<Entity> entities = m_PersonalVehicleQuery.ToEntityArray(Allocator.Temp))
+            {
+                for (int i = 0; i < entities.Length; i++)
+                {
+                    Entity e = entities[i];
+
+                    if (!prefabRefLookup.HasComponent(e))
+                        continue;
+
+                    Entity prefabEntity = prefabRefLookup[e].m_Prefab;
+                    if (prefabEntity == Entity.Null)
+                        continue;
+
+                    if (bicycleDataLookup.HasComponent(prefabEntity))
+                        continue;
+
+                    if (!parkedLookup.HasComponent(e))
+                        continue;
+
+                    if (!unspawnedLookup.HasComponent(e))
+                        continue;
+
+                    if (!ownerLookup.HasComponent(e))
+                        continue;
+
+                    Owner o = ownerLookup[e];
+                    if (o.m_Owner == Entity.Null)
+                        continue;
+
+                    ParkedCar pc = parkedLookup[e];
+                    Entity lane = pc.m_Lane;
+
+                    if (lane == Entity.Null || !connectionLaneLookup.HasComponent(lane))
+                        continue;
+
+                    totalBorderHidden++;
+
+                    if (touristHouseholdLookup.HasComponent(o.m_Owner))
+                        touristOwners++;
+                    else
+                        residentOwners++;
+
+                    AddHeadTailSample(e, head, tail, headCount, tailCount);
+                }
+            }
+
+            Mod.LogSafe(( ) =>
+            {
+                var sb = new System.Text.StringBuilder();
+
+                sb.AppendLine("\n==================== [FB] BORDER-HIDDEN CARS (SAMPLES) ====================");
+                sb.AppendLine("Meaning: Parked + Unspawned + Owner, parked lane is ConnectionLane (outside connection border).");
+                sb.AppendLine($"TotalBorderHidden={totalBorderHidden} (TouristOwners={touristOwners}, ResidentOwners={residentOwners})");
+                sb.AppendLine("Samples are VehicleIndex:Version. Use Scene Explorer to Jump To.");
+                sb.AppendLine();
+
+                sb.Append("Head: ");
+                AppendEntitySamples(sb, head);
+                sb.AppendLine();
+
+                sb.Append("Tail: ");
+                AppendEntitySamples(sb, tail);
+                sb.AppendLine();
+
+                sb.AppendLine("Tip: In Scene Explorer, open ParkedCar -> m_Lane should show Connection Lane for border-hidden cases.");
+
+                return sb.ToString();
+            });
+
+            static void AddHeadTailSample(Entity e, List<Entity> headList, List<Entity> tailList, int headMax, int tailMax)
+            {
+                if (headList.Count < headMax)
+                    headList.Add(e);
+
+                if (tailList.Count == tailMax)
+                    tailList.RemoveAt(0);
+
+                tailList.Add(e);
+            }
+
+            static void AppendEntitySamples(System.Text.StringBuilder sb, List<Entity> items)
+            {
+                if (items == null || items.Count == 0)
+                {
+                    sb.Append("<none>");
+                    return;
+                }
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (i > 0)
+                        sb.Append(", ");
+
+                    Entity e = items[i];
+                    sb.Append(e.Index);
+                    sb.Append(':');
+                    sb.Append(e.Version);
+                }
+            }
         }
 
         private bool IsElectricScooterPrefab(Entity prefabEntity)

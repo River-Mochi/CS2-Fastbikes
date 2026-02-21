@@ -87,7 +87,7 @@ if ($LeftAlignBlocks) {
 }
 
 # Replace ONLY the Value="..." part of ModVersion (works for empty/space/weird values).
-# Anchored to line-start so we don't accidentally match a commented-out ModVersion.
+# Anchored to line-start so it won't accidentally match a commented-out ModVersion.
 $rxMod = [System.Text.RegularExpressions.Regex]::new(
   '(?m)^(?<prefix>[\t ]*<ModVersion\b[^>]*\bValue=")[^"]*(?<suffix>")',
   [System.Text.RegularExpressions.RegexOptions]::IgnoreCase

@@ -62,9 +62,9 @@ namespace FastBikes
             PathSpeedScalar = DefaultPathSpeedScalar;
         }
 
-        // -------------------------------------------------
+        // ----------------------------
         // ACTIONS: Main toggle
-        // -------------------------------------------------
+        // ----------------------------
 
         [SettingsUISection(ActionsTab, ActionsSpeedGrp)]
         [SettingsUISetter(typeof(Setting), nameof(SetEnableFastBikes))]
@@ -147,6 +147,19 @@ namespace FastBikes
         }
 
         // -----------------------------
+        // Actions: Path speed
+        // -----------------------------
+
+        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
+        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
+        public float PathSpeedScalar
+        {
+            get; set;
+        }
+
+        // -----------------------------
         // Actions: Status (read-only)
         // -----------------------------
 
@@ -182,18 +195,36 @@ namespace FastBikes
             }
         }
 
-        // -----------------------------
-        // Actions: Path speed
-        // -----------------------------
-
-        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
-        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
-        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
-        public float PathSpeedScalar
+        [SettingsUISection(ActionsTab, ActionsStatusGrp)]
+        public string StatusSummary3
         {
-            get; set;
+            get
+            {
+                try
+                {
+                    FastBikeStatus.RefreshIfNeeded();
+                }
+                catch { }
+
+                return FastBikeStatus.CarsRow3 ?? string.Empty;
+            }
         }
+
+        [SettingsUISection(ActionsTab, ActionsStatusGrp)]
+        [SettingsUIButton]
+        public bool LogBorderHiddenCars
+        {
+            set
+            {
+                if (!value)
+                {
+                    return;
+                }
+
+                LogBorderHiddenCarsNow();
+            }
+        }
+
 
         // ------------------------
         // About: Info
@@ -309,6 +340,20 @@ namespace FastBikes
         {
             GetSystem()?.ScheduleResetVanillaAll();
         }
+
+
+        private static void LogBorderHiddenCarsNow( )
+        {
+            World? world = GetWorld();
+            if (world == null)
+            {
+                return;
+            }
+
+            FastBikeStatusSystem sys = world.GetOrCreateSystemManaged<FastBikeStatusSystem>();
+            sys.LogBorderParkedSamples(headCount: 10, tailCount: 10);
+        }
+
 
         private static void RequestDump( )
         {

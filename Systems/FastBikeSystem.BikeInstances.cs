@@ -26,7 +26,6 @@ namespace FastBikes
             Mod.LogSafe(( ) =>
                 "\n==================== [FB] CAR GROUP INSTANCES (LIVE) ====================\n" +
                 "Meaning: live PersonalCar instances excluding BicycleData prefabs.\n" +
-                "Live excludes: Deleted, Temp, Destroyed.\n" +
                 "Status classification:\n" +
                 "  Parked = ParkedCar\n" +
                 "  Active = CarCurrentLane (Parked wins)\n" +
@@ -68,7 +67,8 @@ namespace FastBikes
         .WithNone<Deleted, Temp, Destroyed>()
         .Build();
 
-            using (Unity.Collections.NativeArray<Entity> trailerEntities = trailerQuery.ToEntityArray(Unity.Collections.Allocator.Temp))
+            using (Unity.Collections.NativeArray<Entity> trailerEntities =
+                   trailerQuery.ToEntityArray(Unity.Collections.Allocator.Temp))
             {
                 for (int i = 0; i < trailerEntities.Length; i++)
                 {
@@ -95,14 +95,29 @@ namespace FastBikes
 
             int statusTotal = 0; // parked + active only
 
+            // Unspawned totals (all states)
             int unspawnedTotal = 0;
             int unspawnedWithOwner = 0;
             int unspawnedNoOwner = 0;
 
+            // Optional: split "NoOwner" meaning
+            int unspawnedNoOwnerComponent = 0; // no Owner component
+            int unspawnedOwnerIsNull = 0;      // Owner component but Owner.m_Owner == Null
+
+            // Pending splits
             int pendingWithOwner = 0;
             int pendingNoOwner = 0;
             int pendingUnspawnedNoOwner = 0;
 
+            int pendingNoOwnerComponent = 0;
+            int pendingOwnerIsNull = 0;
+
+            // Parked && Unspawned totals (these are the “hidden in buildings / garages” normal)
+            int parkedUnspawnedTotal = 0;
+            int parkedUnspawnedWithOwner = 0;
+            int parkedUnspawnedNoOwner = 0;
+
+            // Diagnostics
             int pendingAndAccident = 0;
             int movingNoLane = 0;
             int parkedAndLane = 0;
@@ -139,11 +154,14 @@ namespace FastBikes
                 bool hasAccident = SystemAPI.HasComponent<Game.Events.InvolvedInAccident>(e);
 
                 bool hasOwnerComp = SystemAPI.HasComponent<Game.Common.Owner>(e);
+                bool ownerIsNull = false;
                 bool hasOwner = false;
+
                 if (hasOwnerComp)
                 {
                     Game.Common.Owner o = SystemAPI.GetComponent<Game.Common.Owner>(e);
-                    hasOwner = o.m_Owner != Entity.Null;
+                    ownerIsNull = (o.m_Owner == Entity.Null);
+                    hasOwner = !ownerIsNull;
                 }
 
                 // Status-aligned classification (Parked wins)
@@ -171,6 +189,25 @@ namespace FastBikes
                         unspawnedWithOwner++;
                     else
                         unspawnedNoOwner++;
+
+                    if (!hasOwnerComp)
+                        unspawnedNoOwnerComponent++;
+                    else if (ownerIsNull)
+                        unspawnedOwnerIsNull++;
+                }
+
+                if (hasUnspawned && isParked)
+                {
+                    parkedUnspawnedTotal++;
+
+                    if (hasOwner)
+                        parkedUnspawnedWithOwner++;
+                    else
+                        parkedUnspawnedNoOwner++;
+
+#if DEBUG
+                    AddHeadTailSample(e, sampleParkedUnspawnedHead, sampleParkedUnspawnedTail, kHead, kTail);
+#endif
                 }
 
                 if (isPending)
@@ -179,6 +216,11 @@ namespace FastBikes
                         pendingWithOwner++;
                     else
                         pendingNoOwner++;
+
+                    if (!hasOwnerComp)
+                        pendingNoOwnerComponent++;
+                    else if (ownerIsNull)
+                        pendingOwnerIsNull++;
 
                     if (hasUnspawned && !hasOwner)
                         pendingUnspawnedNoOwner++;
@@ -202,18 +244,13 @@ namespace FastBikes
 
                 if (isPending && hasAccident)
                     pendingAndAccident++;
-
-#if DEBUG
-                if (hasUnspawned && isParked)
-                    AddHeadTailSample(e, sampleParkedUnspawnedHead, sampleParkedUnspawnedTail, kHead, kTail);
-#endif
             }
 
             Mod.LogSafe(( ) =>
             {
                 var sb = new System.Text.StringBuilder();
 
-                sb.AppendLine($"[FB] Trailers: Total={trailerTotal}, Unspawned={trailerUnspawned}");
+                sb.AppendLine($"\n  [FB] Trailers: Total={trailerTotal}, Unspawned={trailerUnspawned}");
 #if DEBUG
                 sb.Append("  TrailerSamples Head: ");
                 AppendEntitySamples(sb, trailerHead);
@@ -226,8 +263,15 @@ namespace FastBikes
 
                 sb.AppendLine($"[FB] CarGroup AllLive: Total={allLiveTotal}, Parked={parked}, Active={active}, Pending={pending}");
                 sb.AppendLine($"[FB] CarGroup StatusTotal(Parked+Active)={statusTotal}");
+
                 sb.AppendLine($"[FB] Unspawned: Total={unspawnedTotal} (WithOwner={unspawnedWithOwner}, NoOwner={unspawnedNoOwner})");
+                sb.AppendLine($"[FB] Unspawned NoOwner split: NoOwnerComponent={unspawnedNoOwnerComponent}, OwnerIsNull={unspawnedOwnerIsNull}");
+
+                sb.AppendLine($"[FB] Parked&&Unspawned: Total={parkedUnspawnedTotal} (WithOwner={parkedUnspawnedWithOwner}, NoOwner={parkedUnspawnedNoOwner})");
+
                 sb.AppendLine($"[FB] Pending: Total={pending} (WithOwner={pendingWithOwner}, NoOwner={pendingNoOwner}, Unspawned&&NoOwner={pendingUnspawnedNoOwner})");
+                sb.AppendLine($"[FB] Pending NoOwner split: NoOwnerComponent={pendingNoOwnerComponent}, OwnerIsNull={pendingOwnerIsNull}");
+
                 sb.AppendLine($"[FB] Pending diagnostics: Pending&&InvolvedInAccident={pendingAndAccident}, Moving&&!CarCurrentLane={movingNoLane}");
                 sb.AppendLine($"[FB] Sanity: ParkedCar&&CarCurrentLane={parkedAndLane}");
 
@@ -295,6 +339,7 @@ namespace FastBikes
             }
 #endif
         }
+
 
 
         // ====== BIKES Stuff ======
