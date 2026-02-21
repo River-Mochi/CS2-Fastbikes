@@ -12,6 +12,7 @@ namespace FastBikes
     using Game.Tools;             // Temp
     using Game.Vehicles;          // Car, CarCurrentLane, ParkedCar
     using System.Collections.Generic;
+    using Unity.Collections;
     using Unity.Entities;
 
 
@@ -29,9 +30,14 @@ namespace FastBikes
                 "Status classification:\n" +
                 "  Parked = ParkedCar\n" +
                 "  Active = CarCurrentLane (Parked wins)\n" +
-                "  Pending = neither ParkedCar nor CarCurrentLane (diagnostic only; not intended for UI totals)\n");
+                "  Pending = neither ParkedCar nor CarCurrentLane (diagnostic only)\n" +
+                "Notes:\n" +
+                "  - UI totals should use Parked+Active only.\n" +
+                "  - Trailers (CarTrailer) are excluded from car-group counts and logged separately.\n");
 
+            // -----------------------------------------------------
             // Build bicycle-group prefab set (BicycleData on prefab).
+            // -----------------------------------------------------
             var bikeGroupPrefabs = new HashSet<Entity>();
 
             foreach ((RefRO<PrefabData> _, Entity prefabEntity) in SystemAPI
@@ -43,6 +49,45 @@ namespace FastBikes
                 bikeGroupPrefabs.Add(prefabEntity);
             }
 
+            // -----------------------------------------------------------
+            // Trailer totals (separate; trailers are not drivable "cars").
+            // -----------------------------------------------------------
+            int trailerTotal = 0;
+            int trailerUnspawned = 0;
+
+#if DEBUG
+            const int kHead = 5;
+            const int kTail = 5;
+
+            var trailerHead = new List<Entity>(kHead);
+            var trailerTail = new List<Entity>(kTail);
+#endif
+
+            EntityQuery trailerQuery = SystemAPI.QueryBuilder()
+        .WithAll<Game.Vehicles.PersonalCar, Game.Vehicles.CarTrailer, PrefabRef>()
+        .WithNone<Deleted, Temp, Destroyed>()
+        .Build();
+
+            using (Unity.Collections.NativeArray<Entity> trailerEntities = trailerQuery.ToEntityArray(Unity.Collections.Allocator.Temp))
+            {
+                for (int i = 0; i < trailerEntities.Length; i++)
+                {
+                    Entity e = trailerEntities[i];
+
+                    trailerTotal++;
+
+                    if (SystemAPI.HasComponent<Game.Objects.Unspawned>(e))
+                        trailerUnspawned++;
+
+#if DEBUG
+                    AddHeadTailSample(e, trailerHead, trailerTail, kHead, kTail);
+#endif
+                }
+            }
+
+            // --------------------------------------------------------
+            // Car-group totals (exclude bike group + exclude trailers).
+            // --------------------------------------------------------
             int allLiveTotal = 0;
             int parked = 0;
             int active = 0;
@@ -51,25 +96,32 @@ namespace FastBikes
             int statusTotal = 0; // parked + active only
 
             int unspawnedTotal = 0;
-            int parkedAndUnspawned = 0;
-            int activeAndUnspawned = 0;
-            int pendingAndUnspawned = 0;
+            int unspawnedWithOwner = 0;
+            int unspawnedNoOwner = 0;
+
+            int pendingWithOwner = 0;
+            int pendingNoOwner = 0;
+            int pendingUnspawnedNoOwner = 0;
 
             int pendingAndAccident = 0;
             int movingNoLane = 0;
             int parkedAndLane = 0;
 
 #if DEBUG
-            const int kMaxSamples = 12;
-            var sampleParkedUnspawned = new List<Entity>(kMaxSamples);
-            var samplePending = new List<Entity>(kMaxSamples);
-            var samplePendingAccident = new List<Entity>(kMaxSamples);
-            var sampleMovingNoLane = new List<Entity>(kMaxSamples);
+            var samplePendingNoOwnerHead = new List<Entity>(kHead);
+            var samplePendingNoOwnerTail = new List<Entity>(kTail);
+
+            var samplePendingUnspawnedNoOwnerHead = new List<Entity>(kHead);
+            var samplePendingUnspawnedNoOwnerTail = new List<Entity>(kTail);
+
+            var sampleParkedUnspawnedHead = new List<Entity>(kHead);
+            var sampleParkedUnspawnedTail = new List<Entity>(kTail);
 #endif
 
             foreach ((RefRO<PrefabRef> prefabRefRO, Entity e) in SystemAPI
                 .Query<RefRO<PrefabRef>>()
                 .WithAll<Game.Vehicles.PersonalCar>()
+                .WithNone<Game.Vehicles.CarTrailer>()
                 .WithNone<Deleted, Temp, Destroyed>()
                 .WithEntityAccess())
             {
@@ -77,16 +129,22 @@ namespace FastBikes
 
                 // Exclude bicycles + e-scooters (bike row owns those).
                 if (bikeGroupPrefabs.Contains(prefabEntity))
-                {
                     continue;
-                }
 
                 bool hasParked = SystemAPI.HasComponent<ParkedCar>(e);
                 bool hasLane = SystemAPI.HasComponent<CarCurrentLane>(e);
 
-                bool hasUnspawned = SystemAPI.HasComponent<Unspawned>(e);
-                bool hasMoving = SystemAPI.HasComponent<Moving>(e);
+                bool hasUnspawned = SystemAPI.HasComponent<Game.Objects.Unspawned>(e);
+                bool hasMoving = SystemAPI.HasComponent<Game.Objects.Moving>(e);
                 bool hasAccident = SystemAPI.HasComponent<Game.Events.InvolvedInAccident>(e);
+
+                bool hasOwnerComp = SystemAPI.HasComponent<Game.Common.Owner>(e);
+                bool hasOwner = false;
+                if (hasOwnerComp)
+                {
+                    Game.Common.Owner o = SystemAPI.GetComponent<Game.Common.Owner>(e);
+                    hasOwner = o.m_Owner != Entity.Null;
+                }
 
                 // Status-aligned classification (Parked wins)
                 bool isParked = hasParked;
@@ -102,7 +160,6 @@ namespace FastBikes
                 else
                     pending++;
 
-                // UI-intended total (conservative): parked + active only.
                 if (!isPending)
                     statusTotal++;
 
@@ -110,44 +167,45 @@ namespace FastBikes
                 {
                     unspawnedTotal++;
 
-                    if (isParked)
-                        parkedAndUnspawned++;
-                    else if (isActive)
-                        activeAndUnspawned++;
+                    if (hasOwner)
+                        unspawnedWithOwner++;
                     else
-                        pendingAndUnspawned++;
+                        unspawnedNoOwner++;
+                }
+
+                if (isPending)
+                {
+                    if (hasOwner)
+                        pendingWithOwner++;
+                    else
+                        pendingNoOwner++;
+
+                    if (hasUnspawned && !hasOwner)
+                        pendingUnspawnedNoOwner++;
+
+#if DEBUG
+                    if (!hasOwner)
+                    {
+                        AddHeadTailSample(e, samplePendingNoOwnerHead, samplePendingNoOwnerTail, kHead, kTail);
+
+                        if (hasUnspawned)
+                            AddHeadTailSample(e, samplePendingUnspawnedNoOwnerHead, samplePendingUnspawnedNoOwnerTail, kHead, kTail);
+                    }
+#endif
                 }
 
                 if (hasParked && hasLane)
-                {
                     parkedAndLane++;
-                }
 
-                // Diagnostic: cars that are moving but have no lane often correlate with accidents/cleanup oddities.
                 if (hasMoving && !hasLane)
-                {
                     movingNoLane++;
-#if DEBUG
-                    if (sampleMovingNoLane.Count < kMaxSamples)
-                        sampleMovingNoLane.Add(e);
-#endif
-                }
 
                 if (isPending && hasAccident)
-                {
                     pendingAndAccident++;
-#if DEBUG
-                    if (samplePendingAccident.Count < kMaxSamples)
-                        samplePendingAccident.Add(e);
-#endif
-                }
 
 #if DEBUG
-                if (isPending && samplePending.Count < kMaxSamples)
-                    samplePending.Add(e);
-
-                if (hasUnspawned && isParked && sampleParkedUnspawned.Count < kMaxSamples)
-                    sampleParkedUnspawned.Add(e);
+                if (hasUnspawned && isParked)
+                    AddHeadTailSample(e, sampleParkedUnspawnedHead, sampleParkedUnspawnedTail, kHead, kTail);
 #endif
             }
 
@@ -155,34 +213,87 @@ namespace FastBikes
             {
                 var sb = new System.Text.StringBuilder();
 
+                sb.AppendLine($"[FB] Trailers: Total={trailerTotal}, Unspawned={trailerUnspawned}");
+#if DEBUG
+                sb.Append("  TrailerSamples Head: ");
+                AppendEntitySamples(sb, trailerHead);
+                sb.AppendLine();
+
+                sb.Append("  TrailerSamples Tail: ");
+                AppendEntitySamples(sb, trailerTail);
+                sb.AppendLine();
+#endif
+
                 sb.AppendLine($"[FB] CarGroup AllLive: Total={allLiveTotal}, Parked={parked}, Active={active}, Pending={pending}");
                 sb.AppendLine($"[FB] CarGroup StatusTotal(Parked+Active)={statusTotal}");
-                sb.AppendLine($"[FB] Unspawned: Total={unspawnedTotal} (Parked={parkedAndUnspawned}, Active={activeAndUnspawned}, Pending={pendingAndUnspawned})");
+                sb.AppendLine($"[FB] Unspawned: Total={unspawnedTotal} (WithOwner={unspawnedWithOwner}, NoOwner={unspawnedNoOwner})");
+                sb.AppendLine($"[FB] Pending: Total={pending} (WithOwner={pendingWithOwner}, NoOwner={pendingNoOwner}, Unspawned&&NoOwner={pendingUnspawnedNoOwner})");
                 sb.AppendLine($"[FB] Pending diagnostics: Pending&&InvolvedInAccident={pendingAndAccident}, Moving&&!CarCurrentLane={movingNoLane}");
                 sb.AppendLine($"[FB] Sanity: ParkedCar&&CarCurrentLane={parkedAndLane}");
 
 #if DEBUG
                 sb.AppendLine("[FB] DEBUG Samples (Index:Version):");
 
-                sb.Append("  Parked&&Unspawned: ");
-                AppendSamples(sb, sampleParkedUnspawned);
+                sb.Append("  Pending&&NoOwner Head: ");
+                AppendEntitySamples(sb, samplePendingNoOwnerHead);
                 sb.AppendLine();
 
-                sb.Append("  Pending: ");
-                AppendSamples(sb, samplePending);
+                sb.Append("  Pending&&NoOwner Tail: ");
+                AppendEntitySamples(sb, samplePendingNoOwnerTail);
                 sb.AppendLine();
 
-                sb.Append("  Pending&&Accident: ");
-                AppendSamples(sb, samplePendingAccident);
+                sb.Append("  Pending&&Unspawned&&NoOwner Head: ");
+                AppendEntitySamples(sb, samplePendingUnspawnedNoOwnerHead);
                 sb.AppendLine();
 
-                sb.Append("  MovingNoLane: ");
-                AppendSamples(sb, sampleMovingNoLane);
+                sb.Append("  Pending&&Unspawned&&NoOwner Tail: ");
+                AppendEntitySamples(sb, samplePendingUnspawnedNoOwnerTail);
+                sb.AppendLine();
+
+                sb.Append("  Parked&&Unspawned Head: ");
+                AppendEntitySamples(sb, sampleParkedUnspawnedHead);
+                sb.AppendLine();
+
+                sb.Append("  Parked&&Unspawned Tail: ");
+                AppendEntitySamples(sb, sampleParkedUnspawnedTail);
                 sb.AppendLine();
 #endif
 
                 return sb.ToString();
             });
+
+#if DEBUG
+            static void AddHeadTailSample(Entity e, List<Entity> head, List<Entity> tail, int headMax, int tailMax)
+            {
+                if (head.Count < headMax)
+                    head.Add(e);
+
+                if (tail.Count == tailMax)
+                    tail.RemoveAt(0);
+
+                tail.Add(e);
+            }
+
+            static void AppendEntitySamples(System.Text.StringBuilder sb, List<Entity> items)
+            {
+                if (items == null || items.Count == 0)
+                {
+                    sb.Append("<none>");
+                    return;
+                }
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (i > 0)
+                        sb.Append(", ");
+
+                    Entity e = items[i];
+                    sb.Append(e.Index);
+                    sb.Append(':');
+                    sb.Append(e.Version);
+                }
+            }
+#endif
         }
 
 

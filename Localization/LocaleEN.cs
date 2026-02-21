@@ -47,7 +47,8 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
                     "Turns the mod **ON/OFF**.\n" +
-                    "When OFF, bicycle and scooter behavior is restored to game defaults."
+                    "When OFF, bicycle and scooter behavior is restored to game defaults.\n\n" +
+                    "QoL: Status info below is available even if Enable Fast Bikes is off."
                 },
 
                 // Speed

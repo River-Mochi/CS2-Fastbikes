@@ -546,7 +546,7 @@ namespace FastBikes
             Mod.LogSafe(( ) =>
                 "\n==================== [FB] PATH SPEED SUMMARY ====================\n" +
                 "Meaning: PathwayData speed limit tracks authoring * scalar.\n" +
-                $"EffectivePathScalar={pathScalar:0.##}");
+                $"Path Scalar={pathScalar:0.##}");
 
             int prefabs = 0;
             int prefabMissingBase = 0;
