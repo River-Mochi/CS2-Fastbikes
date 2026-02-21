@@ -14,10 +14,10 @@ namespace FastBikes
     [FileLocation("ModsSettings/FastBikes/FastBikes")]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(
-        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsStatusGrp, ActionsPathSpeedGrp,
+        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsPathSpeedGrp, ActionsStatusGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     [SettingsUIShowGroupName(
-        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsStatusGrp, ActionsPathSpeedGrp,
+        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsPathSpeedGrp, ActionsStatusGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     public sealed class Setting : ModSetting
     {
@@ -141,6 +141,20 @@ namespace FastBikes
         }
 
         // -----------------------------
+        // Actions: Path speed
+        // -----------------------------
+
+        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
+        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
+        public float PathSpeedScalar
+        {
+            get; set;
+        }
+
+
+        // -----------------------------
         // Actions: Status (read-only)
         // -----------------------------
 
@@ -194,19 +208,6 @@ namespace FastBikes
                 world.GetOrCreateSystemManaged<FastBikeStatusSystem>()
                     .LogBorderParkedSamples(headCount: 10, tailCount: 10);
             }
-        }
-
-        // -----------------------------
-        // Actions: Path speed
-        // -----------------------------
-
-        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
-        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
-        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
-        public float PathSpeedScalar
-        {
-            get; set;
         }
 
         // ------------------------

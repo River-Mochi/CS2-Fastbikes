@@ -120,14 +120,14 @@ namespace FastBikes
                     "**Parked in buildings** = normal garage/building parking (Unspawned).\n" +
                     "**Hidden at border OC** = parked just outside the city border on a connection lane.\n" +
                     "Some cities show a large number of OC cars linked to in-city Owners.\n" +
-                    "Cause is unknown.\n\n" +
-                    "Use <Log hidden cars> to write sample Entity IDs to the log, then inspect with Scene Explorer."
+                    "Cause is unknown. It could be part of game staging or something else.\n\n" +
+                    "Use <Log hidden cars> to write sample Entity IDs to the log, then inspect with Scene Explorer mod."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LogBorderHiddenCars)), "Log hidden cars" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.LogBorderHiddenCars)),
                     "Writes a small report to **Logs/FastBikes.log** with head+tail samples.\n" +
-                    "Use Scene Explorer to Jump To the listed Vehicle entity IDs."
+                    "Use Scene Explorer mod to Jump To the listed Vehicle entity IDs."
                 },
 
                 // Status fallback keys
