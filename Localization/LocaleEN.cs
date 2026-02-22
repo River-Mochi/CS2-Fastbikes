@@ -115,12 +115,13 @@ namespace FastBikes
                     "Scan runs only while Options is open and not in-city fps, so no worries on performance."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary3)), "Hidden parking" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary3)), "Hidden parked cars" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary3)),
-                    "**Hidden at border** = cars parked just outside the city border on Outside City (OC) connection.\n" +
+                    "**Hidden at border** = cars parked just outside the border on Outside City (OC) connection.\n" +
                     "Some cities show a large number of OC cars linked to in-city Owners.\n" +
                     "More study needed by players: is this game staging or something else?\n\n" +
-                    "Use <Log hidden cars> to write sample Entity IDs to the log, then inspect with Scene Explorer mod."
+                    "If curious: use <Log hidden cars> button to record sample IDs to the log.\n" +
+                    "Then inspect ID's with Scene Explorer mod and share results. Can cims use these cars they are tied to?"
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LogBorderHiddenCars)), "Log hidden cars" },
