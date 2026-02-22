@@ -118,11 +118,11 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary3)), "Hidden parked cars" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary3)),
                     "**Hidden at border** = cars parked just outside the border on Outside City (OC) connection.\n" +
-                    "These cars are not visible in-game and are PART of the total parked car count.\n" +
                     "Some cities show a large number of OC cars linked to in-city Owners.\n" +
                     "More study needed: is this game staging or something else?\n\n" +
                     "If curious: use <Log hidden cars> button to record sample IDs to the log.\n" +
-                    "Then inspect ID's with Scene Explorer mod and share results. Can cims use these cars they are tied to?"
+                    "Then inspect ID's with Scene Explorer mod and share results. Can cims use these cars they are tied to?\n" +
+                    "These cars are part of the total parked car count but seem to be hidden/underground at OC."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LogBorderHiddenCars)), "Log hidden cars" },
