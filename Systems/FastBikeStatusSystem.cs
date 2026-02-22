@@ -437,7 +437,7 @@ namespace FastBikes
 
                 sb.AppendLine("\n==================== [FB] HIDDEN CARS AT BORDER OC (SAMPLES) ====================");
                 sb.AppendLine("Meaning: Parked + Unspawned + Owner, parked lane is OC/border.");
-                sb.AppendLine($"Total={total} (TouristOwners={touristOwners}, OtherOwners={otherOwners})");
+                sb.AppendLine($"Total={total} (TouristOwners={touristOwners}, Citizens={otherOwners})");
                 sb.AppendLine("Samples are VehicleIndex:Version. Use Scene Explorer to Jump To.");
                 sb.AppendLine();
 
