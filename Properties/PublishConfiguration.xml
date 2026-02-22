@@ -1,72 +1,82 @@
 <Publish>
-  <!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
-  <ModId Value="" />
-  <!--Name of the mod to display to players-->
-  <DisplayName Value="Fast Bikes" />
-  <!--Short description of the mod-->
-  <ShortDescription Value="Fast Bikes and Scooters (adjustable speed + swaying) :)" />
-  <!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
-  <!--LongDescription Value="Fast Bikes" /-->
-  <LongDescription>Is your city stuck behind slow bikes?
+	<!--This PublishConfiguration.xml is required to publish any mod on Paradox Mods website and is part of the CSII toolchain-->
+	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
+	<ModId Value="134067" />
+	<!--Name of the mod to display to players-->
+	<DisplayName Value="Fast Bikes" />
+	<!--Short description of the mod-->
+	<ShortDescription Value="Fast Bikes, Scooters, and Path Speeds :)" />
+	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
+	<!--LongDescription Value="Fast Bikes" /-->
+	<LongDescription>
+🚲 Fast Bikes speeds up bicycles and scooters.
 
-Fast Bikes speeds up bicycles and electric scooters (or slows them down).
+🚴 NEW: PATH speed limit - YES - now you can change bike paths (paths are independent of road speed limits)!
 
-### Features
+- road mods don't let you set "path" speeds so this is unique to this mod.
 
-- Speed multiplier
-- Uses a smoothing formula for acceleration + braking
-- Optional sway stability tuning (stiffness/damping)
-- One-click Reset buttons.
+#### Features
 
-### Tech notes
+✅  Speed ⬆️ ⬇️
+✅  Smoothing math for acceleration + braking (no teleport and panic braking)
+✅  Optional stability tuning (affects swaying)
+✅  One-click Reset buttons.
+
+#### Tech notes
 
 - Road speed limits and game conditions may still cap speeds.
-- To make Fast-bikes even better, install "Road Speed Adjuster" mod to change road speeds.
-- Uncheck Enable to disable the mod without uninstalling.
-- Safe to remove any time (reset first for the cleanest return to game defaults).
-- 11 Languages
+- Compatible with "Road Speed Adjuster" mod (as that does normal roads and not paths).
+- Path speed is **new** beta feature, please report issues.
+- To disable the mod without uninstalling, uncheck [ ] the enable box.
+- Safe to remove (Reset button first for fast return to game defaults, then save city, and uninstall).
+- Has 11 Languages
 
-### Support and Feedback
+#### Support and Feedback
 
-If the mod helps you, give it a Like :)
-Report issues on Github link, Forum, or Discord.
+- If the mod helps, drop a Like :)
+- Report issues on Github / Forum / Discord.
 
-### Performant design
+#### Performant design
 
-- Great effort was made to ensure this runs only when you change mod menu settings, then goes idle.
-- Does not run per-frame continuously in-city to impact fps :)
+- This runs only when you change mod menu settings.
+- Does not run continuously per-frame in cities to impact fps :)
 
-### Credits
+#### Credits
+
 - **River-mochi** - author
 
+tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life, change path speed, bike path.
+</LongDescription>
 
-tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life.
-	</LongDescription>
-  <!--Thumbnail-->
-  <Thumbnail Value="Properties/Thumbnail10.jpg" />
-  <!--Screenshot, can be set multiple times-->
-  <Screenshot Value="Properties/image10-Actions.jpg" />
-  <Screenshot Value="Properties/image20-slowBike.jpg" />
-  <!--Tag, can be set multiple times-->
-  <Tag Value="" />
-  <!--Link to the forum post where the mod can be discussed-->
-  <ForumLink Value="" />
-  <!--Version of the mod-->
-  <ModVersion Value="1.0.1" />
-  <!--Recommended version of the base game to use the mod-->
-  <GameVersion Value="1.5.*" />
-  <!--Dependency for the mod, can be set multiple times-->
-  <Dependency Id="" />
-  <!--Required DLC, can be set multiple times. Supported values are "Landmark Buildings", "San Fransisco Set", "Beach Properties", "Urban Promenades", "Modern Architecture"-->
-  <RequiredDLC Value="" />
-  <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
-  <ChangeLog Value="" />
-  <!--<ChangeLog>
-	</ChangeLog>-->
-  <!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
-  <ExternalLink Type="" Url="" />
-  <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
-  <ExternalLink Type="github" Url="https://github.com/River-Mochi/CS2-Fastbikes" />
-  <!--Supported values Public, Private, Unlisted-->
-  <AccessLevel Value="Public" />
+	<!--Thumbnail-->
+	<Thumbnail Value="Properties/ThumbnailFastBikePath8.jpg" />
+	<!--Screenshot, can be set multiple times-->
+	<Screenshot Value="Properties/image10-Actions.jpg" />
+    <Screenshot Value="Properties/image15-Status.jpg" />
+	<Screenshot Value="Properties/image20-slowBike.jpg" />
+    <Screenshot Value="Properties/image25-PathSpeed.jpg" />
+	<Screenshot Value="Properties/image30-BikesParis.jpg" />
+	<!--Tag, can be set multiple times-->
+	<Tag Value="" />
+	<!--Link to the forum post where the mod can be discussed-->
+	<ForumLink Value="" />
+	<!--Version of the mod-->
+	<ModVersion Value="1.0.3" />
+	<!--Recommended version of the base game to use the mod-->
+	<GameVersion Value="1.5.*" />
+	<!--Dependency for the mod, can be set multiple times-->
+	<Dependency Id="" />
+	<!--Required DLC, can be set multiple times. Supported values are "Landmark Buildings", "San Fransisco Set", "Beach Properties", "Urban Promenades", "Modern Architecture"-->
+	<RequiredDLC Value="" />
+	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
+	<ChangeLog>
+- Adds expanded Status Report data and error checks.
+- All Languages updated for changes.
+</ChangeLog>
+	<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
+	<ExternalLink Type="" Url="" />
+	<ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
+	<ExternalLink Type="github" Url="https://github.com/River-Mochi/CS2-Fastbikes" />
+	<!--Supported values Public, Private, Unlisted-->
+	<AccessLevel Value="Public" />
 </Publish>

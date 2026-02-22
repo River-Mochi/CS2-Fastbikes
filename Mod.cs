@@ -26,9 +26,9 @@ namespace FastBikes
         private static bool s_BannerLogged;
 
 #if DEBUG
-        private const string buildTag = "[DEBUG]";
+        private const string BuildTag = "[DEBUG]";
 #else
-        private const string buildTag = "[RELEASE]";
+        private const string BuildTag = "[RELEASE]";
 #endif
 
         public static readonly ILog s_Log =
@@ -50,19 +50,18 @@ namespace FastBikes
             if (!s_BannerLogged)
             {
                 s_BannerLogged = true;
-                LogSafe(() => $"{ModName} v{ModVersion} OnLoad {buildTag}");
+                LogSafe(( ) => $"{ModName} v{ModVersion} OnLoad {BuildTag}");
             }
 
             if (GameManager.instance == null)
             {
-                WarnSafe(() => "GameManager.instance is null in Mod.OnLoad.");
+                WarnSafe(( ) => "GameManager.instance is null in Mod.OnLoad.");
                 return;
             }
 
-            var setting = new Setting(this);
+            Setting setting = new Setting(this);
             Settings = setting;
 
-            // Locales should be best-effort; never crash mod load.
             AddLocaleSource("en-US", new LocaleEN(setting));
             AddLocaleSource("fr-FR", new LocaleFR(setting));
             AddLocaleSource("es-ES", new LocaleES(setting));
@@ -75,21 +74,16 @@ namespace FastBikes
             AddLocaleSource("zh-HANS", new LocaleZH_CN(setting));    // Simplified Chinese
             AddLocaleSource("zh-HANT", new LocaleZH_HANT(setting));  // Traditional Chinese
 
-            // Settings + Options UI
             try
             {
-     
-                // LoadSettings(sectionName, instance, defaultInstance)
-                // Saving is automatic on changes
                 AssetDatabase.global.LoadSettings(ModId, setting, new Setting(this));
                 setting.RegisterInOptionsUI();
             }
             catch (Exception ex)
             {
-                WarnSafe(() => $"Settings/UI init failed: {ex.GetType().Name}: {ex.Message}");
+                WarnSafe(( ) => $"Settings/UI init failed: {ex.GetType().Name}: {ex.Message}");
             }
 
-            // System scheduling/init.
             try
             {
                 updateSystem.UpdateAfter<FastBikeSystem>(SystemUpdatePhase.PrefabUpdate);
@@ -97,18 +91,24 @@ namespace FastBikes
             }
             catch (Exception ex)
             {
-                WarnSafe(() => $"System scheduling/init failed: {ex.GetType().Name}: {ex.Message}");
+                WarnSafe(( ) => $"System scheduling/init failed: {ex.GetType().Name}: {ex.Message}");
             }
         }
 
-        public void OnDispose()
+        public void OnDispose( )
         {
-            LogSafe(() => "OnDispose");
+            LogSafe(( ) => "OnDispose");
 
             if (Settings != null)
             {
-                try { Settings.UnregisterInOptionsUI(); }
-                catch (Exception ex) { WarnSafe(() => $"UnregisterInOptionsUI failed: {ex.GetType().Name}: {ex.Message}"); }
+                try
+                {
+                    Settings.UnregisterInOptionsUI();
+                }
+                catch (Exception ex)
+                {
+                    WarnSafe(( ) => $"UnregisterInOptionsUI failed: {ex.GetType().Name}: {ex.Message}");
+                }
 
                 Settings = null;
             }
@@ -128,14 +128,17 @@ namespace FastBikes
             LocalizationManager? lm = GameManager.instance?.localizationManager;
             if (lm == null)
             {
-                WarnSafe(() => $"AddLocaleSource: No LocalizationManager; cannot add source for '{localeId}'.");
+                WarnSafe(( ) => $"AddLocaleSource: No LocalizationManager; cannot add source for '{localeId}'.");
                 return;
             }
 
-            try { lm.AddSource(localeId, source); }
+            try
+            {
+                lm.AddSource(localeId, source);
+            }
             catch (Exception ex)
             {
-                WarnSafe(() => $"AddLocaleSource: AddSource for '{localeId}' failed: {ex.GetType().Name}: {ex.Message}");
+                WarnSafe(( ) => $"AddLocaleSource: AddSource for '{localeId}' failed: {ex.GetType().Name}: {ex.Message}");
             }
         }
     }

@@ -1,11 +1,11 @@
 // File: Systems/FastBikeSystem.cs
-// Purpose: On-demand bicycle tuning on prefab entities (speed + accel/brake scaling + swaying stability).
+// Purpose: On-demand bicycle tuning on prefab entities (speed + accel/brake scaling + swaying stability) + pathway speed scaling.
 
 namespace FastBikes
 {
     using Colossal.Serialization.Entities; // Purpose
     using Game;                           // GameSystemBase, GameMode
-    using Game.Common;                    // Deleted
+    using Game.Common;                    // Deleted, Overridden
     using Game.Prefabs;                   // PrefabSystem, PrefabBase, BicyclePrefab, BicycleData, CarData, PrefabData, SwayingData
     using Game.Tools;                     // Temp
     using System.Collections.Generic;     // Dictionary
@@ -14,55 +14,109 @@ namespace FastBikes
 
     public sealed partial class FastBikeSystem : GameSystemBase
     {
-        private bool m_Dirty;
+        // Dirty flags schedule work into the next OnUpdate.
+        // System remains disabled when no work is queued.
+        private bool m_BikeDirty;
+        private bool m_StabilityDirty;
+        private bool m_PathDirty;
         private bool m_ResetVanilla;
 
         private PrefabSystem m_PrefabSystem = null!;
 
-        // Key = bicycle prefab entity, Value = captured "vanilla base" SwayingData for this load session.
+        // Key = bicycle prefab entity, Value = captured baseline SwayingData for this load session.
+        // Baseline must be per-load because prefab entities and data are recreated on world/city load.
         private readonly Dictionary<Entity, SwayingData> m_SwayingBaseline =
             new Dictionary<Entity, SwayingData>();
 
-        protected override void OnCreate()
+        protected override void OnCreate( )
         {
             base.OnCreate();
 
-            // On-demand only: system stays disabled unless a setting change or debug dump is requested.
+            // Run-once behavior: system stays disabled unless settings schedule work.
             Enabled = false;
+
             m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
+        }
+
+        protected override void OnDestroy( )
+        {
+            DisposePathBatch();
+
+            base.OnDestroy();
         }
 
         protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
         {
             base.OnGameLoadingComplete(purpose, mode);
 
-            // Parameters are required by the override; no special behavior needed per mode/purpose.
-            m_SwayingBaseline.Clear(); // recapture per load session
+            // City load recreates prefab entities and runtime lanes.
+            // Cached baselines and batch snapshots must be cleared.
+            m_SwayingBaseline.Clear();
+            DisposePathBatch();
 
+            // Apply current settings on each city load (including city switching without restarting).
             if (Mod.Settings != null)
             {
-                ScheduleApply();
+                ScheduleApplyAll();
             }
         }
 
-        public void ScheduleApply()
+        // --------------------------------------------------------------------
+        // Scheduling
+        // --------------------------------------------------------------------
+
+        public void ScheduleApplyAll( )
         {
-            m_Dirty = true;
+            m_BikeDirty = true;
+            m_StabilityDirty = true;
+            m_PathDirty = true;
             m_ResetVanilla = false;
+
+            DisposePathBatch();
+
             Enabled = true;
         }
 
-        public void ScheduleResetVanilla()
+        public void ScheduleApplyBicyclesAndStability( )
         {
-            m_Dirty = true;
+            m_BikeDirty = true;
+            m_StabilityDirty = true;
+            m_ResetVanilla = false;
+
+            Enabled = true;
+        }
+
+        public void ScheduleApplyPaths( )
+        {
+            m_PathDirty = true;
+            m_ResetVanilla = false;
+
+            DisposePathBatch();
+
+            Enabled = true;
+        }
+
+        public void ScheduleResetVanillaAll( )
+        {
+            m_BikeDirty = true;
+            m_StabilityDirty = true;
+            m_PathDirty = true;
             m_ResetVanilla = true;
+
+            DisposePathBatch();
+
             Enabled = true;
         }
 
-        protected override void OnUpdate()
+        // --------------------------------------------------------------------
+        // Update
+        // --------------------------------------------------------------------
+
+        protected override void OnUpdate( )
         {
+            // Fast exit: no scheduled work and no active batch.
             // Dump can run without apply (m_Dump lives in FastBikeSystem.Dump.cs).
-            if (!m_Dirty && !m_Dump)
+            if (!m_BikeDirty && !m_StabilityDirty && !m_PathDirty && !m_ResetVanilla && !m_Dump && !IsPathBatchActive())
             {
                 Enabled = false;
                 return;
@@ -71,9 +125,14 @@ namespace FastBikes
             Setting? setting = Mod.Settings;
             if (setting == null)
             {
-                m_Dirty = false;
+                // Settings not available: clear all work and stop.
+                m_BikeDirty = false;
+                m_StabilityDirty = false;
+                m_PathDirty = false;
                 m_ResetVanilla = false;
                 m_Dump = false;
+
+                DisposePathBatch();
                 Enabled = false;
                 return;
             }
@@ -91,13 +150,8 @@ namespace FastBikes
                         dampingScalar: setting.DampingScalar);
                 }
 
-                if (!m_Dirty)
-                {
-                    return;
-                }
-
-                m_Dirty = false;
-
+                // Reset must win over all other state.
+                // Disable (EnableFastBikes=false) also forces vanilla.
                 bool forceVanilla = m_ResetVanilla || !setting.EnableFastBikes;
                 m_ResetVanilla = false;
 
@@ -105,39 +159,71 @@ namespace FastBikes
                 float stiffnessScalar = forceVanilla ? 1.0f : math.clamp(setting.StiffnessScalar, 0.30f, 5.0f);
                 float dampingScalar = forceVanilla ? 1.0f : math.clamp(setting.DampingScalar, 0.30f, 5.0f);
 
-                int tunedCars = ApplyBicycleTuning(speedScalar);
-                int tunedSway = ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
+                // Bicycle tuning (prefab entity writes; no structural changes).
+                if (m_BikeDirty)
+                {
+                    m_BikeDirty = false;
+                    ApplyBicycleTuning(speedScalar);
+                }
 
-#if DEBUG
-                Mod.LogSafe(() =>
-                    $"[FB] Applied. Enabled={setting.EnableFastBikes}, Speed={speedScalar:0.##}x, " +
-                    $"Stiffness={stiffnessScalar:0.##}x, Damping={dampingScalar:0.##}x, " +
-                    $"CarDataUpdated={tunedCars}, SwayUpdated={tunedSway}");
-#endif
+                // Stability (prefab entity writes; per-load baselines).
+                if (m_StabilityDirty)
+                {
+                    m_StabilityDirty = false;
+                    ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
+                }
+
+                // Path updates:
+                // - Prefab + composition writes are done once per apply.
+                // - Runtime lane speed updates are chunked over multiple updates using a persistent snapshot.
+                if (m_PathDirty && !IsPathBatchActive())
+                {
+                    m_PathDirty = false;
+
+                    float pathScalar = forceVanilla ? 1.0f : math.clamp(setting.PathSpeedScalar, 1.0f, 5.0f);
+                    ApplyPathwayPrefabAndComposition(pathScalar);
+                    BeginPathLaneBatch();
+                }
+
+                if (IsPathBatchActive())
+                {
+                    ContinuePathLaneBatch();
+                }
             }
             catch (System.Exception ex)
             {
-                Mod.WarnOnce("FB_SYSTEM_EXCEPTION", () =>
+                Mod.WarnOnce("FB_SYSTEM_EXCEPTION", ( ) =>
                     $"[FB] FastBikeSystem failed: {ex.GetType().Name}: {ex.Message}");
+
+                DisposePathBatch();
             }
             finally
             {
-                // Run-once behavior: disable until the next explicit schedule.
-                Enabled = false;
+                // Disable until next explicit schedule, unless an active batch remains.
+                if (!m_BikeDirty && !m_StabilityDirty && !m_PathDirty && !m_ResetVanilla && !m_Dump && !IsPathBatchActive())
+                {
+                    Enabled = false;
+                }
+                else
+                {
+                    Enabled = true;
+                }
             }
         }
 
         /// <summary>Tunes CarData on bicycle prefab entities using BicyclePrefab authoring as baseline.</summary>
         private int ApplyBicycleTuning(float speedScalar)
         {
-            float speed = math.max(0f, speedScalar);                // top speed uses scalar directly
-            float accelBrake = math.sqrt(math.max(0.01f, speed));   // accel/brake use sqrt(scalar)
+            float speed = Unity.Mathematics.math.max(0f, speedScalar);
+
+            // Accel/brake scale uses sqrt() to avoid extreme values at high speed.
+            float accelBrake = Unity.Mathematics.math.sqrt(Unity.Mathematics.math.max(0.01f, speed));
 
             int updated = 0;
 
             foreach ((RefRW<CarData> carRW, Entity prefabEntity) in SystemAPI.Query<RefRW<CarData>>()
                 .WithAll<PrefabData, BicycleData>()
-                .WithNone<Deleted, Temp>()
+                .WithNone<Game.Common.Deleted, Game.Tools.Temp, Game.Common.Overridden>()
                 .WithEntityAccess())
             {
                 if (!TryGetBicycleBase(prefabEntity, out BicyclePrefab bicyclePrefab))
@@ -145,9 +231,9 @@ namespace FastBikes
                     continue;
                 }
 
-                float baseMaxMs = bicyclePrefab.m_MaxSpeed * (1f / 3.6f); // authoring km/h -> runtime m/s
+                float baseMaxMs = bicyclePrefab.m_MaxSpeed * (1f / 3.6f);
 
-                float newMaxSpeed = baseMaxMs <= 0f ? 0f : math.max(0.01f, baseMaxMs * speed);
+                float newMaxSpeed = baseMaxMs <= 0f ? 0f : Unity.Mathematics.math.max(0.01f, baseMaxMs * speed);
                 float newAccel = bicyclePrefab.m_Acceleration <= 0f ? 0f : bicyclePrefab.m_Acceleration * accelBrake;
                 float newBrake = bicyclePrefab.m_Braking <= 0f ? 0f : bicyclePrefab.m_Braking * accelBrake;
 
@@ -168,19 +254,19 @@ namespace FastBikes
         /// <summary>Tunes SwayingData on bicycle prefab entities using cached per-prefab baselines.</summary>
         private int ApplyBicycleSwaying(bool forceVanilla, float stiffnessScalar, float dampingScalar)
         {
-            float stiff = math.max(0.01f, stiffnessScalar);
-            float damp = math.max(0.01f, dampingScalar);
+            float stiff = Unity.Mathematics.math.max(0.01f, stiffnessScalar);
+            float damp = Unity.Mathematics.math.max(0.01f, dampingScalar);
 
             int updated = 0;
 
             foreach ((RefRW<SwayingData> swayRW, Entity prefabEntity) in SystemAPI.Query<RefRW<SwayingData>>()
                 .WithAll<PrefabData, BicycleData>()
-                .WithNone<Deleted, Temp>()
+                .WithNone<Deleted, Temp, Overridden>()
                 .WithEntityAccess())
             {
                 SwayingData current = swayRW.ValueRO;
 
-                // Baseline = first-seen SwayingData for this prefab entity after load.
+                // Baseline capture: first seen value becomes baseline for this load session.
                 if (!m_SwayingBaseline.TryGetValue(prefabEntity, out SwayingData baseline))
                 {
                     baseline = current;
@@ -199,9 +285,12 @@ namespace FastBikes
 
                 SwayingData tuned = baseline;
 
-                tuned.m_MaxPosition = baseline.m_MaxPosition / stiff;        // higher stiffness -> smaller lean distance
-                tuned.m_DampingFactors = baseline.m_DampingFactors / damp;   // higher damping -> settles faster
-                tuned.m_DampingFactors = math.clamp(tuned.m_DampingFactors, 0.01f, 0.999f); // safety clamp
+                // Higher stiffness reduces sway amplitude.
+                tuned.m_MaxPosition = baseline.m_MaxPosition / stiff;
+
+                // Higher damping settles sway faster.
+                tuned.m_DampingFactors = baseline.m_DampingFactors / damp;
+                tuned.m_DampingFactors = Unity.Mathematics.math.clamp(tuned.m_DampingFactors, 0.01f, 0.999f);
 
                 if (!tuned.Equals(current))
                 {
@@ -217,7 +306,6 @@ namespace FastBikes
         {
             bicyclePrefab = default!;
 
-            // Safe way to read default BicyclePrefab fields (m_MaxSpeed, m_Acceleration, m_Braking).
             if (!m_PrefabSystem.TryGetPrefab(prefabEntity, out PrefabBase prefabBase))
             {
                 return false;
