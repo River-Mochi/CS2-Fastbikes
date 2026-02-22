@@ -671,29 +671,32 @@ namespace FastBikes
                 sb.AppendLine("\n==================== [FB] HIDDEN CARS AT BORDER OC (SAMPLES) ====================");
                 sb.AppendLine("Meaning: Parked + Unspawned + Owner, parked at OC lane outside border.");
                 sb.AppendLine("Status count uses CityOwnerNotAtOC only.");
-                sb.AppendLine($"TotalCandidates={total}");
+                sb.AppendLine($"Total Candidates={total}");
                 sb.AppendLine($"CityOwnerNotAtOC(Status)={cityOwnerNotAtOc}");
                 sb.AppendLine($"OwnerAlsoAtOC(LogOnly)={ownerAlsoAtOc} (TouristOwners={ownerAlsoAtOcTourist}, Others={ownerAlsoAtOcOther})");
-                sb.AppendLine("Samples are VehicleIndex:Version. Use Scene Explorer to Jump To.");
+                sb.AppendLine("Samples are Vehicle Index:Version. Use Scene Explorer mod to Jump To it.");
                 sb.AppendLine();
 
-                sb.Append("CityOwnerNotAtOC Head: ");
+                sb.AppendLine("---- Car at OC - Owner in-city: ----");
+                sb.Append("Head: ");
                 AppendEntitySamples(sb, headCityOwnerNotAtOc);
                 sb.AppendLine();
 
-                sb.Append("CityOwnerNotAtOC Tail: ");
+                sb.Append("Tail: ");
                 AppendEntitySamples(sb, tailCityOwnerNotAtOc);
                 sb.AppendLine();
 
-                sb.AppendLine();
+                sb.AppendLine(); // blank line between sections
 
-                sb.Append("OwnerAlsoAtOC Head: ");
+                sb.AppendLine("---- Owner + car at OC: ----");
+                sb.Append("Head: ");
                 AppendEntitySamples(sb, headOwnerAlsoAtOc);
                 sb.AppendLine();
 
-                sb.Append("OwnerAlsoAtOC Tail: ");
+                sb.Append("Tail: ");
                 AppendEntitySamples(sb, tailOwnerAlsoAtOc);
                 sb.AppendLine();
+
 
                 return sb.ToString();
             });
