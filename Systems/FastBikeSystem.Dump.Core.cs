@@ -143,7 +143,9 @@ namespace FastBikes
             int mismatchSwayPos = 0;
             int mismatchSwayDamp = 0;
 
+#if DEBUG
             int examplesLogged = 0;
+#endif
 
             foreach ((RefRO<PrefabData> _, Entity prefabEntity) in SystemAPI
                 .Query<RefRO<PrefabData>>()
