@@ -53,6 +53,7 @@ tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life, chan
 	<!--Screenshot, can be set multiple times-->
 	<Screenshot Value="Properties/image10-Actions.jpg" />
 	<Screenshot Value="Properties/image20-slowBike.jpg" />
+    <Screenshot Value="Properties/image25-PathSpeed.jpg" />
 	<Screenshot Value="Properties/image30-BikesParis.jpg" />
 	<!--Tag, can be set multiple times-->
 	<Tag Value="" />
