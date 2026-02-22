@@ -436,7 +436,7 @@ namespace FastBikes
                 StringBuilder sb = new System.Text.StringBuilder();
 
                 sb.AppendLine("\n==================== [FB] HIDDEN CARS AT BORDER OC (SAMPLES) ====================");
-                sb.AppendLine("Meaning: Parked + Unspawned + Owner, parked lane is OC/border.");
+                sb.AppendLine("Meaning: Parked + Owner, but it's parked at border (OC) outside city and hidden.");
                 sb.AppendLine($"Total={total} (TouristOwners={touristOwners}, Citizens={otherOwners})");
                 sb.AppendLine("Samples are VehicleIndex:Version. Use Scene Explorer to Jump To.");
                 sb.AppendLine();
