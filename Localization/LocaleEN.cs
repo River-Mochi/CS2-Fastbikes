@@ -103,7 +103,7 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary1)),
                     "Bikes and electric scooters.\n" +
                     "**Active** = has a current lane (moving).\n" +
-                    "**Total Parked**"
+                    "**Total Parked** = includes all Parked flags (e.g., roadside), not just parking lots."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "Car group" },
@@ -118,8 +118,9 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary3)), "Hidden parked cars" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary3)),
                     "**Hidden at border** = cars parked just outside the border on Outside City (OC) connection.\n" +
+                    "These cars are not visible in-game and are PART of the total parked car count.\n" +
                     "Some cities show a large number of OC cars linked to in-city Owners.\n" +
-                    "More study needed by players: is this game staging or something else?\n\n" +
+                    "More study needed: is this game staging or something else?\n\n" +
                     "If curious: use <Log hidden cars> button to record sample IDs to the log.\n" +
                     "Then inspect ID's with Scene Explorer mod and share results. Can cims use these cars they are tied to?"
                 },
@@ -136,7 +137,7 @@ namespace FastBikes
                 { "FAST_STATS_CARS_NOT_AVAIL",  "run the city a few minutes for data." },
 
                 // Status rows
-                { "FAST_STATS_BIKES_ROW1", "{0} active | {1} bikes | {2} scooter | {3} / {4} parked/total" },
+                { "FAST_STATS_BIKES_ROW1", "{0} active | {1} bikes | {2} scooters | {3} / {4} parked/total" },
                 { "FAST_STATS_CARS_ROW2",  "{0} active | {1} parked | {2} total | {3} trailers" },
                 { "FAST_STATS_CARS_ROW3",  "{0} hidden at border OC | updated {1}" },
 

@@ -3,8 +3,8 @@
 
 namespace FastBikes
 {
-    using Colossal; // IDictionarySource, IDictionaryEntryError
-    using System.Collections.Generic; // IEnumerable, Dictionary, KeyValuePair
+    using Colossal;                    // IDictionarySource, IDictionaryEntryError
+    using System.Collections.Generic;  // IEnumerable, Dictionary, KeyValuePair
 
     public sealed class LocaleZH_HANT : IDictionarySource
     {
@@ -30,122 +30,134 @@ namespace FastBikes
                 { m_Setting.GetSettingsLocaleID(), title },
 
                 // Tabs
-                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab),       "操作" },
-                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab),        "關於" },
+                { m_Setting.GetOptionTabLocaleID(Setting.ActionsTab), "操作" },
+                { m_Setting.GetOptionTabLocaleID(Setting.AboutTab),   "關於" },
 
                 // Groups
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp),     "速度" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp), "穩定性" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp),     "重設" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp), "步道" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp),      "速度" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp),  "穩定性" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp),      "重置" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStatusGrp),     "私人車輛狀態" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp),  "路徑" },
 
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp),   "模組資訊" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp),  "連結" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp),  "除錯" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp),  "模組資訊" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutLinksGrp), "連結" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.AboutDebugGrp), "除錯" },
 
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "啟用 Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "將模組 **開啟/關閉（開/關）**。\n" +
-                    "關閉後，自行車與電動滑板車會恢復為遊戲預設行為。"
+                    "將模組切換為 **開/關**。\n" +
+                    "關閉時，自行車與電動滑板車行為會回到遊戲預設。\n\n" +
+                    "即使 啟用 Fast Bikes 為關閉，下方狀態仍可使用。"
                 },
 
                 // Speed
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "自行車與電動滑板車速度" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "自行車/滑板車速度" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
-                    "**縮放最大速度**\n" +
-                    "在高速時使用更平滑的加速與制動公式。\n" +
-                    "**0.30 = 預設值的 30%**\n" +
-                    "**1.00 = 遊戲預設值**\n" +
-                    "注意：道路限速與遊戲條件仍可能套用。"
+                    "縮放 **最高速度**。\n" +
+                    "**0.30 = 30%** 遊戲預設\n" +
+                    "**1.00 = 遊戲預設**\n" +
+                    "注意：仍受道路限速與遊戲狀況影響。"
                 },
 
                 // Stability
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "剛性" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "用於 **擺動幅度** 的倍率。\n" +
-                    "**更高 = 更少傾斜**（更緊實的外觀）。\n" +
-                    "**更低 = 更搖晃。**\n" +
-                    "注意：電動滑板車的預設值不同，可能仍會更傾斜。\n" +
-                    "- 高速更穩定：1.25–1.75。\n" +
-                    "- 更搖晃：< 0.75。"
+                    "**擺動幅度** 倍率。\n" +
+                    "**更高 = 更少傾斜**。\n" +
+                    "**更低 = 更晃**。\n" +
+                    "建議：高速穩定 1.25–1.75。"
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "阻尼" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "更高 = 更快穩定（振盪更快消失）。\n" +
-                    "**1.0 = 遊戲預設值**\n" +
-                    "- 高速更穩定：1.25–2.0+\n" +
-                    "- 更搖晃：< 0.75"
+                    "更高 = 更快穩定（更少振盪）。\n" +
+                    "**1.00 = 遊戲預設**\n" +
+                    "建議：高速穩定 1.25–2.00。"
                 },
 
                 // Reset buttons
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "模組預設值" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "模組預設" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
-                    "套用模組建議的預設調校數值。"
+                    "套用模組的預設調校值。"
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "遊戲預設值" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "遊戲預設" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
-                    "將所有滑桿恢復為 **100%**，並恢復遊戲預設值（vanilla）。"
+                    "把所有滑桿設為 **100%** 並恢復遊戲預設（vanilla）。"
                 },
 
                 // Path Speed
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "步道限速" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "路徑限速" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
-                    "按倍率縮放 **步道（Path）** 的限速（步道不是道路）。\n" +
-                    "**1.00 = 遊戲預設值**\n" +
-                    "影響：自行車道、分離的步行+自行車道、步行道。\n" +
-                    "卸載模組前，請將此項（以及所有數值）重設為 1.00，然後載入一次城市以恢復步道限速。\n" +
-                    "之後即可安全卸載。若跳過此步驟，\n" +
-                    "現有步道會保留目前限速，而所有新建步道將使用 vanilla 預設限速。"
+                    "縮放 **路徑** 的限速（路徑不是道路）。\n" +
+                    "**1.00 = 遊戲預設**\n" +
+                    "影響：自行車道、步行+自行車、步行路徑。\n\n" +
+                    "解除安裝：設為 1.00 或用重置按鈕，存檔後再解除安裝。\n" +
+                    "忘了也沒事：舊路徑保留改過速度，新路徑用遊戲預設。"
                 },
 
-                // Status fields
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStatusGrp), "個人車輛狀態" },
-
+                // Status lines
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary1)), "自行車組" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary1)),
                     "自行車與電動滑板車。\n" +
-                    "**行駛中** = 具有目前車道的實體（正在移動）。\n" +
-                    "**停放** = 具有 **ParkedCar** 的實體。\n" +
-                    "自行車組由 prefab 上的 **BicycleData** 進行判定。"
+                    "**活動** = 有目前車道（移動中）。\n" +
+                    "**總停放** = 包含所有停放標記（如路邊），不只停車場。"
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "汽車組" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary2)),
-                    "僅個人汽車（不包含上方自行車組）。\n" +
-                    "**行駛中** = 具有目前車道的實體（正在移動）。\n" +
-                    "**停放** = 具有 **ParkedCar** 的實體（包含路邊/路沿）。\n" +
-                    "注意：可能與遊戲資訊面板的停放數量不一致，因為此處統計所有停放，而不只停車場內的。\n" +
-                    "掃描僅在開啟選項選單時執行（不會在城市中每幀執行，以獲得最佳效能）。"
+                    "僅私人汽車（不含自行車組）。\n" +
+                    "**活動** = 有目前車道（移動中）。\n" +
+                    "**停放** = 有 **ParkedCar**。\n" +
+                    "注意：遊戲資訊面板不包含所有停放類型，所以數字較低。\n" +
+                    "掃描只在開啟選項時執行，不影響城內 fps。"
                 },
 
-                { "FAST_STATUS_NOT_LOADED", "狀態尚未載入。" },
-                { "FAST_STATS_NOT_AVAIL", "沒有城市... ¯\\_(ツ)_/¯ ...沒有統計" },
-                { "FAST_STATS_CARS_NOT_AVAIL", "讓城市運行幾分鐘以取得資料。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary3)), "邊界隱藏車輛" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary3)),
+                    "**邊界隱藏** = 停在邊界外、城外連線（OC）的車輛。\n" +
+                    "這些車在遊戲內看不到，但計入總停放數。\n" +
+                    "有些城市會有大量 OC 車輛，並綁定城內車主。\n" +
+                    "仍需研究：這是遊戲暫存還是別的？\n\n" +
+                    "想查：按 <記錄隱藏車輛> 把樣本 ID 寫入日誌。\n" +
+                    "再用 Scene Explorer 查看車輛 ID 並分享結果。市民能用這些綁定的車嗎？"
+                },
 
-                { "FAST_STATS_BIKES_ROW1", "{0} 行駛中 | {1} 自行車 | {2} 電動滑板車 | {3} / {4} 停放/總計" },
-                { "FAST_STATS_CARS_ROW2",  "{0} 行駛中 | {1} 停放 | {2} 總計 | 更新 {3}" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LogBorderHiddenCars)), "記錄隱藏車輛" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.LogBorderHiddenCars)),
+                    "一次性寫入 **Logs/FastBikes.log**（開頭+結尾樣本）。\n" +
+                    "用 Scene Explorer 跳轉到列出的車輛實體 ID。"
+                },
+
+                // Status fallback keys
+                { "FAST_STATUS_NOT_LOADED",     "狀態未載入。" },
+                { "FAST_STATS_NOT_AVAIL",       "沒有城市... ¯\\_(ツ)_/¯ ...沒資料" },
+                { "FAST_STATS_CARS_NOT_AVAIL",  "讓城市跑幾分鐘再看。" },
+
+                // Status rows
+                { "FAST_STATS_BIKES_ROW1", "{0} 活動 | {1} 自行車 | {2} 滑板車 | {3} / {4} 停/總" },
+                { "FAST_STATS_CARS_ROW2",  "{0} 活動 | {1} 停放 | {2} 總計 | {3} 拖車" },
+                { "FAST_STATS_CARS_ROW3",  "{0} 邊界隱藏OC | 更新 {1}" },
 
                 // About: Info
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),      "模組" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)),       "顯示名稱。" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)),   "版本" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)),    "目前版本。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),    "模組" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)),     "顯示名稱。" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "版本" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)),  "目前版本。" },
 
                 // Links
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)), "開啟作者的 Paradox Mods 頁面。" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)),  "開啟作者的 Paradox mods 頁面。" },
 
                 // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "自行車除錯報告" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "一次性輸出自行車相關數值到日誌。\n" +
-                    "一般遊玩不需要。\n\n" +
-                    "用於遊戲更新後驗證 prefab 或進行除錯。\n" +
-                    "點擊前請先載入城市；輸出到 **Logs/FastBikes.log**"
-                },
+                    "一次性除錯日誌。\n" +
+                    "先載入城市。\n" +
+                    "輸出：**Logs/FastBikes.log**"
+                }
             };
         }
 

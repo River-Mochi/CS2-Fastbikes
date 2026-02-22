@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!-- File: FastBikes.csproj -->
   <!-- Purpose: Build configuration for Fast Bikes mod using CSII toolchain.
 	     Notes: TargetFramework net48, C# LangVersion 9.0, OutputType Library is set by toolchain Mod.props. -->
@@ -17,7 +17,7 @@
     <Nullable>enable</Nullable>
 
     <!-- Single source of truth for version number -->
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <AssemblyVersion>$(Version).0</AssemblyVersion>
     <FileVersion>$(Version).0</FileVersion>
   </PropertyGroup>

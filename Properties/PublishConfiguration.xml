@@ -13,7 +13,7 @@
 
 🚴 NEW: PATH speed limit - YES - now you can change bike paths (paths are independent of road speed limits)!
 
-- No known road mod lets you set "path" speeds so this is unique to this mod.
+- road mods don't let you set "path" speeds so this is unique to this mod.
 
 #### Features
 
@@ -59,7 +59,7 @@ tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life, chan
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="" />
 	<!--Version of the mod-->
-	<ModVersion Value="1.0.2" />
+	<ModVersion Value="1.0.3" />
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.5.*" />
 	<!--Dependency for the mod, can be set multiple times-->
