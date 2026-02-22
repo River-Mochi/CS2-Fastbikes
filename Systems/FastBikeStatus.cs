@@ -37,7 +37,7 @@ namespace FastBikes
             "{0} active | {1} parked | {2} total | {3} trailers";
 
         private const string FallbackCarsRow3 =
-            "{0} parked in buildings | {1} hidden at border OC | updated {2}";
+             "{0} hidden at border OC | updated {1}";
 
         public static string BikesRow { get; private set; } = string.Empty;
         public static string CarsRow { get; private set; } = string.Empty;
@@ -185,9 +185,9 @@ namespace FastBikes
             CarsRow3 = LocaleUtils.SafeFormat(
                 KeyCarsRow3,
                 fallbackFormat: FallbackCarsRow3,
-                LocaleUtils.FormatN0(snap.CarHiddenInBuildings), // {0}
-                LocaleUtils.FormatN0(snap.CarHiddenAtBorder),    // {1}
-                updated                                          // {2}
+                //  LocaleUtils.FormatN0(snap.CarHiddenInBuildings), // {0}
+                LocaleUtils.FormatN0(snap.CarHiddenAtBorder),    // {0}
+                updated                                          // {1}
             );
         }
     }
