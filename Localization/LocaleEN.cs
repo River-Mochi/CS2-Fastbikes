@@ -138,7 +138,7 @@ namespace FastBikes
                 { "FAST_STATS_CARS_ROW2",  "{0} active | {1} parked | {2} total | {3} trailers" },
 
                 // Row3 shows TOTAL OC hidden
-                { "FAST_STATS_CARS_ROW3",  "{0} total at OC border | updated {1}" },
+                { "FAST_STATS_CARS_ROW3",  "{0} hidden at border OC | updated {1}" },
 
                 // About: Info
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),    "Mod" },
