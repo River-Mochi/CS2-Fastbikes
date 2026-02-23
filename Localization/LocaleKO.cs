@@ -118,7 +118,7 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary3)),
                     "**OC 경계 총합** = 도시 밖(OC) 연결에서 ParkedCar인 자동차 그룹 차량.\n" +
                     "도시에 따라 도시 밖 연결에 주차로 막힌 차가 아주 많을 수 있습니다.\n" +
-                    "<숨겨진 차량 로그>로 숨겨진 차량 샘플 내역을 확인하세요.\n"
+                    "<숨겨진 차량 로그>로 숨겨진 차량 샘플 내역을 확인하세요."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LogBorderHiddenCars)), "숨겨진 차량 로그" },
