@@ -9,9 +9,10 @@
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="Fast Bikes" /-->
 	<LongDescription>
-🚲 Fast Bikes speeds up bicycles and scooters.
+🚲 Fast Bikes: speeds up bicycles and scooters.
 
-🚴 NEW: PATH speed limit - YES - now you can change bike paths (paths are independent of road speed limits)!
+🚴 NEW: Path speed limit - YES - now you can change bike paths (paths are independent of road speed limits)!
+🚴 NEW: Status report - compare Bike versus Cars usage (this can be used without enabling Fast Bikes checkbox).
 
 - road mods don't let you set "path" speeds so this is unique to this mod.
 
@@ -36,7 +37,7 @@
 - If the mod helps, drop a Like :)
 - Report issues on Github / Forum / Discord.
 
-#### Performant design
+#### Design
 
 - This runs only when you change mod menu settings.
 - Does not run continuously per-frame in cities to impact fps :)
@@ -61,7 +62,7 @@ tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life, chan
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/fast-bikes.1900016/" />
 	<!--Version of the mod-->
-	<ModVersion Value="1.0.4" />
+	<ModVersion Value="1.0.5" />
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.5.*" />
 	<!--Dependency for the mod, can be set multiple times-->
@@ -70,8 +71,8 @@ tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life, chan
 	<RequiredDLC Value="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 	<ChangeLog>
-- Adds details to Status Report.
-- Splits hidden cars at OC into 2 buckets.
+- Adds details to Status Report back end.
+- updates all translations.
 </ChangeLog>
 	<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
 	<ExternalLink Type="" Url="" />

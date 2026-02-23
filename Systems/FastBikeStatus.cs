@@ -1,9 +1,5 @@
 // File: Systems/FastBikeStatus.cs
 // Purpose: UI-facing cached status lines for Options UI.
-// Notes:
-// - Refresh driven by Setting.cs getters (runs only while Options is open).
-// - Cache invalidates on main-menu <-> city transitions.
-// - Localization + formatting safety is handled here; FastBikeStatusSystem returns raw numbers only.
 
 namespace FastBikes
 {
@@ -37,7 +33,7 @@ namespace FastBikes
             "{0} active | {1} parked | {2} total | {3} trailers";
 
         private const string FallbackCarsRow3 =
-             "{0} hidden at border OC | updated {1}";
+            "Hidden parked cars {0} total at OC border | updated {1}";
 
         public static string BikesRow { get; private set; } = string.Empty;
         public static string CarsRow { get; private set; } = string.Empty;
@@ -109,8 +105,6 @@ namespace FastBikes
             {
                 BikesRow = LocaleUtils.SafeFormat(KeyStatsNotAvail, FallbackStatsNotAvail);
                 CarsRow = LocaleUtils.SafeFormat(KeyCarsNotAvail, FallbackCarsNotAvail);
-
-                // Prevent duplicate "run city" line in the UI.
                 CarsRow3 = string.Empty;
                 return;
             }
@@ -181,13 +175,11 @@ namespace FastBikes
 
             string updated = snap.SnapshotTimeLocal.ToString("HH:mm:ss");
 
-            // Format string expects Buildings first, Border second.
             CarsRow3 = LocaleUtils.SafeFormat(
                 KeyCarsRow3,
                 fallbackFormat: FallbackCarsRow3,
-                //  LocaleUtils.FormatN0(snap.CarHiddenInBuildings), // {0}
-                LocaleUtils.FormatN0(snap.CarHiddenAtBorder),    // {0}
-                updated                                          // {1}
+                LocaleUtils.FormatN0(snap.CarHiddenAtBorder),   // {0} TOTAL OC hidden
+                updated                                         // {1}
             );
         }
     }

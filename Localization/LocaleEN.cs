@@ -47,7 +47,7 @@ namespace FastBikes
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Enable Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "Turns the mod **ON/OFF**.\n" +
+                    "Turns the mod **ON / OFF**.\n" +
                     "When OFF, bicycle and scooter behavior is restored to game defaults.\n\n" +
                     "Status info below is available even if Enable Fast Bikes is OFF."
                 },
@@ -111,24 +111,21 @@ namespace FastBikes
                     "Personal cars only (excludes the Bike group).\n" +
                     "**Active** = has a current lane (moving).\n" +
                     "**Parked** = has **ParkedCar**.\n" +
-                    "Note: in-game info panel does not include all types of parked car so it has lower numbers.\n" +
                     "Scan runs only while Options is open and not in-city fps, so no worries on performance."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary3)), "Hidden parked cars" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary3)),
-                    "**Hidden at border** = cars parked just outside the border on Outside City (OC) connection.\n" +
-                    "Some cities show a large number of OC cars linked to in-city Owners.\n" +
-                    "More study needed: is this game staging or something else?\n\n" +
-                    "If curious: use <Log hidden cars> button to record sample IDs to the log.\n" +
-                    "Then inspect ID's with Scene Explorer mod and share results. Can cims use these cars they are tied to?\n" +
-                    "These cars are part of the total parked car count but seem to be hidden/underground at OC."
+                    "**Total at OC border** = car-group vehicles with ParkedCar at Outside City (OC) connection.\n" +
+                    "Some cities show a large number of cars stuck parked at Outside City connection.\n" +
+                    "Use <Log hidden cars> for sample breakdown of hidden cars.\n"
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LogBorderHiddenCars)), "Log hidden cars" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.LogBorderHiddenCars)),
-                    "Writes a small one-time report to **Logs/FastBikes.log** with head+tail samples.\n" +
-                    "Use Scene Explorer mod to Jump To the listed Vehicle entity IDs."
+                    "Writes a one-time report to **Logs/FastBikes.log**.\n" +
+                    "Includes Total + Bucket A/B/C breakdown and sample ID numbers.\n" +
+                    "Use Scene Explorer mod to Jump To the listed Vehicle entity IDs and investigate."
                 },
 
                 // Status fallback keys
@@ -139,7 +136,9 @@ namespace FastBikes
                 // Status rows
                 { "FAST_STATS_BIKES_ROW1", "{0} active | {1} bikes | {2} scooters | {3} / {4} parked/total" },
                 { "FAST_STATS_CARS_ROW2",  "{0} active | {1} parked | {2} total | {3} trailers" },
-                { "FAST_STATS_CARS_ROW3",  "{0} hidden at border OC | updated {1}" },
+
+                // Row3 shows TOTAL OC hidden
+                { "FAST_STATS_CARS_ROW3",  "{0} total at OC border | updated {1}" },
 
                 // About: Info
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),    "Mod" },
@@ -154,9 +153,10 @@ namespace FastBikes
                 // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Bike debug report" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "One-time log report for debugging.\n" +
+                    "One-time detailed log report for debugging or game patch day verify.\n" +
+                    "Not needed for normal gameplay.\n" +
                     "Load a city first.\n" +
-                    "Output: **Logs/FastBikes.log**"
+                    "Output location: **Logs/FastBikes.log**"
                 }
             };
         }

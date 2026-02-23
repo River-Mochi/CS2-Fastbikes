@@ -37,7 +37,7 @@ namespace FastBikes
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsSpeedGrp),      "Velocità" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStabilityGrp),  "Stabilità" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsResetGrp),      "Reset" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStatusGrp),     "Stato veicoli perso" },
+                { m_Setting.GetOptionGroupLocaleID(Setting.ActionsStatusGrp),     "Stato veicoli personali" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.ActionsPathSpeedGrp),  "Percorsi" },
 
                 { m_Setting.GetOptionGroupLocaleID(Setting.AboutInfoGrp),  "Info mod" },
@@ -47,116 +47,116 @@ namespace FastBikes
                 // Master toggle
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableFastBikes)), "Abilita Fast Bikes" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableFastBikes)),
-                    "Attiva/disattiva il mod **ON/OFF**.\n" +
-                    "Quando OFF, bici e monopattini tornano ai valori del gioco.\n\n" +
-                    "Lo stato sotto è disponibile anche se Abilita Fast Bikes è OFF."
+                    "Attiva/disattiva il mod **ON / OFF**.\n" +
+                    "Quando OFF, bici e scooter tornano ai valori predefiniti del gioco.\n\n" +
+                    "Le info di stato sotto sono disponibili anche se Enable Fast Bikes è OFF."
                 },
 
                 // Speed
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Velocità bici e monop." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Velocità bici e scooter" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
-                    "**Scala la velocità max**.\n" +
-                    "**0.30 = 30%** del gioco\n" +
-                    "**1.00 = gioco**\n" +
+                    "**Scala la velocità massima**.\n" +
+                    "**0.30 = 30%** del valore del gioco\n" +
+                    "**1.00 = valore del gioco**\n" +
                     "Nota: limiti stradali e condizioni del gioco si applicano comunque."
                 },
 
                 // Stability
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Rigidità" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Scala per **ampiezza oscillazione**.\n" +
+                    "Fattore per **ampiezza oscillazione**.\n" +
                     "**Più alto = meno inclinazione**.\n" +
                     "**Più basso = più wobble**.\n" +
-                    "Consiglio: 1.25–1.75 per stabilità ad alta velocità."
+                    "Suggerito: 1.25–1.75 per stabilità ad alta velocità."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Smorzamento" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Più alto = si stabilizza prima (meno oscillazione).\n" +
-                    "**1.00 = gioco**\n" +
-                    "Consiglio: 1.25–2.00 per stabilità ad alta velocità."
+                    "Più alto = si stabilizza prima (meno oscillazioni).\n" +
+                    "**1.00 = valore del gioco**\n" +
+                    "Suggerito: 1.25–2.00 per stabilità ad alta velocità."
                 },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Default mod" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
-                    "Applica i valori predefiniti del mod."
+                    "Applica i valori di tuning predefiniti del mod."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Default gioco" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
-                    "Imposta tutti gli slider a **100%** e ripristina il gioco (vanilla)."
+                    "Imposta tutti gli slider a **100%** e ripristina i default del gioco (vanilla)."
                 },
 
                 // Path Speed
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Limite percorsi" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Limite velocità percorsi" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
-                    "Scala i limiti dei **Percorsi** (i percorsi non sono strade).\n" +
-                    "**1.00 = gioco**\n" +
-                    "Influisce su: piste ciclabili, pedonale+bici, e percorsi pedonali.\n\n" +
-                    "Disinstallazione: imposta a 1.00 o usa reset, salva la città, poi disinstalla.\n" +
-                    "Se te ne dimentichi: i vecchi percorsi tengono la velocità mod e i nuovi sono vanilla."
+                    "Scala i limiti di velocità dei **Percorsi** (i percorsi non sono strade).\n" +
+                    "**1.00 = valore del gioco**\n" +
+                    "Influisce: piste ciclabili, pedoni+bici, e percorsi pedonali.\n\n" +
+                    "Nota disinstallazione: metti 1.00 o usa reset, salva la città, poi disinstalla.\n" +
+                    "Se lo dimentichi: i vecchi percorsi restano moddati, i nuovi usano i default vanilla."
                 },
 
                 // Status lines
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary1)), "Gruppo bici" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary1)),
-                    "Bici e monopattini elettrici.\n" +
-                    "**Attivo** = ha una lane corrente (in movimento).\n" +
-                    "**Totale parcheggiati** = include tutti i flag Parked (es. bordo strada), non solo parcheggi."
+                    "Bici e scooter elettrici.\n" +
+                    "**Attivo** = ha una corsia corrente (in movimento).\n" +
+                    "**Totale parcheggiati** = include tutti i flag di parcheggio (es: bordo strada), non solo i parcheggi."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "Gruppo auto" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary2)),
-                    "Solo auto personali (esclude Gruppo bici).\n" +
-                    "**Attivo** = ha una lane corrente (in movimento).\n" +
-                    "**Parcheggiata** = ha **ParkedCar**.\n" +
-                    "Nota: il pannello del gioco non include tutti i tipi di auto parcheggiate, quindi numeri più bassi.\n" +
-                    "Lo scan gira solo mentre Opzioni è aperto, quindi ok per le prestazioni."
+                    "Solo auto personali (esclude il Gruppo bici).\n" +
+                    "**Attivo** = ha una corsia corrente (in movimento).\n" +
+                    "**Parcheggiato** = ha **ParkedCar**.\n" +
+                    "La scansione gira solo quando Options è aperto, quindi niente pensieri sulle prestazioni."
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary3)), "Auto nascoste" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary3)), "Auto parcheggiate nascoste" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary3)),
-                    "**Nascoste al confine** = auto parcheggiate appena fuori dal confine su collegamento Outside City (OC).\n" +
-                    "Queste auto non sono visibili in gioco e sono PARTE del totale auto parcheggiate.\n" +
-                    "Alcune città mostrano molte auto OC collegate a Owners in città.\n" +
-                    "Da studiare: staging del gioco o altro?\n\n" +
-                    "Se curioso: usa <Log auto nascoste> per scrivere ID di esempio nel log.\n" +
-                    "Poi controlla gli ID con Scene Explorer e condividi i risultati. I cims possono usare queste auto?"
+                    "**Totale al confine OC** = veicoli del gruppo auto con ParkedCar alla connessione Fuori Città (OC).\n" +
+                    "In alcune città ci sono molte auto bloccate e parcheggiate alla connessione Fuori Città.\n" +
+                    "Usa <Registra auto nascoste> per un esempio di auto nascoste.\n"
                 },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LogBorderHiddenCars)), "Log auto nascoste" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.LogBorderHiddenCars)), "Registra auto nascoste" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.LogBorderHiddenCars)),
-                    "Scrive un piccolo report una tantum in **Logs/FastBikes.log** con esempi testa+coda.\n" +
-                    "Usa Scene Explorer: Jump To agli ID entità Vehicle elencati."
+                    "Scrive un report una tantum in **Logs/FastBikes.log**.\n" +
+                    "Include Totale + ripartizione Gruppo A/B/C e numeri ID di esempio.\n" +
+                    "Usa il mod Scene Explorer per andare agli ID entità dei veicoli e investigare."
                 },
 
                 // Status fallback keys
                 { "FAST_STATUS_NOT_LOADED",     "Stato non caricato." },
-                { "FAST_STATS_NOT_AVAIL",       "Niente città... ¯\\_(ツ)_/¯ ...niente dati" },
-                { "FAST_STATS_CARS_NOT_AVAIL",  "fai girare la città qualche minuto." },
+                { "FAST_STATS_NOT_AVAIL",       "Nessuna città... ¯\\_(ツ)_/¯ ...Niente stats" },
+                { "FAST_STATS_CARS_NOT_AVAIL",  "Fai girare la città qualche minuto per i dati." },
 
                 // Status rows
-                { "FAST_STATS_BIKES_ROW1", "{0} attivi | {1} bici | {2} monop. | {3} / {4} parch/tot" },
-                { "FAST_STATS_CARS_ROW2",  "{0} attivi | {1} parch | {2} tot | {3} rimorchi" },
-                { "FAST_STATS_CARS_ROW3",  "{0} nascosti confine OC | agg {1}" },
+                { "FAST_STATS_BIKES_ROW1", "{0} attivi | {1} bici | {2} scooter | {3} / {4} parcheggiati/totale" },
+                { "FAST_STATS_CARS_ROW2",  "{0} attivi | {1} parcheggiati | {2} totale | {3} rimorchi" },
+
+                // Row3 shows TOTAL OC hidden (not bucket A)
+                { "FAST_STATS_CARS_ROW3",  "{0} totale al confine OC | aggiornato {1}" },
 
                 // About: Info
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),    "Mod" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutName)),     "Nome visualizzato." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutVersion)), "Versione" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)),  "Versione corrente." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AboutVersion)),  "Versione attuale." },
 
                 // Links
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OpenParadoxMods)), "Paradox Mods" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)),  "Apre la pagina Paradox mods dell’autore." },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OpenParadoxMods)),  "Apre la pagina Paradox Mods dell’autore." },
 
                 // Debug
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DumpBicyclePrefabs)), "Report debug bici" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.DumpBicyclePrefabs)),
-                    "Report una tantum per debug.\n" +
-                    "Carica prima una città.\n" +
-                    "Output: **Logs/FastBikes.log**"
+                    "Report dettagliato una tantum per debug o verifica giorno patch.\n" +
+                    "Non serve per il gameplay normale.\n" +
+                    "Prima carica una città.\n" +
+                    "Posizione output: **Logs/FastBikes.log**"
                 }
             };
         }

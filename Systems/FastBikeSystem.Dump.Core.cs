@@ -1,8 +1,7 @@
 // File: Systems/FastBikeSystem.Dump.Core.cs
 // Purpose: Dump entrypoint + bicycle prefab sanity + scalar summary.
 // Notes:
-// - Dump is read-only.
-// - Debug-only mismatch examples; Release logs counts only.
+// - Dump is read-only; Debug-only mismatch examples; Release logs counts only.
 
 namespace FastBikes
 {
@@ -354,7 +353,6 @@ namespace FastBikes
                 }
             }
 
-            // IMPORTANT: extras are allowed (DLC/custom assets). Only missing expected names are flagged.
             bool clean =
                 missingExpected.Count == 0 &&
                 missingPrefabBase == 0 &&
@@ -366,11 +364,6 @@ namespace FastBikes
             {
                 Mod.LogSafe(( ) =>
                     $"[FB] BIKE SUMMARY: ALL GOOD (Total={total}, Bicycles={bikes}, Scooters={scooters}).");
-
-#if DEBUG
-                Mod.LogSafe(( ) =>
-                    $"[FB] BIKE SUMMARY (DEBUG): Names={string.Join(", ", groupNames)}");
-#endif
             }
             else
             {
@@ -403,9 +396,25 @@ namespace FastBikes
             DumpScooter01Report();
             DumpCitizenVehicleEligibilityReport();
 
+            // One-line A/B/C summary matching Actions tab hidden-car report.
+            DumpOcHiddenBucketsOneLine();
+
             // Defined in Systems/FastBikeSystem.BikeInstances.cs (keep logic there).
             DumpBikeInstancesReport();
             DumpCarGroupInstancesReport();
+        }
+
+        private void DumpOcHiddenBucketsOneLine( )
+        {
+            try
+            {
+                FastBikeStatusSystem sys = World.GetOrCreateSystemManaged<FastBikeStatusSystem>();
+                sys.LogOcHiddenBucketsOneLine();
+            }
+            catch (Exception ex)
+            {
+                Mod.LogSafe(( ) => $"[FB] OC Hidden Cars A/B/C: failed ({ex.GetType().Name})");
+            }
         }
 
         private static bool IsExpectedBicycleGroupName(string name)
