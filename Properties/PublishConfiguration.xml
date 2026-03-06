@@ -39,10 +39,11 @@
 
 
 #### Design + Performance
-- FB is designed for the best city performance, it's partly why I made this mod.
-- I don't like to have a lot of mods that are running constantly in the city per frame when it's not needed to do certain things (like bike or path speed).
-- It updates tuning when you change a setting (or when a city loads), then goes idle. The Status report only refreshes when the Options menu is actually open.
-- FB doesn't run constantly while in the city. Some mods do it and might not need to if they were designed differently. And some mods must run constantly per frame due to the nature what they do.
+Fast Bikes is built to be lightweight, it's partly why I made this.
+
+- My preference is to not run in the city per frame constantly if it's not needed to do certain things (like bike or path speed).
+- Applies tuning when you change settings (or when a city loads), then goes idle.
+- Status report refreshes only when the Options menu is open.
 - This is a brief idea, there is much more of course; be sure, effort is made for this.
 
 
