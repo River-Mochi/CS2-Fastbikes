@@ -43,7 +43,7 @@
 - I don't like to have a lot of mods that are running constantly in the city per frame when it's not needed to do certain things (like bike or path speed).
 - It updates tuning when you change a setting (or when a city loads), then goes idle. The Status report only refreshes when the Options menu is actually open.
 - FB doesn't run constantly while in the city. Some mods do it and might not need to if they were designed differently. And some mods must run constantly per frame due to the nature what they do.
-- This is a brief idea, there is much more of course; be sure, effort is made to be performance conscious.
+- This is a brief idea, there is much more of course; be sure, effort is made for this.
 
 
 #### Credits
