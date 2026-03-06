@@ -27,20 +27,24 @@
 
 - Road speed limits and game conditions may still cap speeds.
 - Compatible with "Road Speed Adjuster" mod (as that does normal roads and not paths).
-- Path speed is **new** beta feature, please report issues.
+- Path speed limit: includes both bike and pedestrian paths.
 - To disable the mod without uninstalling, uncheck [ ] the enable box.
 - Safe to remove (Reset button first for fast return to game defaults, then save city, and uninstall).
 - Has 11 Languages
 
 #### Support and Feedback
 
-- If the mod helps, drop a Like :)
+- If the mod helps, drop a Like, it's free + easy to do :)
 - Report issues on Github / Forum / Discord.
 
-#### Design
 
-- This runs only when you change mod menu settings.
-- Does not run continuously per-frame in cities to impact fps :)
+#### Design + Performance
+- FB is designed for the best city performance, it's partly why I made this mod.
+- I don't like to have a lot of mods that are running constantly in the city per frame when it's not needed to do certain things (like bike or path speed).
+- It updates tuning when you change a setting (or when a city loads), then goes idle. The Status report only refreshes when the Options menu is actually open.
+- FB doesn't run constantly while in the city. Some mods do it and might not need to if they were designed differently. And some mods must run constantly per frame due to the nature what they do.
+- This is a brief idea, there is much more of course; be sure, effort is made to be performance conscious.
+
 
 #### Credits
 
