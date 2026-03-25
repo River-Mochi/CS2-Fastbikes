@@ -70,16 +70,16 @@
     </None>
   </ItemGroup>
 
-  <!-- AUTO UPDATE PublishConfiguration ModVersion using CSPROJ Version
-     Normalizes EOL + optional left-align blocks (LongDescription/ChangeLog). -->
+  <!-- AUTO UPDATE PublishConfiguration ModVersion using csproj Version
+     remove BOM, make EOL=CRLF, and left-align text -->
   <Target Name="UpdatePublishConfigVersion"
           BeforeTargets="Build"
           Condition="Exists('$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1')
                    AND Exists('$(MSBuildProjectDirectory)\$(PublishConfigurationPath)')">
 
-      <Message Text="FastBikes PublishConfig: syncing ModVersion + normalizing PublishConfiguration.xml..." Importance="high" />
+      <Message Text="FastBikes PublishConfig: syncing ModVersion + normalizing EOL/BOM + left-align blocks..." Importance="high" />
 
-      <Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol crlf -ModJsonEol lf -LeftAlignBlocks -RepoRoot &quot;$(MSBuildProjectDirectory)&quot;" />
+      <Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol crlf -LeftAlignBlocks" />
   </Target>
 
 
