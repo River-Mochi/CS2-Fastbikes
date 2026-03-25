@@ -22,7 +22,6 @@
 .editorconfig  text eol=lf
 .gitignore     text eol=lf
 
-
 # Binaries (never touch line endings)
 *.png  binary
 *.jpg  binary

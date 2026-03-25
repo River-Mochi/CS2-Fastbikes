@@ -64,20 +64,23 @@
 
   <ItemGroup>
     <!-- Dev-only scripts: keep in repo, never copy to build output -->
-    <None Update="tools\**\*">
+    <None Update="Scripts\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <Pack>false</Pack>
     </None>
   </ItemGroup>
 
-  <!-- AUTO UPDATE PublishConfiguration ModVersion using CSPROJ Version number -->
+  <!-- AUTO UPDATE PublishConfiguration ModVersion using CSPROJ Version
+     Normalizes EOL + optional left-align blocks (LongDescription/ChangeLog). -->
   <Target Name="UpdatePublishConfigVersion"
-	        BeforeTargets="Build"
-	        Condition="'$(Configuration)' == 'Release'
-	                  AND Exists('$(MSBuildProjectDirectory)\tools\Update-PublishConfig.ps1')
-	                  AND Exists('$(MSBuildProjectDirectory)\$(PublishConfigurationPath)')">
+          BeforeTargets="Build"
+          Condition="Exists('$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1')
+                   AND Exists('$(MSBuildProjectDirectory)\$(PublishConfigurationPath)')">
 
-    <Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\tools\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol lf -LeftAlignBlocks" />
+      <Message Text="FastBikes PublishConfig: syncing ModVersion + normalizing PublishConfiguration.xml..." Importance="high" />
+
+      <Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol crlf -ModJsonEol lf -LeftAlignBlocks -RepoRoot &quot;$(MSBuildProjectDirectory)&quot;" />
   </Target>
+
 
 </Project>

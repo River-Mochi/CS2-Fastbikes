@@ -14,10 +14,10 @@ namespace FastBikes
     [FileLocation("ModsSettings/FastBikes/FastBikes")]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(
-        ActionsSpeedGrp, ActionsResetGrp, ActionsPathSpeedGrp, ActionsStatusGrp,
+        ActionsSpeedGrp, ActionsPathSpeedGrp,  ActionsResetGrp, ActionsStatusGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     [SettingsUIShowGroupName(
-        ActionsSpeedGrp, ActionsResetGrp, ActionsPathSpeedGrp, ActionsStatusGrp,
+        ActionsSpeedGrp, ActionsPathSpeedGrp, ActionsResetGrp, ActionsStatusGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     public sealed class Setting : ModSetting
     {
@@ -104,6 +104,22 @@ namespace FastBikes
             get; set;
         }
 
+       
+
+        // -----------------------------
+        // Actions: Path speed
+        // -----------------------------
+
+        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
+        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
+        public float PathSpeedScalar
+        {
+            get; set;
+        }
+
+
         // ------------------------
         // Actions: Reset buttons
         // ------------------------
@@ -142,18 +158,6 @@ namespace FastBikes
             }
         }
 
-        // -----------------------------
-        // Actions: Path speed
-        // -----------------------------
-
-        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
-        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
-        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
-        public float PathSpeedScalar
-        {
-            get; set;
-        }
 
         // -----------------------------
         // Actions: Status (read-only)
