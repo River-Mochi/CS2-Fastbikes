@@ -104,14 +104,14 @@ namespace FastBikes
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary1)),
                     "Bikes and electric scooters.\n" +
                     "**Active** = has a current lane (moving).\n" +
-                    "**Total Parked** = includes all Parked flags (e.g., roadside), not just parking lots."
+                    "**Total Parked** = includes all Parked flags from anywhere, not just parking lots."
                 },
 
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StatusSummary2)), "Car group" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.StatusSummary2)),
                     "Personal cars only (excludes the Bike group).\n" +
                     "**Active** = has a current lane (moving).\n" +
-                    "**Parked** = has **ParkedCar**.\n" +
+                    "**Parked** = all **ParkedCar**, not just parking lots.\n " +
                     "Scan runs only while Options is open and not in-city fps, so no worries on performance."
                 },
 
