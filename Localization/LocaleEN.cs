@@ -62,20 +62,20 @@ namespace FastBikes
                 },
 
                 // Stability
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Stiffness" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Scalar for **sway amplitude**.\n" +
-                    "**Higher = less leaning**.\n" +
-                    "**Lower = more wobble**.\n" +
-                    "Suggested: 1.25–1.75 for high-speed stability."
-                },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Higher = settles faster (less oscillation).\n" +
-                    "**1.00 = game default**\n" +
-                    "Suggested: 1.25–2.00 for high-speed stability."
-                },
+    //            { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Stiffness" },
+    //            { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
+    //                "Scalar for **sway amplitude**.\n" +
+    //                "**Higher = less leaning**.\n" +
+    //                "**Lower = more wobble**.\n" +
+    //                "Suggested: 1.25–1.75 for high-speed stability."
+    //            },
+    //
+    //            { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Damping" },
+    //            { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
+    //                "Higher = settles faster (less oscillation).\n" +
+    //                "**1.00 = game default**\n" +
+    //                "Suggested: 1.25–2.00 for high-speed stability."
+    //            },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod defaults" },
