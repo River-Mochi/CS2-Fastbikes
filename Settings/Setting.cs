@@ -14,10 +14,10 @@ namespace FastBikes
     [FileLocation("ModsSettings/FastBikes/FastBikes")]
     [SettingsUITabOrder(ActionsTab, AboutTab)]
     [SettingsUIGroupOrder(
-        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsPathSpeedGrp, ActionsStatusGrp,
+        ActionsSpeedGrp, ActionsPathSpeedGrp,  ActionsResetGrp, ActionsStatusGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     [SettingsUIShowGroupName(
-        ActionsSpeedGrp, ActionsStabilityGrp, ActionsResetGrp, ActionsPathSpeedGrp, ActionsStatusGrp,
+        ActionsSpeedGrp, ActionsPathSpeedGrp, ActionsResetGrp, ActionsStatusGrp,
         AboutInfoGrp, AboutLinksGrp, AboutDebugGrp)]
     public sealed class Setting : ModSetting
     {
@@ -25,7 +25,10 @@ namespace FastBikes
         public const string AboutTab = "About";
 
         public const string ActionsSpeedGrp = "Speed";
+
+        // Kept for settings compatibility; Stability UI is disabled.
         public const string ActionsStabilityGrp = "Stability";
+
         public const string ActionsResetGrp = "Reset";
         public const string ActionsStatusGrp = "Status";
         public const string ActionsPathSpeedGrp = "PathSpeed";
@@ -41,8 +44,11 @@ namespace FastBikes
 
         private const bool DefaultEnabled = true;
         private const float DefaultSpeed = 2.0f;
+
+        // Kept for settings compatibility; Stability behavior is disabled.
         private const float DefaultStiffness = 1.50f;
         private const float DefaultDamping = 1.50f;
+
         private const float DefaultPathSpeedScalar = 2.0f;
 
         private const float FloatEpsilon = 0.0001f;
@@ -51,8 +57,11 @@ namespace FastBikes
         {
             EnableFastBikes = DefaultEnabled;
             SpeedScalar = DefaultSpeed;
+
+            // Kept for settings compatibility; unused while Stability is disabled.
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
+
             PathSpeedScalar = DefaultPathSpeedScalar;
         }
 
@@ -81,26 +90,35 @@ namespace FastBikes
         }
 
         // ------------------------
-        // Actions: Stability
+        // Actions: Stability (disabled)
         // ------------------------
+        // Kept for settings compatibility; no Options UI attributes on purpose.
 
-        [SettingsUISection(ActionsTab, ActionsStabilityGrp)]
-        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.10f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
-        [SettingsUISetter(typeof(Setting), nameof(SetStiffnessScalar))]
         public float StiffnessScalar
         {
             get; set;
         }
 
-        [SettingsUISection(ActionsTab, ActionsStabilityGrp)]
-        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 0.30f, max = 5.00f, step = 0.10f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
-        [SettingsUISetter(typeof(Setting), nameof(SetDampingScalar))]
         public float DampingScalar
         {
             get; set;
         }
+
+       
+
+        // -----------------------------
+        // Actions: Path speed
+        // -----------------------------
+
+        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
+        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
+        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
+        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
+        public float PathSpeedScalar
+        {
+            get; set;
+        }
+
 
         // ------------------------
         // Actions: Reset buttons
@@ -138,19 +156,6 @@ namespace FastBikes
 
                 DoResetToVanilla();
             }
-        }
-
-        // -----------------------------
-        // Actions: Path speed
-        // -----------------------------
-
-        [SettingsUISection(ActionsTab, ActionsPathSpeedGrp)]
-        [SettingsUIHideByCondition(typeof(Setting), nameof(EnableFastBikes), true)]
-        [SettingsUISlider(min = 1.00f, max = 5.00f, step = 0.25f, unit = Unit.kFloatTwoFractions, updateOnDragEnd = true)]
-        [SettingsUISetter(typeof(Setting), nameof(SetPathSpeedScalar))]
-        public float PathSpeedScalar
-        {
-            get; set;
         }
 
 
@@ -273,8 +278,11 @@ namespace FastBikes
         {
             EnableFastBikes = DefaultEnabled;
             SpeedScalar = DefaultSpeed;
+
+            // Kept for settings compatibility; unused while Stability is disabled.
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
+
             PathSpeedScalar = DefaultPathSpeedScalar;
         }
 
@@ -349,6 +357,7 @@ namespace FastBikes
             }
         }
 
+        // Kept for settings compatibility (no UI setter attributes reference these).
         private void SetStiffnessScalar(float value)
         {
             if (Math.Abs(StiffnessScalar - value) < FloatEpsilon)
@@ -362,6 +371,7 @@ namespace FastBikes
             }
         }
 
+        // Kept for settings compatibility (no UI setter attributes reference these).
         private void SetDampingScalar(float value)
         {
             if (Math.Abs(DampingScalar - value) < FloatEpsilon)
@@ -391,8 +401,11 @@ namespace FastBikes
         private void DoResetToVanilla( )
         {
             SpeedScalar = Vanilla;
+
+            // Kept for settings compatibility; unused while Stability is disabled.
             StiffnessScalar = Vanilla;
             DampingScalar = Vanilla;
+
             PathSpeedScalar = Vanilla;
 
             ApplyAndSave();
@@ -402,8 +415,11 @@ namespace FastBikes
         private void DoResetToModDefaults( )
         {
             SpeedScalar = DefaultSpeed;
+
+            // Kept for settings compatibility; unused while Stability is disabled.
             StiffnessScalar = DefaultStiffness;
             DampingScalar = DefaultDamping;
+
             PathSpeedScalar = DefaultPathSpeedScalar;
 
             ApplyAndSave();

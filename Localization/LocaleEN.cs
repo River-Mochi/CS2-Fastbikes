@@ -56,6 +56,7 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SpeedScalar)), "Bike & scooter speed" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SpeedScalar)),
                     "**Scales max speed**.\n" +
+                    "Acceleration + brake use smoothing math at high-speed for less jump starts and panic braking look.\n" +
                     "**0.30 = 30%** of game default\n" +
                     "**1.00 = game default**\n" +
                     "Note: road limits and game conditions still apply."
@@ -77,6 +78,16 @@ namespace FastBikes
     //                "Suggested: 1.25–2.00 for high-speed stability."
     //            },
 
+                // Path Speed
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Path speed limit" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
+                    "Scales **Path** speed limits (paths are not roads).\n" +
+                    "**1.00 = game default**\n" +
+                    "Affects: bike paths, divided pedestrian+bike, and pedestrian paths.\n\n" +
+                    "Uninstall note: set to 1.00 or use reset button, save city, then uninstall.\n" +
+                    "If you forget, then old paths simply keep the modded speed and new paths are vanilla game defaults."
+                },
+
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod defaults" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToModDefaults)),
@@ -86,16 +97,6 @@ namespace FastBikes
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToVanilla)), "Game defaults" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ResetToVanilla)),
                     "Sets all sliders to **100%** and restores game defaults (vanilla)."
-                },
-
-                // Path Speed
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PathSpeedScalar)), "Path speed limit" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PathSpeedScalar)),
-                    "Scales **Path** speed limits (paths are not roads).\n" +
-                    "**1.00 = game default**\n" +
-                    "Affects: bike paths, divided pedestrian+bike, and pedestrian paths.\n\n" +
-                    "Uninstall note: set to 1.00 or use reset button, save city, then uninstall.\n" +
-                    "If you forget, then old paths simply keep the modded speed and new paths are vanilla game defaults."
                 },
 
                 // Status lines
@@ -138,7 +139,7 @@ namespace FastBikes
                 { "FAST_STATS_CARS_ROW2",  "{0} active | {1} parked | {2} total | {3} trailers" },
 
                 // Row3 shows TOTAL OC hidden
-                { "FAST_STATS_CARS_ROW3",  "{0} hidden at border OC | updated {1}" },
+                { "FAST_STATS_CARS_ROW3",  "{0} hidden at OC border | updated {1}" },
 
                 // About: Info
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AboutName)),    "Mod" },

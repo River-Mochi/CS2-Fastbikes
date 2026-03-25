@@ -62,20 +62,20 @@ namespace FastBikes
                 },
 
                 // Stability
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Rigidità" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Fattore per **ampiezza oscillazione**.\n" +
-                    "**Più alto = meno inclinazione**.\n" +
-                    "**Più basso = più wobble**.\n" +
-                    "Suggerito: 1.25–1.75 per stabilità ad alta velocità."
-                },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Smorzamento" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Più alto = si stabilizza prima (meno oscillazioni).\n" +
-                    "**1.00 = valore del gioco**\n" +
-                    "Suggerito: 1.25–2.00 per stabilità ad alta velocità."
-                },
+    //            { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Rigidità" },
+    //            { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
+    //                "Fattore per **ampiezza oscillazione**.\n" +
+    //                "**Più alto = meno inclinazione**.\n" +
+    //                "**Più basso = più wobble**.\n" +
+    //                "Suggerito: 1.25–1.75 per stabilità ad alta velocità."
+    //            },
+//
+   //            { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Smorzamento" },
+    //            { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
+    //                "Più alto = si stabilizza prima (meno oscillazioni).\n" +
+     //               "**1.00 = valore del gioco**\n" +
+     //               "Suggerito: 1.25–2.00 per stabilità ad alta velocità."
+      //          },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Default mod" },

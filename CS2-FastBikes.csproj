@@ -17,7 +17,7 @@
     <Nullable>enable</Nullable>
 
     <!-- Single source of truth for version number -->
-    <Version>1.0.7</Version>
+    <Version>1.0.8</Version>
     <AssemblyVersion>$(Version).0</AssemblyVersion>
     <FileVersion>$(Version).0</FileVersion>
   </PropertyGroup>
@@ -64,20 +64,23 @@
 
   <ItemGroup>
     <!-- Dev-only scripts: keep in repo, never copy to build output -->
-    <None Update="tools\**\*">
+    <None Update="Scripts\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <Pack>false</Pack>
     </None>
   </ItemGroup>
 
-  <!-- AUTO UPDATE PublishConfiguration ModVersion using CSPROJ Version number -->
+  <!-- AUTO UPDATE PublishConfiguration ModVersion using csproj Version
+     remove BOM, make EOL=CRLF, and left-align text -->
   <Target Name="UpdatePublishConfigVersion"
-	        BeforeTargets="Build"
-	        Condition="'$(Configuration)' == 'Release'
-	                  AND Exists('$(MSBuildProjectDirectory)\tools\Update-PublishConfig.ps1')
-	                  AND Exists('$(MSBuildProjectDirectory)\$(PublishConfigurationPath)')">
+          BeforeTargets="Build"
+          Condition="Exists('$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1')
+                   AND Exists('$(MSBuildProjectDirectory)\$(PublishConfigurationPath)')">
 
-    <Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\tools\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol lf -LeftAlignBlocks" />
+      <Message Text="FastBikes PublishConfig: syncing ModVersion + normalizing EOL/BOM + left-align blocks..." Importance="high" />
+
+      <Exec Command="&quot;$(SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\Update-PublishConfig.ps1&quot; -Path &quot;$(MSBuildProjectDirectory)\$(PublishConfigurationPath)&quot; -Version &quot;$(Version)&quot; -Eol crlf -LeftAlignBlocks" />
   </Target>
+
 
 </Project>

@@ -62,20 +62,20 @@ namespace FastBikes
                 },
 
                 // Stability
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "剛性" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "**揺れ幅** の倍率。\n" +
-                    "**高い = 傾き少なめ**。\n" +
-                    "**低い = ふらつき多め**。\n" +
-                    "推奨：高速安定は 1.25–1.75。"
-                },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "減衰" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "高いほど早く落ち着く（振動が減る）。\n" +
-                    "**1.00 = ゲーム標準**\n" +
-                    "推奨：高速安定は 1.25–2.00。"
-                },
+    //            { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "剛性" },
+    //            { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
+    //                "**揺れ幅** の倍率。\n" +
+    //                "**高い = 傾き少なめ**。\n" +
+    //                "**低い = ふらつき多め**。\n" +
+    //                "推奨：高速安定は 1.25–1.75。"
+    //            },
+    //
+    //            { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "減衰" },
+     //           { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
+     //               "高いほど早く落ち着く（振動が減る）。\n" +
+     //               "**1.00 = ゲーム標準**\n" +
+     //               "推奨：高速安定は 1.25–2.00。"
+      //          },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Modデフォルト" },

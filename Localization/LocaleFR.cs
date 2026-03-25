@@ -62,20 +62,21 @@ namespace FastBikes
                 },
 
                 // Stability
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Rigidité" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Facteur pour **l’amplitude de balancement**.\n" +
-                    "**Plus haut = moins d’inclinaison**.\n" +
-                    "**Plus bas = plus de wobble**.\n" +
-                    "Suggéré : 1.25–1.75 pour la stabilité à grande vitesse."
-                },
+      //          { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Rigidité" },
+      //          { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
+      //              "Facteur pour **l’amplitude de balancement**.\n" +
+      //              "**Plus haut = moins d’inclinaison**.\n" +
+      //              "**Plus bas = plus de wobble**.\n" +
+      //              "Suggéré : 1.25–1.75 pour la stabilité à grande vitesse."
+       //         },
+//
+       //         { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Amortissement" },
+       //         { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
+       //             "Plus haut = se stabilise plus vite (moins d’oscillation).\n" +
+       //             "**1.00 = jeu par défaut**\n" +
+       //             "Suggéré : 1.25–2.00 pour la stabilité à grande vitesse."
+       //         },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Amortissement" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Plus haut = se stabilise plus vite (moins d’oscillation).\n" +
-                    "**1.00 = jeu par défaut**\n" +
-                    "Suggéré : 1.25–2.00 pour la stabilité à grande vitesse."
-                },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Valeurs du mod" },

@@ -62,20 +62,20 @@ namespace FastBikes
                 },
 
                 // Stability
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Steifigkeit" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Skalar für **Schwank-Amplitude**.\n" +
-                    "**Höher = weniger Neigung**.\n" +
-                    "**Niedriger = mehr Wackeln**.\n" +
-                    "Empfohlen: 1.25–1.75 für Stabilität bei hohem Tempo."
-                },
+             //   { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Steifigkeit" },
+             //   { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
+             //       "Skalar für **Schwank-Amplitude**.\n" +
+             //       "**Höher = weniger Neigung**.\n" +
+             //       "**Niedriger = mehr Wackeln**.\n" +
+             //       "Empfohlen: 1.25–1.75 für Stabilität bei hohem Tempo."
+             //   },
 
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Dämpfung" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Höher = beruhigt schneller (weniger Schwingung).\n" +
-                    "**1.00 = Spielstandard**\n" +
-                    "Empfohlen: 1.25–2.00 für Stabilität bei hohem Tempo."
-                },
+            //    { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Dämpfung" },
+             //   { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
+             //       "Höher = beruhigt schneller (weniger Schwingung).\n" +
+             //       "**1.00 = Spielstandard**\n" +
+             //       "Empfohlen: 1.25–2.00 für Stabilität bei hohem Tempo."
+             //   },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Mod-Standard" },

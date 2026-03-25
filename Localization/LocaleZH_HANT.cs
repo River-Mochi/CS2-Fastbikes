@@ -62,20 +62,20 @@ namespace FastBikes
                 },
 
                 // Stability
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "剛性" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "**搖擺幅度** 的比例。\n" +
-                    "**更高 = 更少傾斜**。\n" +
-                    "**更低 = 更晃**。\n" +
-                    "建議：高速穩定 1.25–1.75。"
-                },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "阻尼" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "更高 = 更快穩定（更少振盪）。\n" +
-                    "**1.00 = 遊戲預設**\n" +
-                    "建議：高速穩定 1.25–2.00。"
-                },
+  //              { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "剛性" },
+   //             { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
+   //                 "**搖擺幅度** 的比例。\n" +
+  //                  "**更高 = 更少傾斜**。\n" +
+   //                 "**更低 = 更晃**。\n" +
+   //                 "建議：高速穩定 1.25–1.75。"
+   //             },
+   //
+   //             { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "阻尼" },
+    //            { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
+     //               "更高 = 更快穩定（更少振盪）。\n" +
+     //               "**1.00 = 遊戲預設**\n" +
+     //               "建議：高速穩定 1.25–2.00。"
+     //           },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "模組預設" },

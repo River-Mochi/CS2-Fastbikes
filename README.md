@@ -6,9 +6,6 @@ It can also raise **path speed limits** so bikes don’t get bottlenecked on pat
 ## Features
 - **Bike & scooter speed** multiplier (0.30x to 10.00x)
 - **Accel/brake auto-scaled** for smoother high-speed behavior
-- Optional stability tuning:
-  - **Stiffness** (sway amplitude)
-  - **Damping** (how fast sway settles)
 - **Path speed limit** (1.00x to 5.00x)
   - Affects: bike paths, pedestrian+bike paths, and pedestrian-only paths (**not roads**)
 - One-click reset buttons:
@@ -17,10 +14,12 @@ It can also raise **path speed limits** so bikes don’t get bottlenecked on pat
 - **Status panel** (runs only while Options is open)
   - Bike group counts (bikes + e-scooters)
   - Car group counts (personal cars; bikes excluded)
-  - Hidden parking breakdown (buildings vs border OC)
-- Debug / logs:
-  - **Bike debug report** → `Logs/FastBikes.log`
-  - Includes **Scooter01 (fuel)** count + sample entity IDs (useful for bug reports)
+  - “Total at OC border” count for hidden parked cars at Outside Connection
+- Logs / debug:
+  - **Log hidden cars** → writes A/B/C bucket breakdown + sample entity IDs to `Logs/FastBikes.log`
+  - **Bike debug report** → detailed report to `Logs/FastBikes.log` (good for patch-day sanity checks)
+
+> Compatibility note: the optional “sway/stability tuning” UI has been removed for now to avoid conflicts with mods that also modify stiffness/damping.
 
 ---
 
@@ -40,25 +39,7 @@ Scales **max speed** allowed. Acceleration/braking auto-adjust for the selected 
 
 Notes:
 - Road speed limits and game conditions may still cap speeds.
-- If you want faster bikes on roads too, consider a road speed limit mod (this mod handles **paths**, not roads).
-
-### Stiffness
-Scalar for **sway amplitude**.
-
-- Higher = less leaning / tighter look
-- Lower = more wobble
-
-Good at high speed: **1.25–1.75**  
-More wobble: **< 0.75**
-
-### Damping
-How quickly sway settles.
-
-- Higher = oscillation dies faster
-- **1.0 = vanilla**
-
-Good at high speed: **1.25–2.0+**  
-More wobble: **< 0.75**
+- If faster bikes on normal roads are needed too, use a road speed limit mod (this mod handles **paths**, not roads).
 
 ### Path speed limit
 Scales speed limits for **paths** (not roads).
@@ -69,18 +50,31 @@ Scales speed limits for **paths** (not roads).
 
 ---
 
-## Status: “Hidden parking” + “Log hidden cars”
+## Status: “Hidden parked cars” + “Log hidden cars”
 Some parked vehicles are **Unspawned** (hidden) because they’re parked inside buildings/garages — normal.
 
 Some cities also show lots of cars **hidden at the border (OC / Outside Connection)**.  
-These show up as parked on an outside-connection lane (Connection Lane / OutsideConnection).
+In the Status panel, the row shows **Total at OC border**.
 
 If you want to help investigate:
 1. Open **Options → Fast Bikes → Status**
 2. Click **Log hidden cars**
 3. Open `Logs/FastBikes.log`
-4. Use **Scene Explorer** mod → “Jump To” the listed **VehicleIndex:Version**
-   - Look at `ParkedCar.m_Lane` (Connection Lane is the border/OC case)
+4. The log prints:
+   - **Total OC Hidden Cars**
+   - Bucket **A/B/C** breakdown
+   - Sample **VehicleIndex:Version** IDs
+5. Use **Scene Explorer** mod → “Jump To” the listed vehicle entity IDs
+   - Look at `ParkedCar.m_Lane` and owner/citizen panels
+
+---
+
+## Performance notes
+Fast Bikes is built to be lightweight.
+
+- Applies tuning when settings change (or when a city loads), then goes idle.
+- Status report refreshes only when the Options menu is open.
+- No constant per-frame city work for the tuning features.
 
 ---
 
@@ -109,9 +103,6 @@ If you uninstall without resetting Path Speed to 1.00:
 If settings get corrupted:
 - Delete `ModsSettings/FastBikes/FastBikes.coc`
 - Start the game (a fresh settings file will be recreated)
-
-After a game update:
-- Optional: run **Bike debug report** again and compare behavior.
 
 ---
 
