@@ -1,20 +1,27 @@
-# File: .gitattributes
+# File: .gitattributes version 0.5.0
 # controls checkout/commit behavior in Git
 # Policy:
 # - Treat text as text automatically.
 # - Check out LF for all text by default.
 # - Only .bat/.cmd use CRLF (Windows-native).
 
-* text=auto eol=lf
+* text=auto eol=crlf
+
+# Windows-style line endings for VS project files and C#
+*.sln      text eol=crlf
+*.csproj   text eol=crlf
+*.props    text eol=crlf
+*.targets  text eol=crlf
+*.cs       text eol=crlf
+*.xml     text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
 
 # Repo meta files: keep LF (prevents “mixed” popups)
 .gitattributes text eol=lf
 .editorconfig  text eol=lf
 .gitignore     text eol=lf
 
-# Windows-native scripts that actually want CRLF
-*.bat text eol=crlf
-*.cmd text eol=crlf
 
 # Binaries (never touch line endings)
 *.png  binary
@@ -31,3 +38,19 @@
 
 # SVG is text (useful diffs); keep LF
 *.svg  text eol=lf
+
+
+# optional: LF renders nicer on GitHub
+*.md       text eol=lf
+*.json text eol=lf
+
+*.css   text eol=lf
+*.scss  text eol=lf
+*.js    text eol=lf
+*.ts    text eol=lf
+*.tsx   text eol=lf
+
+# Scripts
+*.sh       text eol=lf
+*.bash     text eol=lf
+*.ps1      text eol=crlf

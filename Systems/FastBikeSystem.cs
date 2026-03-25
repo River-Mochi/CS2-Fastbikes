@@ -1,5 +1,7 @@
 // File: Systems/FastBikeSystem.cs
-// Purpose: On-demand bicycle tuning on prefab entities (speed + accel/brake scaling + swaying stability) + pathway speed scaling.
+// Purpose: On-demand bicycle tuning on prefab entities (speed + accel/brake scaling) + pathway speed scaling.
+// Notes:
+// - Stability (SwayingData) tuning is intentionally disabled for compatibility.
 
 namespace FastBikes
 {
@@ -17,14 +19,12 @@ namespace FastBikes
         // Dirty flags schedule work into the next OnUpdate.
         // System remains disabled when no work is queued.
         private bool m_BikeDirty;
-        private bool m_StabilityDirty;
         private bool m_PathDirty;
         private bool m_ResetVanilla;
 
         private PrefabSystem m_PrefabSystem = null!;
 
-        // Key = bicycle prefab entity, Value = captured baseline SwayingData for this load session.
-        // Baseline must be per-load because prefab entities and data are recreated on world/city load.
+        // Kept for debug/dump compatibility; stability apply is disabled.
         private readonly Dictionary<Entity, SwayingData> m_SwayingBaseline =
             new Dictionary<Entity, SwayingData>();
 
@@ -50,7 +50,6 @@ namespace FastBikes
             base.OnGameLoadingComplete(purpose, mode);
 
             // City load recreates prefab entities and runtime lanes.
-            // Cached baselines and batch snapshots must be cleared.
             m_SwayingBaseline.Clear();
             DisposePathBatch();
 
@@ -68,7 +67,6 @@ namespace FastBikes
         public void ScheduleApplyAll( )
         {
             m_BikeDirty = true;
-            m_StabilityDirty = true;
             m_PathDirty = true;
             m_ResetVanilla = false;
 
@@ -79,8 +77,8 @@ namespace FastBikes
 
         public void ScheduleApplyBicyclesAndStability( )
         {
+            // Compatibility: stability apply disabled; bicycle tuning still applies.
             m_BikeDirty = true;
-            m_StabilityDirty = true;
             m_ResetVanilla = false;
 
             Enabled = true;
@@ -99,7 +97,6 @@ namespace FastBikes
         public void ScheduleResetVanillaAll( )
         {
             m_BikeDirty = true;
-            m_StabilityDirty = true;
             m_PathDirty = true;
             m_ResetVanilla = true;
 
@@ -115,8 +112,8 @@ namespace FastBikes
         protected override void OnUpdate( )
         {
             // Fast exit: no scheduled work and no active batch.
-            // Dump can run without apply (m_Dump lives in FastBikeSystem.Dump.cs).
-            if (!m_BikeDirty && !m_StabilityDirty && !m_PathDirty && !m_ResetVanilla && !m_Dump && !IsPathBatchActive())
+            // Dump can run without apply (m_Dump lives in FastBikeSystem.Dump.*).
+            if (!m_BikeDirty && !m_PathDirty && !m_ResetVanilla && !m_Dump && !IsPathBatchActive())
             {
                 Enabled = false;
                 return;
@@ -127,7 +124,6 @@ namespace FastBikes
             {
                 // Settings not available: clear all work and stop.
                 m_BikeDirty = false;
-                m_StabilityDirty = false;
                 m_PathDirty = false;
                 m_ResetVanilla = false;
                 m_Dump = false;
@@ -143,6 +139,7 @@ namespace FastBikes
                 {
                     m_Dump = false;
 
+                    // Dump keeps the signature for compatibility.
                     DumpBicyclePrefabs(
                         enableFastBikes: setting.EnableFastBikes,
                         speedScalar: setting.SpeedScalar,
@@ -156,21 +153,12 @@ namespace FastBikes
                 m_ResetVanilla = false;
 
                 float speedScalar = forceVanilla ? 1.0f : math.clamp(setting.SpeedScalar, 0.30f, 10.0f);
-                float stiffnessScalar = forceVanilla ? 1.0f : math.clamp(setting.StiffnessScalar, 0.30f, 5.0f);
-                float dampingScalar = forceVanilla ? 1.0f : math.clamp(setting.DampingScalar, 0.30f, 5.0f);
 
                 // Bicycle tuning (prefab entity writes; no structural changes).
                 if (m_BikeDirty)
                 {
                     m_BikeDirty = false;
                     ApplyBicycleTuning(speedScalar);
-                }
-
-                // Stability (prefab entity writes; per-load baselines).
-                if (m_StabilityDirty)
-                {
-                    m_StabilityDirty = false;
-                    ApplyBicycleSwaying(forceVanilla, stiffnessScalar, dampingScalar);
                 }
 
                 // Path updates:
@@ -200,7 +188,7 @@ namespace FastBikes
             finally
             {
                 // Disable until next explicit schedule, unless an active batch remains.
-                if (!m_BikeDirty && !m_StabilityDirty && !m_PathDirty && !m_ResetVanilla && !m_Dump && !IsPathBatchActive())
+                if (!m_BikeDirty && !m_PathDirty && !m_ResetVanilla && !m_Dump && !IsPathBatchActive())
                 {
                     Enabled = false;
                 }
@@ -251,7 +239,7 @@ namespace FastBikes
             return updated;
         }
 
-        /// <summary>Tunes SwayingData on bicycle prefab entities using cached per-prefab baselines.</summary>
+        // Kept for compatibility and debug history; not called while Stability is disabled.
         private int ApplyBicycleSwaying(bool forceVanilla, float stiffnessScalar, float dampingScalar)
         {
             float stiff = Unity.Mathematics.math.max(0.01f, stiffnessScalar);
@@ -266,7 +254,6 @@ namespace FastBikes
             {
                 SwayingData current = swayRW.ValueRO;
 
-                // Baseline capture: first seen value becomes baseline for this load session.
                 if (!m_SwayingBaseline.TryGetValue(prefabEntity, out SwayingData baseline))
                 {
                     baseline = current;
@@ -284,11 +271,8 @@ namespace FastBikes
                 }
 
                 SwayingData tuned = baseline;
-
-                // Higher stiffness reduces sway amplitude.
                 tuned.m_MaxPosition = baseline.m_MaxPosition / stiff;
 
-                // Higher damping settles sway faster.
                 tuned.m_DampingFactors = baseline.m_DampingFactors / damp;
                 tuned.m_DampingFactors = Unity.Mathematics.math.clamp(tuned.m_DampingFactors, 0.01f, 0.999f);
 
