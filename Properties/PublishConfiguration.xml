@@ -25,7 +25,7 @@
 #### Tech notes
 
 - Road speed limits and game conditions may still cap speeds.
-- Compatible with "Road Speed Adjuster" mod (as that does normal roads and not paths).
+- Compatible with "Road Speed Adjuster" mod (as that does normal roads and not Paths).
 - Path speed limit: includes both bike and pedestrian paths.
 - To disable the mod without uninstalling, uncheck [ ] the enable box.
 - Safe to remove (Reset button first for fast return to game defaults, then save city, and uninstall).
@@ -55,10 +55,10 @@ tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life, chan
 	<Thumbnail Value="Properties/ThumbnailFastBikePath8.jpg" />
 	<!--Screenshot, can be set multiple times-->
 	<Screenshot Value="Properties/image10-Actions.jpg" />
-    <Screenshot Value="Properties/image15-Status.jpg" />
-	<Screenshot Value="Properties/image20-slowBike.jpg" />
-    <Screenshot Value="Properties/image25-PathSpeed.jpg" />
-	<Screenshot Value="Properties/image30-BikesParis.jpg" />
+    <Screenshot Value="Properties/image20-Status.jpg" />
+	<Screenshot Value="Properties/image30-slowBike.jpg" />
+    <Screenshot Value="Properties/image40-PathSpeed.jpg" />
+	<Screenshot Value="Properties/image50-BikesParis.jpg" />
 	<!--Tag, can be set multiple times-->
 	<Tag Value="" />
 	<!--Link to the forum post where the mod can be discussed-->
