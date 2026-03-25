@@ -62,20 +62,20 @@ namespace FastBikes
                 },
 
                 // Stability
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "강성" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "**흔들림 폭** 배율.\n" +
-                    "**높을수록 = 덜 기울어짐**.\n" +
-                    "**낮을수록 = 더 흔들림**.\n" +
-                    "추천: 고속 안정은 1.25–1.75."
-                },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "감쇠" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "높을수록 빨리 안정(진동 감소).\n" +
-                    "**1.00 = 게임 기본**\n" +
-                    "추천: 고속 안정은 1.25–2.00."
-                },
+    //            { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "강성" },
+    //            { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
+    //                "**흔들림 폭** 배율.\n" +
+    //                "**높을수록 = 덜 기울어짐**.\n" +
+    //                "**낮을수록 = 더 흔들림**.\n" +
+    //                "추천: 고속 안정은 1.25–1.75."
+    //            },
+    //
+    //            { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "감쇠" },
+    //            { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
+    //                "높을수록 빨리 안정(진동 감소).\n" +
+    //                "**1.00 = 게임 기본**\n" +
+     //               "추천: 고속 안정은 1.25–2.00."
+       //         },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "모드 기본값" },

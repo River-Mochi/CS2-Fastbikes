@@ -73,8 +73,8 @@ tags: slow bike, bicycle speed, fix bike traffic, scooter, quality of life, chan
 	<RequiredDLC Value="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 	<ChangeLog>
-- Compatibility, removed swaying feature.
-- updates languages.
+- Compatibility with other mods, remove sway feature.
+- update language files.
 </ChangeLog>
 	<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
 	<ExternalLink Type="" Url="" />

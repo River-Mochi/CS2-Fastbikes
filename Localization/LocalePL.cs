@@ -62,20 +62,20 @@ namespace FastBikes
                 },
 
                 // Stability
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Sztywność" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
-                    "Skala dla **amplitudy kołysania**.\n" +
-                    "**Wyżej = mniej przechyłu**.\n" +
-                    "**Niżej = więcej chwiania**.\n" +
-                    "Sugerowane: 1.25–1.75 dla stabilności przy dużej prędkości."
-                },
-
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Tłumienie" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
-                    "Wyżej = szybciej się uspokaja (mniej oscylacji).\n" +
-                    "**1.00 = ustawienia gry**\n" +
-                    "Sugerowane: 1.25–2.00 dla stabilności przy dużej prędkości."
-                },
+    //            { m_Setting.GetOptionLabelLocaleID(nameof(Setting.StiffnessScalar)), "Sztywność" },
+    //            { m_Setting.GetOptionDescLocaleID(nameof(Setting.StiffnessScalar)),
+    //                "Skala dla **amplitudy kołysania**.\n" +
+    //                "**Wyżej = mniej przechyłu**.\n" +
+    //                "**Niżej = więcej chwiania**.\n" +
+     //               "Sugerowane: 1.25–1.75 dla stabilności przy dużej prędkości."
+    //            },
+//
+    //            { m_Setting.GetOptionLabelLocaleID(nameof(Setting.DampingScalar)), "Tłumienie" },
+    //            { m_Setting.GetOptionDescLocaleID(nameof(Setting.DampingScalar)),
+    //                "Wyżej = szybciej się uspokaja (mniej oscylacji).\n" +
+    //                "**1.00 = ustawienia gry**\n" +
+    //                "Sugerowane: 1.25–2.00 dla stabilności przy dużej prędkości."
+     //           },
 
                 // Reset buttons
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ResetToModDefaults)), "Domyślne moda" },
